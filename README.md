@@ -7,7 +7,7 @@ CoralME is an order book data-structure that matches orders based on price-time 
 ## What people usually mean by the term _Matching Engine_?
 Usually when people talk about a _Matching Engine_, what they are really referring to is the full solution for an electronic exchange. That would include gateways, drop copies, market data, balances, reports, monitors, margins, compliance, fees, etc. Plus the _message middleware_ to tie all these pieces together. In that context, **the matching engine is really just one of the many parts of an electronic exchange**. It is an important part, the central nervous systems of an exchange, which maintains orders resting inside order books, and match them when liquidity takers meet liquidity providers (i.e. market makers).
 
-For a detailed discussion of how a **first-class electronic exchange** can be built from the groud up using the sequencer architecture, please refer to <a href="https://www.coralblocks.com/index.php/building-a-first-class-exchange-architecture-with-coralsequencer/" target="_blank">this article</a>.
+For a detailed discussion of how a **first-class electronic exchange** can be built from the groud up using the sequencer architecture, please refer to [this article](https://www.coralblocks.com/index.php/building-a-first-class-exchange-architecture-with-coralsequencer/).
 
 ## Quick Start
 Refer to [Example.java](https://github.com/coralblocks/CoralME/blob/main/src/main/java/com/coralblocks/coralme/example/Example.java) for a bunch of order matching use-cases.
