@@ -26,18 +26,23 @@ The [OrderBookTest.java](https://github.com/coralblocks/CoralME/blob/main/src/te
 ```Java
 public interface OrderBookListener {
     
-    public void onOrderReduced(OrderBook orderBook, long time, Order order, long reduceNewTotalSize);
+    public void onOrderReduced(OrderBook orderBook, long time, Order order, 
+                                 long reduceNewTotalSize);
     
-    public void onOrderCanceled(OrderBook orderBook, long time, Order order, CancelReason cancelReason);
+    public void onOrderCanceled(OrderBook orderBook, long time, Order order, 
+                                  CancelReason cancelReason);
     
-    public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide, 
-                                    long executeSize, long executePrice, long executeId, long executeMatchId);
+    public void onOrderExecuted(OrderBook orderBook, long time, Order order, 
+                                  ExecuteSide executeSide, long executeSize, 
+                                  long executePrice, long executeId, long executeMatchId);
     
     public void onOrderAccepted(OrderBook orderBook, long time, Order order);
     
-    public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason rejectReason);
+    public void onOrderRejected(OrderBook orderBook, long time, Order order, 
+                                  RejectReason rejectReason);
     
-    public void onOrderRested(OrderBook orderBook, long time, Order order, long restSize, long restPrice);
+    public void onOrderRested(OrderBook orderBook, long time, Order order,
+                                long restSize, long restPrice);
     
 }
 ```
