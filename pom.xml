@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.coralblocks</groupId>
   <artifactId>coralme</artifactId>
-  <version>1.2.2</version>
+  <version>1.2.3-SNAPSHOT</version>
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -11,9 +11,9 @@
   </properties>
 
   <scm>
-    <connection>scm:svn:https://github.com/coralblocks/CoralME/tags/1.2.2</connection>
-    <developerConnection>scm:svn:https://github.com/coralblocks/CoralME/tags/1.2.2</developerConnection>
-    <url>https://github.com/coralblocks/CoralME/tags/1.2.2</url>
+    <connection>scm:svn:https://github.com/coralblocks/CoralME/trunk</connection>
+    <developerConnection>scm:svn:https://github.com/coralblocks/CoralME/trunk</developerConnection>
+    <url>https://github.com/coralblocks/CoralME</url>
   </scm>
 
   <dependencies>
