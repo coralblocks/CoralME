@@ -100,7 +100,7 @@ public class NoGCTest {
 			Order askOrder = book.getBestAskOrder();
 			
 			if (createGarbage) {
-				// and more garbage
+				// create some garbage
 				sb.setLength(0);
 				sb.append("someGarbage"); // appending a CharSequence does not produce garbage
 				for(int x = 0; x < 10; x++) sb.toString(); // but this produces garbage
