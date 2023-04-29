@@ -48,7 +48,13 @@ public interface OrderBookListener {
 ```
 ## Code Snippet
 ```Java
-    OrderBook orderBook = new OrderBook("AAPL", listener);
+
+    // This OrderBookListener will print all callbacks to System.out
+    OrderBookLogger orderBookLogger = new OrderBookLogger();
+
+    OrderBook orderBook = new OrderBook("AAPL", orderBookLogger);
+
+    orderBookLogger.off(); // omit callbacks logging for clarity
 
     orderBook.createLimit("1", 1, Side.BUY, 200, 150.44, TimeInForce.DAY);
     orderBook.createLimit("2", 2, Side.BUY, 500, 149.44, TimeInForce.DAY);
@@ -110,7 +116,62 @@ public interface OrderBookListener {
        300 @    153.24 (id=5)
        500 @    156.43 (id=6)
     */
+    
+    orderBookLogger.on(); // turn logging back on so we can see the callbacks
+	    
+    orderBook.createLimit("8", 8, Side.BUY, 1500, 155.00, TimeInForce.DAY);
+    
+    /*
+        -----> onOrderAccepted called:
+          orderBook=AAPL
+          time=1682765163100000000
+          order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=1500, openSize=1500, executedSize=0, canceledSize=0, price=155.0, type=LIMIT, tif=DAY]
+
+        -----> onOrderExecuted called:
+          orderBook=AAPL
+          time=1682765163100000000
+          order=Order [id=5, clientOrderId=5, side=SELL, security=AAPL, originalSize=300, openSize=0, executedSize=300, canceledSize=0, price=153.24, type=LIMIT, tif=GTC]
+          executeSide=MAKER
+          executeSize=300
+          executePrice=153.24
+          executeId=1
+          executeMatchId=1
+
+        -----> onOrderExecuted called:
+          orderBook=AAPL
+          time=1682765163100000000
+          order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=1500, openSize=1200, executedSize=300, canceledSize=0, price=155.0, type=LIMIT, tif=DAY]
+          executeSide=TAKER
+          executeSize=300
+          executePrice=153.24
+          executeId=2
+          executeMatchId=1
+
+        -----> onOrderRested called:
+          orderBook=AAPL
+          time=1682765163101000000
+          order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=1500, openSize=1200, executedSize=300, canceledSize=0, price=155.0, type=LIMIT, tif=DAY]
+          restSize=1200
+          restPrice=155.0    
+    */
+	    
+    orderBook.showOrders();
+    
+    /*
+       100 @    148.14 (id=4)
+       500 @    149.44 (id=2)
+       100 @    149.44 (id=3)
+       200 @    150.44 (id=1)
+      1200 @    155.00 (id=8)       <==== Your order sat here after hitting some asks...  
+    --------      1.43
+       500 @    156.43 (id=6)    
+    */
+    
  ```
+ 
+
+ 
+ 
 
 
 
