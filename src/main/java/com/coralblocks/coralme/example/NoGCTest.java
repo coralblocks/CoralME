@@ -71,7 +71,7 @@ public class NoGCTest {
 		
 		OrderBook book = new OrderBook("AAPL", noOpListener);
 		
-		for(int i = 0; i < iterations; i++) {
+		for(int i = 1; i <= iterations; i++) {
 			
 			printIteration(i);
 			
