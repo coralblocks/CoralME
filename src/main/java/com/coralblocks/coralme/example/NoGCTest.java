@@ -29,9 +29,12 @@ import com.coralblocks.coralme.util.Timestamper;
  * <p>Alternatively you can pass <i>true</i> to createGarbage to see a lot of GC activity.</p>
  * 
  * <p>You should also decrease the max size of your heap memory so that if the GC has to kick in, it will do it sooner than later.</p>
+ * 
+ * <p>A good command-line example is:  <b><code>java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.example.NoGCTest</code></b></p>
  */
 public class NoGCTest {
 
+	private static final boolean USE_BAD_SYSTEM_OUT_PRINT = false; // turn this on and you will see a lot of garbage from System.out.print
 	private final static StringBuilder sb = new StringBuilder(1024);
 	private static long orderId = 1;
 	
@@ -39,6 +42,24 @@ public class NoGCTest {
 		sb.setLength(0);
 		sb.append(orderId);
 		return sb;
+	}
+	
+	private static void printWithoutGarbage(CharSequence cs) {
+		int size = cs.length();
+		for(int i = 0; i < size; i++) System.out.write(cs.charAt(i));
+		System.out.flush();
+	}
+	
+	private static void printIteration(int x) {
+		
+		sb.setLength(0);
+		sb.append('\r').append(x); // does not produce garbage
+		
+		if (USE_BAD_SYSTEM_OUT_PRINT) {
+			System.out.print(sb); // produces garbage!
+		} else {
+			printWithoutGarbage(sb);
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -52,9 +73,8 @@ public class NoGCTest {
 		
 		for(int i = 0; i < iterations; i++) {
 			
-			System.out.print("\r");
-			System.out.print(i);
-		
+			printIteration(i);
+			
 			Timestamper ts = book.getTimestamper();
 			
 			// Bids:
@@ -80,8 +100,10 @@ public class NoGCTest {
 			Order askOrder = book.getBestAskOrder();
 			
 			if (createGarbage) {
-				bidOrder.toString(); // creates garbage
-				askOrder.toString(); // creates garbage
+				// and more garbage
+				sb.setLength(0);
+				sb.append("someGarbage"); // appending a CharSequence does not produce garbage
+				for(int x = 0; x < 10; x++) sb.toString(); // but this produces garbage
 			}
 			
 			bidOrder.reduceTo(ts.nanoEpoch(), 100);
@@ -106,6 +128,6 @@ public class NoGCTest {
 			if (!book.isEmpty()) throw new IllegalStateException("Book must be empty here!");
 		}
 		
-		System.out.println(" ... DONE");
+		System.out.println(" ... DONE!");
 	}
 }
