@@ -699,10 +699,11 @@ public class OrderBook implements OrderListener {
 	
 	@Override
     public void onOrderReduced(long time, Order order, long newSize) {
+		
+		int size = listeners.size();
 
-		Iterator<OrderBookListener> iter = listeners.iterator();
-		while(iter.hasNext()) {
-			iter.next().onOrderReduced(this, time, order, newSize);
+		for(int i = 0; i < size; i++) {
+			listeners.get(i).onOrderReduced(this, time, order, newSize);
 		}
     }
 
@@ -711,9 +712,10 @@ public class OrderBook implements OrderListener {
 		
 		removeOrder(order);
 		
-		Iterator<OrderBookListener> iter = listeners.iterator();
-		while(iter.hasNext()) {
-			iter.next().onOrderCanceled(this, time, order, reason);
+		int size = listeners.size();
+
+		for(int i = 0; i < size; i++) {
+			listeners.get(i).onOrderCanceled(this, time, order, reason);
 		}
 		
     }
@@ -726,18 +728,20 @@ public class OrderBook implements OrderListener {
 			removeOrder(order);
 		}
 		
-		Iterator<OrderBookListener> iter = listeners.iterator();
-		while(iter.hasNext()) {
-			iter.next().onOrderExecuted(this, time, order, execSide, sizeExecuted, priceExecuted, executionId, matchId);
+		int size = listeners.size();
+
+		for(int i = 0; i < size; i++) {
+			listeners.get(i).onOrderExecuted(this, time, order, execSide, sizeExecuted, priceExecuted, executionId, matchId);
 		}
     }
 
 	@Override
 	public void onOrderAccepted(long time, Order order) {
 		
-		Iterator<OrderBookListener> iter = listeners.iterator();
-		while(iter.hasNext()) {
-			iter.next().onOrderAccepted(this, time, order);
+		int size = listeners.size();
+
+		for(int i = 0; i < size; i++) {
+			listeners.get(i).onOrderAccepted(this, time, order);
 		}
 		
 	}
@@ -747,18 +751,20 @@ public class OrderBook implements OrderListener {
 	
 		removeOrder(order);
 		
-		Iterator<OrderBookListener> iter = listeners.iterator();
-		while(iter.hasNext()) {
-			iter.next().onOrderRejected(this, time, order, reason);
+		int size = listeners.size();
+
+		for(int i = 0; i < size; i++) {
+			listeners.get(i).onOrderRejected(this, time, order, reason);
 		}
 	}
 
 	@Override
     public void onOrderRested(long time, Order order, long restSize, long restPrice) {
 	    
-		Iterator<OrderBookListener> iter = listeners.iterator();
-		while(iter.hasNext()) {
-			iter.next().onOrderRested(this, time, order, restSize, restPrice);
+		int size = listeners.size();
+
+		for(int i = 0; i < size; i++) {
+			listeners.get(i).onOrderRested(this, time, order, restSize, restPrice);
 		}
     }
 	
