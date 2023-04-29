@@ -2,7 +2,7 @@
 A simple, fast and garbage-free matching engine order book that you can use as a starting point for your matching engines.
 
 ## What is it?
-CoralME is an order book data-structure that matches orders based on price-time priority. It maintains limit orders resting on an order book until they are either canceled or filled.
+CoralME is an order book data-structure that matches orders based on price-time priority. It maintains limit orders resting on an order book until they are either canceled or filled. Whenever an order changes its state, a callback is issued to registered listeners.
 
 ## What people usually mean by the term _Matching Engine_?
 Usually when people talk about a _Matching Engine_, what they are really referring to is the full solution for an electronic exchange. That would include gateways, drop copies, market data, balances, reports, monitors, margins, compliance, fees, etc. Plus the _message middleware_ to tie all these pieces together. In that context, **the matching engine is really just one of the many parts of an electronic exchange**. It is an important part, the central nervous systems of an exchange, which maintains orders resting inside order books, and match them when liquidity takers meet liquidity providers (i.e. market makers).
