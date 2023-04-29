@@ -27,14 +27,25 @@ public class OrderBookLogger implements OrderBookListener {
 	
 	private boolean isOn = true;
 	
+	/**
+	 * Turns on logging to System.out
+	 */
 	public void on() {
 		isOn = true;
 	}
 	
+	/**
+	 * Turns off logging to System.out
+	 */
 	public void off() {
 		isOn = false;
 	}
 	
+	/**
+	 * Is currently logging to System.out?
+	 * 
+	 * @return true if logging
+	 */
 	public boolean isOn() {
 		return isOn;
 	}
