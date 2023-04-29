@@ -30,7 +30,8 @@ public interface OrderBookListener {
     
     public void onOrderCanceled(OrderBook orderBook, long time, Order order, CancelReason cancelReason);
     
-    public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide, long executeSize, long executePrice, long executeId, long executeMatchId);
+    public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide, 
+                                    long executeSize, long executePrice, long executeId, long executeMatchId);
     
     public void onOrderAccepted(OrderBook orderBook, long time, Order order);
     
@@ -81,14 +82,16 @@ public interface OrderBookListener {
     System.out.println(order);
     
     /*
-    Order [id=7, clientOrderId=7, side=SELL, security=AAPL, originalSize=1500, openSize=1500, executedSize=0, canceledSize=0, price=158.54, type=LIMIT, tif=DAY]
+    Order [id=7, clientOrderId=7, side=SELL, security=AAPL, originalSize=1500, 
+            openSize=1500, executedSize=0, canceledSize=0, price=158.54, type=LIMIT, tif=DAY]
     */
     
     order.cancel(orderBook.getTimestamper().nanoEpoch());
     System.out.println(order);
     
     /*
-    Order [id=7, clientOrderId=7, side=SELL, security=AAPL, originalSize=1500, openSize=0, executedSize=0, canceledSize=1500, price=158.54, type=LIMIT, tif=DAY]
+    Order [id=7, clientOrderId=7, side=SELL, security=AAPL, originalSize=1500,
+            openSize=0, executedSize=0, canceledSize=1500, price=158.54, type=LIMIT, tif=DAY]
     */
     
     orderBook.showOrders();
