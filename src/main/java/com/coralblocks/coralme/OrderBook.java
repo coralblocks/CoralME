@@ -324,7 +324,7 @@ public class OrderBook implements OrderListener {
 				
 				for(Order o = pl.head(); o != null; o = o.next) {
 
-					String size = String.format("%6d", o.getOriginalSize());
+					String size = String.format("%6d", o.getOpenSize());
 					String price = String.format("%9.2f", DoubleUtils.toDouble(o.getPrice()));
 					
 					sb.append(size).append(" @ ").append(price);
@@ -342,7 +342,7 @@ public class OrderBook implements OrderListener {
 				
 				for(Order o = pl.head(); o != null; o = o.next) {
 
-					String size = String.format("%6d", o.getOriginalSize());
+					String size = String.format("%6d", o.getOpenSize());
 					String price = String.format("%9.2f", DoubleUtils.toDouble(o.getPrice()));
 					
 					sb.append(size).append(" @ ").append(price);
