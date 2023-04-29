@@ -22,6 +22,33 @@ The [OrderBookTest.java](https://github.com/coralblocks/CoralME/blob/main/src/te
 - ClientOrderID and OrderID
 - ExecutionID and ExecutionMatchID
 
+## How can I check that it is zero garbage?
+Check [NoGCTest.java](https://github.com/coralblocks/CoralME/blob/main/src/main/java/com/coralblocks/coralme/example/NoGCTest.java) to see that it creates a book and populates this book with 10 orders _one million times_. And on each of these one million times it does a bunch of executions, rejects, cancelations, reduces, etc. With `-verbose:gc` you always see **zero GC activity**. _No matter how many iterations you perform, the gc activity is always zero_. If you want to see some GC activity, you can turn on a flag that forces the creation garbage by [producing some random strings](https://github.com/coralblocks/CoralME/blob/c8f63b00d43d50735d4cf925d262e3cc54586522/src/main/java/com/coralblocks/coralme/example/NoGCTest.java#L102) in the middle of loop.
+
+##### Creating ZERO garbage
+```
+$ ./bin/runGCTest.sh
+java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.example.NoGCTest false 1000000
+1000000 ... DONE!
+```
+##### Forcing the creation of garbage (pass true to runGCTest.sh)
+```
+$ ./bin/runGCTest.sh true
+java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.example.NoGCTest true 1000000
+60870[GC (Allocation Failure)  33280K->1224K(125952K), 0.0005392 secs]
+146061[GC (Allocation Failure)  34504K->1200K(125952K), 0.0005032 secs]
+231254[GC (Allocation Failure)  34480K->1240K(125952K), 0.0003991 secs]
+316449[GC (Allocation Failure)  34520K->1208K(125952K), 0.0004686 secs]
+401642[GC (Allocation Failure)  34488K->1264K(125952K), 0.0004315 secs]
+486832[GC (Allocation Failure)  34544K->1200K(129536K), 0.0004712 secs]
+590373[GC (Allocation Failure)  41648K->1128K(129536K), 0.0005286 secs]
+693917[GC (Allocation Failure)  41576K->1128K(128512K), 0.0002270 secs]
+794836[GC (Allocation Failure)  40552K->1128K(129024K), 0.0002390 secs]
+895759[GC (Allocation Failure)  40552K->1128K(129024K), 0.0002202 secs]
+996679[GC (Allocation Failure)  40552K->1128K(129024K), 0.0002492 secs]
+1000000 ... DONE!
+```
+
 ## Callbacks Supported
 ```Java
 public interface OrderBookListener {
@@ -46,6 +73,7 @@ public interface OrderBookListener {
     
 }
 ```
+
 ## Code Snippet
 ```Java
 
