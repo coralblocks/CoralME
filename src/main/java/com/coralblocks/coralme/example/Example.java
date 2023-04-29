@@ -340,25 +340,15 @@ public class Example {
 			  restPrice=159.0	 
 		*/
 		
-		orderBook.showLevels();
-
-		/*
-		   100 @    148.14 (orders=1)
-		   600 @    149.44 (orders=2)
-		  1900 @    159.00 (orders=1)     <=========== You sat here after hitting some asks...
-		--------      1.00
-		  3000 @    160.00 (orders=1)		 
-		*/
-		
 		orderBook.showOrders();
 		
 		/*
 		   100 @    148.14 (id=4)
 		   500 @    149.44 (id=2)
 		   100 @    149.44 (id=3)
-		  3900 @    159.00 (id=11)
+		  1900 @    159.00 (id=11)    <==== You order sat here after hitting some asks...
 		--------      1.00
-		  3000 @    160.00 (id=10)		 
+		  3000 @    160.00 (id=10)	 
 		*/
 	}
 }
