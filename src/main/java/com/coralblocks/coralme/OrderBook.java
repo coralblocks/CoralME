@@ -103,6 +103,24 @@ public class OrderBook implements OrderListener {
 		return security;
 	}
 	
+	public final Order getBestBidOrder() {
+		
+		if (!hasBids()) return null;
+		
+		PriceLevel pl = head(Side.BUY);
+		
+		return pl.head();
+	}
+	
+	public final Order getBestAskOrder() {
+		
+		if (!hasAsks()) return null;
+		
+		PriceLevel pl = head(Side.SELL);
+				
+		return pl.head();
+	}
+	
 	public final Order getOrder(long id) {
 		
 		return orders.get(id);
