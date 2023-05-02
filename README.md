@@ -158,12 +158,14 @@ public interface OrderBookListener {
         -----> onOrderAccepted called:
           orderBook=AAPL
           time=1682765163100000000
-          order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=1500, openSize=1500, executedSize=0, canceledSize=0, price=155.0, type=LIMIT, tif=DAY]
+          order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=1500, 
+	  	openSize=1500, executedSize=0, canceledSize=0, price=155.0, type=LIMIT, tif=DAY]
 
         -----> onOrderExecuted called:
           orderBook=AAPL
           time=1682765163100000000
-          order=Order [id=5, clientOrderId=5, side=SELL, security=AAPL, originalSize=300, openSize=0, executedSize=300, canceledSize=0, price=153.24, type=LIMIT, tif=GTC]
+          order=Order [id=5, clientOrderId=5, side=SELL, security=AAPL, originalSize=300, 
+	  	openSize=0, executedSize=300, canceledSize=0, price=153.24, type=LIMIT, tif=GTC]
           executeSide=MAKER
           executeSize=300
           executePrice=153.24
@@ -173,7 +175,8 @@ public interface OrderBookListener {
         -----> onOrderExecuted called:
           orderBook=AAPL
           time=1682765163100000000
-          order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=1500, openSize=1200, executedSize=300, canceledSize=0, price=155.0, type=LIMIT, tif=DAY]
+          order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=1500, 
+	  	openSize=1200, executedSize=300, canceledSize=0, price=155.0, type=LIMIT, tif=DAY]
           executeSide=TAKER
           executeSize=300
           executePrice=153.24
@@ -183,7 +186,8 @@ public interface OrderBookListener {
         -----> onOrderRested called:
           orderBook=AAPL
           time=1682765163101000000
-          order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=1500, openSize=1200, executedSize=300, canceledSize=0, price=155.0, type=LIMIT, tif=DAY]
+          order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=1500, 
+	  	openSize=1200, executedSize=300, canceledSize=0, price=155.0, type=LIMIT, tif=DAY]
           restSize=1200
           restPrice=155.0    
     */
