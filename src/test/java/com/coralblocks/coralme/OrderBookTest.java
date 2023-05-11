@@ -42,14 +42,14 @@ public class OrderBookTest {
 	
 	private static class OrderExecutedCaptor {
 		
-		ArgumentCaptor<OrderBook> 	book = ArgumentCaptor.forClass(OrderBook.class);
-		ArgumentCaptor<Long> 		time = ArgumentCaptor.forClass(Long.class);
-		ArgumentCaptor<Order> 		order = ArgumentCaptor.forClass(Order.class);
-		ArgumentCaptor<ExecuteSide> executeSide = ArgumentCaptor.forClass(ExecuteSide.class);
-		ArgumentCaptor<Long> 		executeSize = ArgumentCaptor.forClass(Long.class);
-		ArgumentCaptor<Long>  		executePrice = ArgumentCaptor.forClass(Long.class);
-		ArgumentCaptor<Long>  		executeId = ArgumentCaptor.forClass(Long.class);
-		ArgumentCaptor<Long>  		executeMatchId = ArgumentCaptor.forClass(Long.class);
+		ArgumentCaptor<OrderBook> 		book = ArgumentCaptor.forClass(OrderBook.class);
+		ArgumentCaptor<Long> 			time = ArgumentCaptor.forClass(Long.class);
+		ArgumentCaptor<Order> 			order = ArgumentCaptor.forClass(Order.class);
+		ArgumentCaptor<ExecuteSide>		executeSide = ArgumentCaptor.forClass(ExecuteSide.class);
+		ArgumentCaptor<Long> 			executeSize = ArgumentCaptor.forClass(Long.class);
+		ArgumentCaptor<Long>  			executePrice = ArgumentCaptor.forClass(Long.class);
+		ArgumentCaptor<Long>  			executeId = ArgumentCaptor.forClass(Long.class);
+		ArgumentCaptor<Long>  			executeMatchId = ArgumentCaptor.forClass(Long.class);
 	}
 	
 	@Test
