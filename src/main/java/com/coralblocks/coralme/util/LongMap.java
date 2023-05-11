@@ -57,7 +57,7 @@ public class LongMap<E> implements Iterable<E> {
 
 	private float loadFactor;
 
-	private Entry<E> head;
+	private Entry<E> poolHead;
 
 	private final ReusableIterator reusableIter = new ReusableIterator();
 
@@ -96,6 +96,29 @@ public class LongMap<E> implements Iterable<E> {
 		this.lengthMinusOne = initialCapacity - 1;
 		this.loadFactor = loadFactor;
 		this.threshold =  Math.round(initialCapacity * loadFactor);
+	}
+	
+	private Entry<E> getEntryFromPool(long key, E value, Entry<E> next) {
+
+		Entry<E> newEntry = poolHead;
+
+		if (newEntry != null) {
+			poolHead = newEntry.next;
+		} else {
+			newEntry = new Entry<E>();
+		}
+
+		newEntry.key = key;
+		newEntry.value = value;
+		newEntry.next = next;
+
+		return newEntry;
+	}
+
+	private void releaseEntryBackToPool(Entry<E> e) {
+		e.value = null;
+		e.next = poolHead;
+		poolHead = e;
 	}
 	
 	/**
@@ -272,11 +295,11 @@ public class LongMap<E> implements Iterable<E> {
 
 			index = toArrayIndex(key); // lengthMinusOne has changed!
 
-			data[index] = getEntry(key, value, data[index]);
+			data[index] = getEntryFromPool(key, value, data[index]);
 
 		} else {
 
-			data[index] = getEntry(key, value, data[index]);
+			data[index] = getEntryFromPool(key, value, data[index]);
 		}
 
 		count++;
@@ -312,7 +335,7 @@ public class LongMap<E> implements Iterable<E> {
 
 				E oldValue = e.value;
 
-				releaseEntry(e);
+				releaseEntryBackToPool(e);
 
 				count--;
 
@@ -337,7 +360,7 @@ public class LongMap<E> implements Iterable<E> {
 
 				Entry<E> next = data[index].next;
 
-				releaseEntry(data[index]);
+				releaseEntryBackToPool(data[index]);
 
 				data[index] = next;
 			}
@@ -416,7 +439,7 @@ public class LongMap<E> implements Iterable<E> {
 				prev.next = next;
 			}
 
-			releaseEntry(entry);
+			releaseEntryBackToPool(entry);
 
 			entry = null;
 
@@ -436,26 +459,4 @@ public class LongMap<E> implements Iterable<E> {
 		return reusableIter;
 	}
 	
-	private Entry<E> getEntry(long key, E value, Entry<E> next) {
-
-		Entry<E> newEntry = head;
-
-		if (newEntry != null) {
-			head = newEntry.next;
-		} else {
-			newEntry = new Entry<E>();
-		}
-
-		newEntry.key = key;
-		newEntry.value = value;
-		newEntry.next = next;
-
-		return newEntry;
-	}
-
-	private void releaseEntry(Entry<E> e) {
-		e.value = null;
-		e.next = head;
-		head = e;
-	}
 }
