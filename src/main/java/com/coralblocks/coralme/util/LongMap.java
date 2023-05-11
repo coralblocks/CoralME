@@ -37,10 +37,16 @@ import java.util.NoSuchElementException;
  * @param <E> the entry type this hash map will hold
  */
 public class LongMap<E> implements Iterable<E> {
-
+	
 	static final int DEFAULT_INITIAL_CAPACITY = 128;
 	static final float DEFAULT_LOAD_FACTOR = 0.80f;
-
+	
+	static class Entry<T> {
+		long key;
+		T value;
+		Entry<T> next;
+	}
+	
 	private Entry<E>[] data;
 
 	private int lengthMinusOne;
@@ -429,7 +435,7 @@ public class LongMap<E> implements Iterable<E> {
 		reusableIter.reset();
 		return reusableIter;
 	}
-
+	
 	private Entry<E> getEntry(long key, E value, Entry<E> next) {
 
 		Entry<E> newEntry = head;
@@ -451,11 +457,5 @@ public class LongMap<E> implements Iterable<E> {
 		e.value = null;
 		e.next = head;
 		head = e;
-	}
-
-	private static class Entry<T> {
-		long key;
-		T value;
-		Entry<T> next;
 	}
 }
