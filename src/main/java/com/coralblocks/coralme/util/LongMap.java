@@ -38,10 +38,10 @@ import java.util.NoSuchElementException;
  */
 public class LongMap<E> implements Iterable<E> {
 	
-	static final int DEFAULT_INITIAL_CAPACITY = 128;
-	static final float DEFAULT_LOAD_FACTOR = 0.80f;
+	private static final int DEFAULT_INITIAL_CAPACITY = 128;
+	private static final float DEFAULT_LOAD_FACTOR = 0.80f;
 	
-	static class Entry<T> {
+	private static class Entry<T> {
 		long key;
 		T value;
 		Entry<T> next;
