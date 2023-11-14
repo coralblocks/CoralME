@@ -1,5 +1,5 @@
 # CoralME
-A simple, fast and garbage-free matching engine order book that you can use as a starting point for your matching engines.
+A simple,, fast and garbage-free matching engine order book that you can use as a starting point for your matching engines.
 
 ## What is it?
 CoralME is an order book data-structure that matches orders based on price-time priority. It maintains limit orders resting in an order book until they are either canceled or filled. Whenever an order changes its state, a callback is issued to registered listeners.
