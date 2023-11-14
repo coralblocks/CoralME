@@ -82,6 +82,8 @@ public interface OrderBookListener {
 ## Code Snippet
 ```Java
 
+    final long CLIENT_ID = 1003L;
+
     // This OrderBookListener will print all callbacks to System.out
     OrderBookLogger orderBookLogger = new OrderBookLogger();
 
@@ -89,13 +91,13 @@ public interface OrderBookListener {
 
     orderBookLogger.off(); // omit callbacks logging for clarity
 
-    orderBook.createLimit("1", 1, Side.BUY, 200, 150.44, TimeInForce.DAY);
-    orderBook.createLimit("2", 2, Side.BUY, 500, 149.44, TimeInForce.DAY);
-    orderBook.createLimit("3", 3, Side.BUY, 100, 149.44, TimeInForce.GTC);
-    orderBook.createLimit("4", 4, Side.BUY, 100, 148.14, TimeInForce.DAY);
-    orderBook.createLimit("5", 5, Side.SELL, 300, 153.24, TimeInForce.GTC);
-    orderBook.createLimit("6", 6, Side.SELL, 500, 156.43, TimeInForce.DAY);
-    orderBook.createLimit("7", 7, Side.SELL, 1500, 158.54, TimeInForce.DAY);
+    orderBook.createLimit(CLIENT_ID, "1", 1, Side.BUY, 200, 150.44, TimeInForce.DAY);
+    orderBook.createLimit(CLIENT_ID, "2", 2, Side.BUY, 500, 149.44, TimeInForce.DAY);
+    orderBook.createLimit(CLIENT_ID, "3", 3, Side.BUY, 100, 149.44, TimeInForce.GTC);
+    orderBook.createLimit(CLIENT_ID, "4", 4, Side.BUY, 100, 148.14, TimeInForce.DAY);
+    orderBook.createLimit(CLIENT_ID, "5", 5, Side.SELL, 300, 153.24, TimeInForce.GTC);
+    orderBook.createLimit(CLIENT_ID, "6", 6, Side.SELL, 500, 156.43, TimeInForce.DAY);
+    orderBook.createLimit(CLIENT_ID, "7", 7, Side.SELL, 1500, 158.54, TimeInForce.DAY);
 
     orderBook.showLevels();
 
@@ -152,7 +154,7 @@ public interface OrderBookListener {
     
     orderBookLogger.on(); // turn logging back on so we can see the callbacks
 	    
-    orderBook.createLimit("8", 8, Side.BUY, 1500, 155.00, TimeInForce.DAY);
+    orderBook.createLimit(CLIENT_ID, "8", 8, Side.BUY, 1500, 155.00, TimeInForce.DAY);
     
     /*
         -----> onOrderAccepted called:
