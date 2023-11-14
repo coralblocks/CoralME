@@ -62,6 +62,8 @@ public class OrderBook implements OrderListener {
 	
 	private final Timestamper timestamper;
 	
+	private boolean allowTradeToSelf = true;
+	
 	
 	public OrderBook(String security) {
 		
@@ -84,6 +86,11 @@ public class OrderBook implements OrderListener {
 		this.timestamper = timestamper;
 		
 		if (listener != null) listeners.add(listener);
+	}
+	
+	public final void setAllowTradeToSelf(boolean flag) {
+		
+		this.allowTradeToSelf = flag;
 	}
 	
 	public void addListener(OrderBookListener listener) {
@@ -406,6 +413,8 @@ public class OrderBook implements OrderListener {
 			if (order.getType() != Type.MARKET && order.getSide().isOutside(order.getPrice(), pl.getPrice())) break;
 			
 			for(Order o = pl.head(); o != null; o = o.next) {
+				
+				if (!allowTradeToSelf && o.getClientId() == order.getClientId()) continue;
 				
 				long sizeToExecute = Math.min(order.getOpenSize(), o.getOpenSize());
 				
