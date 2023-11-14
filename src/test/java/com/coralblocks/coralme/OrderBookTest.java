@@ -32,7 +32,6 @@ import com.coralblocks.coralme.util.DoubleUtils;
 public class OrderBookTest {
 	
 	private static final long CLIENT_ID = 1002L;
-
 	
 	private OrderBookListener called(OrderBookListener listener, int times) {
 		return Mockito.verify(listener, Mockito.times(times));
