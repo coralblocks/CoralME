@@ -30,6 +30,8 @@ import com.coralblocks.coralme.util.DoubleUtils;
 
 
 public class OrderBookTest {
+	
+	private static final long CLIENT_ID = 1002L;
 
 	
 	private OrderBookListener called(OrderBookListener listener, int times) {
@@ -59,7 +61,7 @@ public class OrderBookTest {
 		
 		OrderBook book = new OrderBook("AAPL", listener);
 		
-		Order order = book.createLimit("1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
+		Order order = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
 		
 		called(listener, 1).onOrderAccepted(book, order.getAcceptTime(), order);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -79,7 +81,7 @@ public class OrderBookTest {
 		OrderBook book = new OrderBook("AAPL", listener);
 		
 		// Market order cannot have a price
-		Order order = book.createOrder("1", 1, Side.BUY, 800, DoubleUtils.toLong(432.12), Order.Type.MARKET, TimeInForce.DAY);
+		Order order = book.createOrder(CLIENT_ID, "1", 1, Side.BUY, 800, DoubleUtils.toLong(432.12), Order.Type.MARKET, TimeInForce.DAY);
 		
 		called(listener, 0).onOrderAccepted(null, 0, null);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -106,7 +108,7 @@ public class OrderBookTest {
 			}
 		};
 		
-		Order order = book.createLimit("1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
+		Order order = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
 		
 		called(listener, 1).onOrderAccepted(book, order.getAcceptTime(), order);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -118,7 +120,7 @@ public class OrderBookTest {
 		done(listener);
 		
 		// Odd lot not accepted...
-		order = book.createLimit("2", 2, Side.SELL, 850, 432.12, TimeInForce.DAY);
+		order = book.createLimit(CLIENT_ID, "2", 2, Side.SELL, 850, 432.12, TimeInForce.DAY);
 		
 		called(listener, 0).onOrderAccepted(null, 0, null);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -137,7 +139,7 @@ public class OrderBookTest {
 		
 		OrderBook book = new OrderBook("AAPL", listener);
 		
-		Order order = book.createLimit("1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
+		Order order = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
 		
 		called(listener, 1).onOrderAccepted(book, order.getAcceptTime(), order);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -148,7 +150,7 @@ public class OrderBookTest {
 		
 		done(listener);
 		
-		order = book.createLimit("2", 2, Side.SELL, 100, 432.13, TimeInForce.IOC);
+		order = book.createLimit(CLIENT_ID, "2", 2, Side.SELL, 100, 432.13, TimeInForce.IOC);
 		
 		called(listener, 1).onOrderAccepted(book, order.getAcceptTime(), order);
 		called(listener, 1).onOrderCanceled(book, order.getCancelTime(), order, CancelReason.MISSED);
@@ -167,7 +169,7 @@ public class OrderBookTest {
 		
 		OrderBook book = new OrderBook("AAPL", listener);
 		
-		Order order = book.createLimit("1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
+		Order order = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
 		
 		called(listener, 1).onOrderAccepted(book, order.getAcceptTime(), order);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -178,7 +180,7 @@ public class OrderBookTest {
 		
 		done(listener);
 		
-		order = book.createLimit("2", 2, Side.SELL, 100, 432.13, TimeInForce.DAY);
+		order = book.createLimit(CLIENT_ID, "2", 2, Side.SELL, 100, 432.13, TimeInForce.DAY);
 		
 		called(listener, 1).onOrderAccepted(book, order.getAcceptTime(), order);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -206,7 +208,7 @@ public class OrderBookTest {
 		
 		OrderBook book = new OrderBook("AAPL", listener);
 		
-		Order order = book.createLimit("1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
+		Order order = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
 		
 		called(listener, 1).onOrderAccepted(book, order.getAcceptTime(), order);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -247,7 +249,7 @@ public class OrderBookTest {
 		
 		OrderBook book = new OrderBook("AAPL", listener);
 		
-		Order buyOrder = book.createLimit("1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
+		Order buyOrder = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
 		
 		called(listener, 1).onOrderAccepted(book, buyOrder.getAcceptTime(), buyOrder);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -260,7 +262,7 @@ public class OrderBookTest {
 
 		OrderExecutedCaptor captor = new OrderExecutedCaptor();
 		
-		Order sellOrder = book.createLimit("2", 2, Side.SELL, 100, 430.00, TimeInForce.DAY);
+		Order sellOrder = book.createLimit(CLIENT_ID, "2", 2, Side.SELL, 100, 430.00, TimeInForce.DAY);
 		
 		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -294,7 +296,7 @@ public class OrderBookTest {
 		Mockito.reset(listener);
 		captor = new OrderExecutedCaptor();
 		
-		sellOrder = book.createLimit("3", 3, Side.SELL, 100, 430.00, TimeInForce.DAY);
+		sellOrder = book.createLimit(CLIENT_ID, "3", 3, Side.SELL, 100, 430.00, TimeInForce.DAY);
 		
 		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -333,13 +335,13 @@ public class OrderBookTest {
 		
 		OrderBook book = new OrderBook("AAPL", listener);
 		
-		Order buyOrder = book.createLimit("1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
-		book.createLimit("2", 2, Side.BUY, 400, 432.11, TimeInForce.DAY);
+		Order buyOrder = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
+		book.createLimit(CLIENT_ID, "2", 2, Side.BUY, 400, 432.11, TimeInForce.DAY);
 		
 		Mockito.reset(listener);
 		OrderExecutedCaptor captor = new OrderExecutedCaptor();
 		
-		Order sellOrder = book.createLimit("3", 3, Side.SELL, 1000, 432.12, TimeInForce.IOC);
+		Order sellOrder = book.createLimit(CLIENT_ID, "3", 3, Side.SELL, 1000, 432.12, TimeInForce.IOC);
 		
 		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
 		called(listener, 1).onOrderCanceled(book, sellOrder.getCancelTime(), sellOrder, CancelReason.MISSED);

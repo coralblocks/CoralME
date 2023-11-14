@@ -33,6 +33,8 @@ import com.coralblocks.coralme.util.Timestamper;
  * <p>A good command-line example is:  <b><code>java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.example.NoGCTest</code></b></p>
  */
 public class NoGCTest {
+	
+	private static final long CLIENT_ID = 1002L;
 
 	private static final boolean USE_BAD_SYSTEM_OUT_PRINT = false; // turn this on and you will see a lot of garbage from System.out.print
 	private final static StringBuilder sb = new StringBuilder(1024);
@@ -78,22 +80,22 @@ public class NoGCTest {
 			Timestamper ts = book.getTimestamper();
 			
 			// Bids:
-			book.createLimit(getClientOrderId(),  orderId++,  Side.BUY, 1000, 100.00, TimeInForce.DAY);
-			book.createLimit(getClientOrderId(),  orderId++,  Side.BUY,  900,  99.00, TimeInForce.DAY);
-			book.createLimit(getClientOrderId(),  orderId++,  Side.BUY,  800,  98.00, TimeInForce.DAY);
-			book.createLimit(getClientOrderId(),  orderId++,  Side.BUY,  700,  97.00, TimeInForce.DAY);
-			book.createLimit(getClientOrderId(),  orderId++,  Side.BUY,  500,  95.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY, 1000, 100.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY,  900,  99.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY,  800,  98.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY,  700,  97.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY,  500,  95.00, TimeInForce.DAY);
 			
 			// Asks:
-			book.createLimit(getClientOrderId(),  orderId++,  Side.SELL,  500, 102.00, TimeInForce.DAY);
-			book.createLimit(getClientOrderId(),  orderId++,  Side.SELL,  400, 104.00, TimeInForce.DAY);
-			book.createLimit(getClientOrderId(),  orderId++,  Side.SELL,  800, 105.00, TimeInForce.DAY);
-			book.createLimit(getClientOrderId(),  orderId++,  Side.SELL,  700, 108.00, TimeInForce.DAY);
-			book.createLimit(getClientOrderId(),  orderId++, Side.SELL,  500, 115.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.SELL,  500, 102.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.SELL,  400, 104.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.SELL,  800, 105.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.SELL,  700, 108.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++, Side.SELL,  500, 115.00, TimeInForce.DAY);
 			
 			// Hit top of book with IOCs:
-			book.createLimit(getClientOrderId(),  orderId++,  Side.BUY,  600, 103.00, TimeInForce.IOC);
-			book.createLimit(getClientOrderId(),  orderId++,  Side.SELL, 900, 96.00,  TimeInForce.IOC);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY,  600, 103.00, TimeInForce.IOC);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.SELL, 900, 96.00,  TimeInForce.IOC);
 			
 			// Reduce and cancel top of book orders
 			Order bidOrder = book.getBestBidOrder();
@@ -113,16 +115,16 @@ public class NoGCTest {
 			askOrder.cancel(ts.nanoEpoch());
 			
 			// Order rejects due odd lot
-			book.createLimit(getClientOrderId(),  orderId++,  Side.BUY,  620, 103.00, TimeInForce.DAY);
-			book.createLimit(getClientOrderId(),  orderId++,  Side.SELL, 940, 96.00,  TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY,  620, 103.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.SELL, 940, 96.00,  TimeInForce.DAY);
 			
 			// Add a couple of more orders in the middle of the book
-			book.createLimit(getClientOrderId(),  orderId++,  Side.BUY,  600, 96.00,  TimeInForce.DAY);
-			book.createLimit(getClientOrderId(),  orderId++,  Side.SELL, 990, 111.00, TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY,  600, 96.00,  TimeInForce.DAY);
+			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.SELL, 990, 111.00, TimeInForce.DAY);
 			
 			// Now use a market order to remove all liquidity from both sides
-			book.createMarket(getClientOrderId(),  orderId++,  Side.BUY,  15000);
-			book.createMarket(getClientOrderId(),  orderId++,  Side.SELL, 15000);
+			book.createMarket(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY,  15000);
+			book.createMarket(CLIENT_ID, getClientOrderId(),  orderId++,  Side.SELL, 15000);
 			
 			// Book must now be empty
 			if (!book.isEmpty()) throw new IllegalStateException("Book must be empty here!");

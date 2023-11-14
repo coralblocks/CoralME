@@ -506,16 +506,16 @@ public class OrderBook implements OrderListener {
 		return priceLevel;
 	}
 	
-	public Order createLimit(CharSequence clientOrderId, long exchangeOrderId, Side side, long size, double price, TimeInForce tif) {
-		return createLimit(clientOrderId, exchangeOrderId, side, size, DoubleUtils.toLong(price), tif);
+	public Order createLimit(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size, double price, TimeInForce tif) {
+		return createLimit(clientId, clientOrderId, exchangeOrderId, side, size, DoubleUtils.toLong(price), tif);
 	}
 
-	public Order createLimit(CharSequence clientOrderId, long exchangeOrderId, Side side, long size, long price, TimeInForce tif) {
-		return createOrder(clientOrderId, exchangeOrderId, side, size, price, Type.LIMIT, tif);
+	public Order createLimit(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size, long price, TimeInForce tif) {
+		return createOrder(clientId, clientOrderId, exchangeOrderId, side, size, price, Type.LIMIT, tif);
 	}
 	
-	public Order createMarket(CharSequence clientOrderId, long exchangeOrderId, Side side, long size) {
-		return createOrder(clientOrderId, exchangeOrderId, side, size, 0, Type.MARKET, null);
+	public Order createMarket(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size) {
+		return createOrder(clientId, clientOrderId, exchangeOrderId, side, size, 0, Type.MARKET, null);
 	}
 
 	protected RejectReason validateOrder(Order order) {
@@ -602,9 +602,9 @@ public class OrderBook implements OrderListener {
 		return order;
 	}
 	
-	final Order createOrder(CharSequence clientOrderId, long exchangeOrderId, Side side, long size, long price, Type type,TimeInForce tif) {
+	final Order createOrder(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size, long price, Type type,TimeInForce tif) {
 		
-		Order order = getOrder(clientOrderId, security, side, size, price, type, tif);
+		Order order = getOrder(clientId, clientOrderId, security, side, size, price, type, tif);
 		
 		if (tif == TimeInForce.IOC || type == Type.MARKET) {
 			
@@ -646,11 +646,11 @@ public class OrderBook implements OrderListener {
 		order.rest(timestamper.nanoEpoch());
 	}
 	
-	private Order getOrder(CharSequence clientOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
+	private Order getOrder(long clientId, CharSequence clientOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
 		
 		Order order = ORDER_POOL.get();
 		
-		order.init(clientOrderId, 0, security, side, size, price, type, tif);
+		order.init(clientId, clientOrderId, 0, security, side, size, price, type, tif);
 		
 		order.addListener(this);
 		

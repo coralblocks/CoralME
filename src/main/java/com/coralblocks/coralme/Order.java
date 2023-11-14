@@ -41,6 +41,8 @@ public class Order {
     
     private PriceLevel priceLevel;
     
+    private long clientId;
+    
     private final StringBuilder clientOrderId = new StringBuilder(CLIENT_ORDER_ID_MAX_LENGTH);
     
     private long price;
@@ -79,8 +81,10 @@ public class Order {
     	
     }
     
-	public void init(CharSequence clientOrderId, long exchangeOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
+	public void init(long clientId, CharSequence clientOrderId, long exchangeOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
     	
+		this.clientId = clientId;
+		
     	this.clientOrderId.setLength(0);
     	this.clientOrderId.append(clientOrderId);
     	
@@ -286,6 +290,11 @@ public class Order {
     public final long getExchangeOrderId() {
     	
     	return id;
+    }
+    
+    public final long getClientId() {
+    	
+    	return clientId;
     }
     
     public final CharSequence getClientOrderId() {
