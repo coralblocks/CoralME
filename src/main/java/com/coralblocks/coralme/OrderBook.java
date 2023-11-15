@@ -34,6 +34,8 @@ import com.coralblocks.coralme.util.Timestamper;
 
 public class OrderBook implements OrderListener {
 	
+	private static final boolean DEFAULT_ALLOW_TRADE_TO_SELF = true;
+	
 	private static final Timestamper TIMESTAMPER = new SystemTimestamper();
 	
 	public static enum State { NORMAL, LOCKED, CROSSED, ONESIDED, EMPTY }
@@ -62,35 +64,46 @@ public class OrderBook implements OrderListener {
 	
 	private final Timestamper timestamper;
 	
-	private boolean allowTradeToSelf = true;
+	private final boolean allowTradeToSelf;
 	
+	
+	public OrderBook(String security, boolean allowTradeToSelf) {
+		this(security, TIMESTAMPER, null, allowTradeToSelf);
+	}
 	
 	public OrderBook(String security) {
-		
 		this(security, TIMESTAMPER, null);
 	}
 	
+	public OrderBook(String security, Timestamper timestamper, boolean allowTradeToSelf) {
+		this(security, timestamper, null, allowTradeToSelf);
+	}
+	
 	public OrderBook(String security, Timestamper timestamper) {
-		
 		this(security, timestamper, null);
+	}
+	
+	public OrderBook(String security, OrderBookListener listener, boolean allowTradeToSelf) {
+		this(security, TIMESTAMPER, listener, allowTradeToSelf);
 	}
 	
 	public OrderBook(String security, OrderBookListener listener) {
 		this(security, TIMESTAMPER, listener);
 	}
-
+	
 	public OrderBook(String security, Timestamper timestamper, OrderBookListener listener) {
+		this(security, timestamper, listener, DEFAULT_ALLOW_TRADE_TO_SELF);
+	}
+
+	public OrderBook(String security, Timestamper timestamper, OrderBookListener listener, boolean allowTradeToSelf) {
 		
 		this.security = security;
 		
 		this.timestamper = timestamper;
 		
-		if (listener != null) listeners.add(listener);
-	}
-	
-	public final void setAllowTradeToSelf(boolean flag) {
+		this.allowTradeToSelf = allowTradeToSelf;
 		
-		this.allowTradeToSelf = flag;
+		if (listener != null) listeners.add(listener);
 	}
 	
 	public void addListener(OrderBookListener listener) {
