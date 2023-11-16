@@ -616,10 +616,20 @@ public class OrderBook implements OrderListener {
 				
 			return order;
 		}
-			
-		// rest the remaining in the book:
 		
-		rest(order);
+		// rest the remaining in the book:
+		// but first check if it will not cross its own order
+		if (!allowTradeToSelf && hasTop(order.getOtherSide()) && order.getSide().isInside(order.getPrice(), getBestPrice(order.getOtherSide()))) {
+			
+			CancelReason cancelReason = CancelReason.CROSSED;
+			
+			order.cancel(timestamper.nanoEpoch(), cancelReason);
+			
+		} else {
+		
+			rest(order);
+			
+		}
 		
 		return order;
 	}

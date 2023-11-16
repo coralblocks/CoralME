@@ -575,6 +575,7 @@ public class Order {
 		USER			('U'),
 		NO_LIQUIDITY	('L'),
 		PRICE			('E'),
+		CROSSED			('C'),
 		PURGED			('P');
 
 		private final char b;

@@ -263,4 +263,45 @@ public class OrderBookNoSelfTradeTest {
 		assertEquals(OrderBook.State.ONESIDED, book.getState());
 		assertEquals(false, book.hasAsks());
 	}
+	
+	@Test
+	public void test_Cross_Reject() {
+		
+		OrderBookListener listener = Mockito.mock(OrderBookListener.class);
+		
+		OrderBook book = new OrderBook("AAPL", listener, false); // <=== NO TRADE_TO_SELF
+		
+		Order buyOrder = book.createLimit(CID_1, "1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
+		
+		called(listener, 1).onOrderAccepted(book, buyOrder.getAcceptTime(), buyOrder);
+		called(listener, 0).onOrderCanceled(null, 0, null, null);
+		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0);
+		called(listener, 0).onOrderRejected(null, 0, null, null);
+		called(listener, 1).onOrderRested(book, buyOrder.getRestTime(), buyOrder, buyOrder.getOriginalSize(), buyOrder.getPrice());
+		
+		done(listener);
+		
+		Order sellOrder = book.createLimit(CID_1, "2", 2, Side.SELL, 500, 432.11, TimeInForce.DAY);
+		
+		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
+		called(listener, 1).onOrderCanceled(book, sellOrder.getCancelTime(), sellOrder, CancelReason.CROSSED);
+		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0);
+		called(listener, 0).onOrderRejected(null, 0, null, null);
+		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		
+		done(listener);
+		
+		sellOrder = book.createLimit(CID_1, "3", 3, Side.SELL, 400, 432.12, TimeInForce.DAY);
+		
+		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
+		called(listener, 1).onOrderCanceled(book, sellOrder.getCancelTime(), sellOrder, CancelReason.CROSSED);
+		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0);
+		called(listener, 0).onOrderRejected(null, 0, null, null);
+		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		
+		done(listener);
+	}
 }
