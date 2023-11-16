@@ -39,6 +39,7 @@ public class OrderBookNoSelfTradeTest {
 	
 	private void done(OrderBookListener listener) {
 		Mockito.verifyNoMoreInteractions(listener);
+		Mockito.clearInvocations(listener);
 	}
 	
 	private static class OrderExecutedCaptor {
