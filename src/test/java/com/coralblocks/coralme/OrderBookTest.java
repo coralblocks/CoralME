@@ -68,6 +68,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 1).onOrderRested(book, order.getRestTime(), order, order.getOriginalSize(), order.getPrice());
+		called(listener, 0).onOrderTerminated(null, 0, null);
 		
 		done(listener);
 	}
@@ -88,6 +89,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 1).onOrderRejected(book, order.getRejectTime(), order, RejectReason.BAD_PRICE);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		called(listener, 0).onOrderTerminated(null, 0, null);
 		
 		done(listener);
 	}
@@ -115,6 +117,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 1).onOrderRested(book, order.getRestTime(), order, order.getOriginalSize(), order.getPrice());
+		called(listener, 0).onOrderTerminated(null, 0, null);
 		
 		done(listener);
 		
@@ -127,6 +130,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 1).onOrderRejected(book, order.getRejectTime(), order, RejectReason.BAD_LOT);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		called(listener, 0).onOrderTerminated(null, 0, null);
 		
 		done(listener);
 	}
@@ -146,6 +150,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 1).onOrderRested(book, order.getRestTime(), order, order.getOriginalSize(), order.getPrice());
+		called(listener, 0).onOrderTerminated(null, 0, null);
 		
 		done(listener);
 		
@@ -157,6 +162,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null,0, null, 0, 0);
+		called(listener, 1).onOrderTerminated(book, order.getCancelTime(), order);
 		
 		done(listener);
 	}
@@ -176,6 +182,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 1).onOrderRested(book, order.getRestTime(), order, order.getOriginalSize(), order.getPrice());
+		called(listener, 0).onOrderTerminated(null, 0, null);
 		
 		done(listener);
 		
@@ -187,6 +194,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 1).onOrderRested(book, order.getRestTime(), order, order.getOriginalSize(), order.getPrice());
+		called(listener, 0).onOrderTerminated(null, 0, null);
 		
 		done(listener);
 		
@@ -215,6 +223,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 1).onOrderRested(book, order.getRestTime(), order, order.getOriginalSize(), order.getPrice());
+		called(listener, 0).onOrderTerminated(null, 0, null);
 		
 		done(listener);
 		
@@ -226,6 +235,7 @@ public class OrderBookTest {
 		called(listener, 1).onOrderReduced(book, order.getReduceTime(), order, 300);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		called(listener, 0).onOrderTerminated(null, 0, null);
 		
 		done(listener);
 		
@@ -237,6 +247,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		called(listener, 1).onOrderTerminated(book, order.getCancelTime(), order);
 		
 		done(listener);
 	}
@@ -256,6 +267,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 1).onOrderRested(book, buyOrder.getRestTime(), buyOrder, buyOrder.getOriginalSize(), buyOrder.getPrice());
+		called(listener, 0).onOrderTerminated(null, 0, null);
 		
 		done(listener);
 
@@ -271,6 +283,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		called(listener, 1).onOrderTerminated(book, sellOrder.getExecuteTime(), sellOrder);
 		
 		done(listener);
 		
@@ -305,6 +318,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		called(listener, 1).onOrderTerminated(book, sellOrder.getExecuteTime(), sellOrder);
 		
 		done(listener);
 		
@@ -350,6 +364,7 @@ public class OrderBookTest {
 		called(listener, 0).onOrderReduced(null, 0, null, 0);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		called(listener, 2).onOrderTerminated(captor.book.capture(), captor.time.capture(), captor.order.capture());
 		
 		done(listener);
 		

@@ -50,4 +50,9 @@ public class OrderBookAdapter implements OrderBookListener {
     public void onOrderRested(OrderBook orderBook, long time, Order order, long restSize, long restPrice) {
     	
     }
+
+	@Override
+	public void onOrderTerminated(OrderBook orderBook, long time, Order order) {
+		
+	}
 }

@@ -33,4 +33,6 @@ public interface OrderListener {
     
     public void onOrderRested(long time, Order order, long restSize, long restPrice);
     
+    public void onOrderTerminated(long time, Order order);
+    
 }

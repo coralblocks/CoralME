@@ -119,4 +119,14 @@ public class OrderBookLogger implements OrderBookListener {
     	System.out.println("  restPrice=" + DoubleUtils.toDouble(restPrice));
     	System.out.println();
     }
+
+	@Override
+	public void onOrderTerminated(OrderBook orderBook, long time, Order order) {
+		if (!isOn) return;
+    	System.out.println("-----> onOrderTerminated called:");
+    	System.out.println("  orderBook=" + orderBook);
+    	System.out.println("  time=" + time);
+    	System.out.println("  order=" + order);
+    	System.out.println();
+	}
 }

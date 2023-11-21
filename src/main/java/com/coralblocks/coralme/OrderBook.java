@@ -749,12 +749,11 @@ public class OrderBook implements OrderListener {
 		for(int i = 0; i < size; i++) {
 			listeners.get(i).onOrderCanceled(this, time, order, reason);
 		}
-		
     }
 
 	@Override
     public void onOrderExecuted(long time, Order order, ExecuteSide execSide, long sizeExecuted, long priceExecuted, long executionId, long matchId) {
-	 
+		
 		if (order.isTerminal()) {
 			
 			removeOrder(order);
@@ -799,6 +798,16 @@ public class OrderBook implements OrderListener {
 			listeners.get(i).onOrderRested(this, time, order, restSize, restPrice);
 		}
     }
+	
+	@Override
+	public void onOrderTerminated(long time, Order order) {
+		
+		int size = listeners.size();
+		
+		for(int i = 0; i < size; i++) {
+			listeners.get(i).onOrderTerminated(this, time, order);
+		}
+	}
 	
 	@Override
 	public String toString() {

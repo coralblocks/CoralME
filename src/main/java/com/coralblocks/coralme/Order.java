@@ -440,6 +440,11 @@ public class Order {
     		listeners.get(i).onOrderCanceled(time, this, reason);
     	}
     	
+    	for(int i = x - 1; i >= 0; i--) {
+    		
+    		listeners.get(i).onOrderTerminated(time, this);
+    	}
+    	
     	listeners.clear();
     }
     
@@ -467,6 +472,11 @@ public class Order {
     	}
     	
     	if (isTerminal()) {
+    		
+        	for(int i = x - 1; i >= 0; i--) {
+        		
+        		listeners.get(i).onOrderTerminated(time, this);
+        	}
     		
     		listeners.clear();
     	}

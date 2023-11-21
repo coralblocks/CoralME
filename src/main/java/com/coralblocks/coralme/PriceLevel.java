@@ -215,4 +215,10 @@ public class PriceLevel implements OrderListener {
 
 		// NOOP
     }
+
+	@Override
+	public void onOrderTerminated(long time, Order order) {
+		
+		// NOOP
+	}
 }

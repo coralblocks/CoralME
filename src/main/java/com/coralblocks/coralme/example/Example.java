@@ -39,14 +39,14 @@ public class Example {
 		/*
 			-----> onOrderAccepted called:
 			  orderBook=AAPL
-			  time=1682731006570000000
-			  order=Order [id=1, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=200, 
+			  time=1700598048045000000
+			  order=Order [id=1, clientId=1001, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=200, 
 			  				executedSize=0, canceledSize=0, price=150.44, type=LIMIT, tif=DAY]
 			
 			-----> onOrderRested called:
 			  orderBook=AAPL
-			  time=1682731006572000000
-			  order=Order [id=1, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=200, 
+			  time=1700598048047000000
+			  order=Order [id=1, clientId=1001, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=200, 
 			  				executedSize=0, canceledSize=0, price=150.44, type=LIMIT, tif=DAY]
 			  restSize=200
 			  restPrice=150.44
@@ -71,14 +71,14 @@ public class Example {
 		/* 
 			-----> onOrderAccepted called:
 			  orderBook=AAPL
-			  time=1682731006574000000
-			  order=Order [id=2, clientOrderId=2, side=BUY, security=AAPL, originalSize=500, openSize=500, 
+			  time=1700598048049000000
+			  order=Order [id=2, clientId=1001, clientOrderId=2, side=BUY, security=AAPL, originalSize=500, openSize=500, 
 			  				executedSize=0, canceledSize=0, price=149.44, type=LIMIT, tif=DAY]
 			
 			-----> onOrderRested called:
 			  orderBook=AAPL
-			  time=1682731006574000000
-			  order=Order [id=2, clientOrderId=2, side=BUY, security=AAPL, originalSize=500, openSize=500, 
+			  time=1700598048050000000
+			  order=Order [id=2, clientId=1001, clientOrderId=2, side=BUY, security=AAPL, originalSize=500, openSize=500, 
 			  				executedSize=0, canceledSize=0, price=149.44, type=LIMIT, tif=DAY]
 			  restSize=500
 			  restPrice=149.44	
@@ -127,14 +127,14 @@ public class Example {
 		/*
 			-----> onOrderAccepted called:
 			  orderBook=AAPL
-			  time=1682731732570000000
-			  order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=100, openSize=100, 
+			  time=1700598048051000000
+			  order=Order [id=8, clientId=1001, clientOrderId=8, side=BUY, security=AAPL, originalSize=100, openSize=100, 
 			  				executedSize=0, canceledSize=0, type=MARKET]
 			
 			-----> onOrderExecuted called:
 			  orderBook=AAPL
-			  time=1682731732570000000
-			  order=Order [id=5, clientOrderId=5, side=SELL, security=AAPL, originalSize=300, openSize=200, 
+			  time=1700598048051000000
+			  order=Order [id=5, clientId=1001, clientOrderId=5, side=SELL, security=AAPL, originalSize=300, openSize=200, 
 			  				executedSize=100, canceledSize=0, price=153.24, type=LIMIT, tif=GTC]
 			  executeSide=MAKER
 			  executeSize=100
@@ -144,14 +144,20 @@ public class Example {
 			
 			-----> onOrderExecuted called:
 			  orderBook=AAPL
-			  time=1682731732570000000
-			  order=Order [id=8, clientOrderId=8, side=BUY, security=AAPL, originalSize=100, openSize=0, 
+			  time=1700598048051000000
+			  order=Order [id=8, clientId=1001, clientOrderId=8, side=BUY, security=AAPL, originalSize=100, openSize=0, 
 			  				executedSize=100, canceledSize=0, type=MARKET]
 			  executeSide=TAKER
 			  executeSize=100
 			  executePrice=153.24
 			  executeId=2
 			  executeMatchId=1
+			
+			-----> onOrderTerminated called:
+			  orderBook=AAPL
+			  time=1700598048051000000
+			  order=Order [id=8, clientId=1001, clientOrderId=8, side=BUY, security=AAPL, originalSize=100, openSize=0, 
+			  				executedSize=100, canceledSize=0, type=MARKET]
 		*/
 		
 		orderBook.showLevels();
@@ -174,8 +180,8 @@ public class Example {
 		/*
 			-----> onOrderReduced called:
 			  orderBook=AAPL
-			  time=1682731732572000000
-			  order=Order [id=1, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=100, 
+			  time=1700598048053000000
+			  order=Order [id=1, clientId=1001, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=100, 
 			  				executedSize=0, canceledSize=100, price=150.44, type=LIMIT, tif=DAY]
 			  reduceNewTotalSize=100	
 		*/
@@ -199,10 +205,16 @@ public class Example {
 		/*
 			-----> onOrderCanceled called:
 			  orderBook=AAPL
-			  time=1682731732572000000
-			  order=Order [id=1, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=0, 
+			  time=1700598048053000000
+			  order=Order [id=1, clientId=1001, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=0, 
 			  				executedSize=0, canceledSize=200, price=150.44, type=LIMIT, tif=DAY]
-			  cancelReason=USER	 
+			  cancelReason=USER
+			
+			-----> onOrderTerminated called:
+			  orderBook=AAPL
+			  time=1700598048053000000
+			  order=Order [id=1, clientId=1001, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=0, 
+			  				executedSize=0, canceledSize=200, price=150.44, type=LIMIT, tif=DAY]
 		*/
 		
 		orderBook.showLevels();
@@ -223,14 +235,14 @@ public class Example {
 		/*
 			-----> onOrderAccepted called:
 			  orderBook=AAPL
-			  time=1682731732573000000
-			  order=Order [id=9, clientOrderId=9, side=BUY, security=AAPL, originalSize=3000, openSize=3000, 
+			  time=1700598048054000000
+			  order=Order [id=9, clientId=1001, clientOrderId=9, side=BUY, security=AAPL, originalSize=3000, openSize=3000, 
 			  				executedSize=0, canceledSize=0, price=155.0, type=LIMIT, tif=IOC]
 			
 			-----> onOrderExecuted called:
 			  orderBook=AAPL
-			  time=1682731732573000000
-			  order=Order [id=5, clientOrderId=5, side=SELL, security=AAPL, originalSize=300, openSize=0, 
+			  time=1700598048054000000
+			  order=Order [id=5, clientId=1001, clientOrderId=5, side=SELL, security=AAPL, originalSize=300, openSize=0, 
 			  				executedSize=300, canceledSize=0, price=153.24, type=LIMIT, tif=GTC]
 			  executeSide=MAKER
 			  executeSize=200
@@ -238,10 +250,16 @@ public class Example {
 			  executeId=3
 			  executeMatchId=2
 			
+			-----> onOrderTerminated called:
+			  orderBook=AAPL
+			  time=1700598048054000000
+			  order=Order [id=5, clientId=1001, clientOrderId=5, side=SELL, security=AAPL, originalSize=300, openSize=0, 
+			  				executedSize=300, canceledSize=0, price=153.24, type=LIMIT, tif=GTC]
+			
 			-----> onOrderExecuted called:
 			  orderBook=AAPL
-			  time=1682731732573000000
-			  order=Order [id=9, clientOrderId=9, side=BUY, security=AAPL, originalSize=3000, openSize=2800, 
+			  time=1700598048054000000
+			  order=Order [id=9, clientId=1001, clientOrderId=9, side=BUY, security=AAPL, originalSize=3000, openSize=2800, 
 			  				executedSize=200, canceledSize=0, price=155.0, type=LIMIT, tif=IOC]
 			  executeSide=TAKER
 			  executeSize=200
@@ -251,10 +269,16 @@ public class Example {
 			
 			-----> onOrderCanceled called:
 			  orderBook=AAPL
-			  time=1682731732573000000
-			  order=Order [id=9, clientOrderId=9, side=BUY, security=AAPL, originalSize=3000, openSize=0, 
+			  time=1700598048055000000
+			  order=Order [id=9, clientId=1001, clientOrderId=9, side=BUY, security=AAPL, originalSize=3000, openSize=0, 
 			  				executedSize=200, canceledSize=2800, price=155.0, type=LIMIT, tif=IOC]
 			  cancelReason=MISSED
+			
+			-----> onOrderTerminated called:
+			  orderBook=AAPL
+			  time=1700598048055000000
+			  order=Order [id=9, clientId=1001, clientOrderId=9, side=BUY, security=AAPL, originalSize=3000, openSize=0, 
+			  				executedSize=200, canceledSize=2800, price=155.0, type=LIMIT, tif=IOC]
 		*/
 		
 		orderBook.showLevels();
@@ -291,23 +315,32 @@ public class Example {
 		/*
 			-----> onOrderAccepted called:
 			  orderBook=AAPL
-			  time=1682731732574000000
-			  order=Order [id=11, clientOrderId=11, side=BUY, security=AAPL, originalSize=3900, openSize=3900, executedSize=0, canceledSize=0, price=159.0, type=LIMIT, tif=DAY]
+			  time=1700598048056000000
+			  order=Order [id=11, clientId=1001, clientOrderId=11, side=BUY, security=AAPL, originalSize=3900, openSize=3900, 
+			  				executedSize=0, canceledSize=0, price=159.0, type=LIMIT, tif=DAY]
 			
 			-----> onOrderExecuted called:
 			  orderBook=AAPL
-			  time=1682731732574000000
-			  order=Order [id=6, clientOrderId=6, side=SELL, security=AAPL, originalSize=500, openSize=0, executedSize=500, canceledSize=0, price=156.43, type=LIMIT, tif=DAY]
+			  time=1700598048056000000
+			  order=Order [id=6, clientId=1001, clientOrderId=6, side=SELL, security=AAPL, originalSize=500, openSize=0, 
+			  				executedSize=500, canceledSize=0, price=156.43, type=LIMIT, tif=DAY]
 			  executeSide=MAKER
 			  executeSize=500
 			  executePrice=156.43
 			  executeId=5
 			  executeMatchId=3
 			
+			-----> onOrderTerminated called:
+			  orderBook=AAPL
+			  time=1700598048056000000
+			  order=Order [id=6, clientId=1001, clientOrderId=6, side=SELL, security=AAPL, originalSize=500, openSize=0, 
+			  				executedSize=500, canceledSize=0, price=156.43, type=LIMIT, tif=DAY]
+			
 			-----> onOrderExecuted called:
 			  orderBook=AAPL
-			  time=1682731732574000000
-			  order=Order [id=11, clientOrderId=11, side=BUY, security=AAPL, originalSize=3900, openSize=3400, executedSize=500, canceledSize=0, price=159.0, type=LIMIT, tif=DAY]
+			  time=1700598048056000000
+			  order=Order [id=11, clientId=1001, clientOrderId=11, side=BUY, security=AAPL, originalSize=3900, openSize=3400, 
+			  				executedSize=500, canceledSize=0, price=159.0, type=LIMIT, tif=DAY]
 			  executeSide=TAKER
 			  executeSize=500
 			  executePrice=156.43
@@ -316,18 +349,26 @@ public class Example {
 			
 			-----> onOrderExecuted called:
 			  orderBook=AAPL
-			  time=1682731732574000000
-			  order=Order [id=7, clientOrderId=7, side=SELL, security=AAPL, originalSize=1500, openSize=0, executedSize=1500, canceledSize=0, price=158.54, type=LIMIT, tif=DAY]
+			  time=1700598048056000000
+			  order=Order [id=7, clientId=1001, clientOrderId=7, side=SELL, security=AAPL, originalSize=1500, openSize=0, 
+			  				executedSize=1500, canceledSize=0, price=158.54, type=LIMIT, tif=DAY]
 			  executeSide=MAKER
 			  executeSize=1500
 			  executePrice=158.54
 			  executeId=7
 			  executeMatchId=4
 			
+			-----> onOrderTerminated called:
+			  orderBook=AAPL
+			  time=1700598048056000000
+			  order=Order [id=7, clientId=1001, clientOrderId=7, side=SELL, security=AAPL, originalSize=1500, openSize=0, 
+			  				executedSize=1500, canceledSize=0, price=158.54, type=LIMIT, tif=DAY]
+			
 			-----> onOrderExecuted called:
 			  orderBook=AAPL
-			  time=1682731732574000000
-			  order=Order [id=11, clientOrderId=11, side=BUY, security=AAPL, originalSize=3900, openSize=1900, executedSize=2000, canceledSize=0, price=159.0, type=LIMIT, tif=DAY]
+			  time=1700598048056000000
+			  order=Order [id=11, clientId=1001, clientOrderId=11, side=BUY, security=AAPL, originalSize=3900, openSize=1900, 
+			  				executedSize=2000, canceledSize=0, price=159.0, type=LIMIT, tif=DAY]
 			  executeSide=TAKER
 			  executeSize=1500
 			  executePrice=158.54
@@ -336,10 +377,11 @@ public class Example {
 			
 			-----> onOrderRested called:
 			  orderBook=AAPL
-			  time=1682731732575000000
-			  order=Order [id=11, clientOrderId=11, side=BUY, security=AAPL, originalSize=3900, openSize=1900, executedSize=2000, canceledSize=0, price=159.0, type=LIMIT, tif=DAY]
+			  time=1700598048056000000
+			  order=Order [id=11, clientId=1001, clientOrderId=11, side=BUY, security=AAPL, originalSize=3900, openSize=1900, 
+			  				executedSize=2000, canceledSize=0, price=159.0, type=LIMIT, tif=DAY]
 			  restSize=1900
-			  restPrice=159.0	 
+			  restPrice=159.0
 		*/
 		
 		orderBook.showOrders();
