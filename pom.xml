@@ -97,13 +97,10 @@
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <releaseProfiles>release</releaseProfiles>
           <pushChanges>true</pushChanges>
-          <pushReleases>true</pushReleases>
           <remoteTagging>true</remoteTagging>
           <scmCommentPrefix>[maven-release-plugin]</scmCommentPrefix>
           <preparationGoals>clean verify</preparationGoals>
           <arguments>-DskipTests</arguments>
-          <retryFailedDeploymentCount>5</retryFailedDeploymentCount>
-          <retryFailedDeploymentDelaySeconds>10</retryFailedDeploymentDelaySeconds>
         </configuration>
       </plugin>
 
