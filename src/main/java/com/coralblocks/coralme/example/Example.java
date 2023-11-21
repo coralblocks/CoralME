@@ -23,9 +23,9 @@ import com.coralblocks.coralme.OrderBookLogger;
 
 public class Example {
 	
-	private static final long CLIENT_ID = 1001L;
-	
 	public static void main(String[] args) {
+		
+		final long CLIENT_ID = 1001L;
 
 		long orderId = 0;
 		
