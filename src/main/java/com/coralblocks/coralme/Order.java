@@ -791,7 +791,8 @@ public class Order {
 	 * @return a CharSequence (i.e. the StringBuilder passed) containing the order information
 	 */
 	public CharSequence toCharSequence(StringBuilder sb) {
-		sb.append("Order [id=").append(id).append(", clientOrderId=").append(clientOrderId).append(", side=")
+		sb.append("Order [id=").append(id).append(", clientId=").append(clientId)
+			.append(", clientOrderId=").append(clientOrderId).append(", side=")
 			.append(side).append(", security=").append(security).append(", originalSize=").append(originalSize)
 			.append(", openSize=").append(getOpenSize()).append(", executedSize=").append(executedSize)
 			.append(", canceledSize=").append(getCanceledSize());
