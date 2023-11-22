@@ -24,7 +24,7 @@ The [OrderBookTest.java](https://github.com/coralblocks/CoralME/blob/main/src/te
 - IOC, GTC and DAY
 - MAKER (of liquidity) and TAKER (of liquidity) execution sides
 - NORMAL, CROSSED, LOCKED, ONESIDED and EMPTY book states
-- ClientId, ClientOrderID and OrderID
+- ClientID, ClientOrderID and OrderID
 - ExecutionID and ExecutionMatchID
 - Can optionally check and disallow trade to self
 
