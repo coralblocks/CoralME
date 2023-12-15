@@ -535,7 +535,8 @@ public class Order {
 		TRADING_HALTED		('H'),
 		BAD_LOT				('L'),
 		UNKNOWN_SYMBOL		('U'),
-		DUPLICATE_ORDER_ID	('D');
+		DUPLICATE_EXCHANGE_ORDER_ID	('E'),
+		DUPBLICATE_CLIENT_ORDER_ID ('C');
 
 		private final char b;
 		public final static CharMap<RejectReason> ALL = new CharMap<RejectReason>();
