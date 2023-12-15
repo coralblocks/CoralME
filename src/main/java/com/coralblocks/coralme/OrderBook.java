@@ -665,9 +665,43 @@ public class OrderBook implements OrderListener {
 		
 	}
 	
-	public void rollTo(OrderBook newOrderBook) {
+	public long rollTo(OrderBook newOrderBook) {
+		return rollTo(newOrderBook, 1);
+	}
+	
+	public long rollTo(OrderBook newOrderBook, long firstExchangeOrderId) {
 		
+		if (hasBids()) {
+			
+			for(PriceLevel pl = head(Side.BUY); pl != null; pl = pl.next) {
+				
+				for(Order o = pl.head(); o != null; o = o.next) {
+					
+					if (o.getTimeInForce() != TimeInForce.GTC) continue;
+					
+					newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
+					
+					o.cancel(timestamper.nanoEpoch(), CancelReason.ROLLED);
+				}
+			}
+		}
 		
+		if (hasAsks()) {
+			
+			for(PriceLevel pl = head(Side.SELL); pl != null; pl = pl.next) {
+				
+				for(Order o = pl.head(); o != null; o = o.next) {
+					
+					if (o.getTimeInForce() != TimeInForce.GTC) continue;
+					
+					newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
+					
+					o.cancel(timestamper.nanoEpoch(), CancelReason.ROLLED);
+				}
+			}
+		}
+		
+		return firstExchangeOrderId;
 	}
 	
 	public void expire() {
