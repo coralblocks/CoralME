@@ -94,6 +94,14 @@ public class OrderBook implements OrderListener {
 	public OrderBook(String security, Timestamper timestamper, OrderBookListener listener) {
 		this(security, timestamper, listener, DEFAULT_ALLOW_TRADE_TO_SELF);
 	}
+	
+	public OrderBook(OrderBook orderBook) {
+		this(orderBook.getSecurity(), orderBook.getTimestamper(), null, orderBook.isAllowTradeToSelf());
+		 List<OrderBookListener> listeners = orderBook.getListeners();
+		 for(int i = 0; i < listeners.size(); i++) {
+			 addListener(listeners.get(i));
+		 }
+	}
 
 	public OrderBook(String security, Timestamper timestamper, OrderBookListener listener, boolean allowTradeToSelf) {
 		
@@ -547,7 +555,7 @@ public class OrderBook implements OrderListener {
 	public Order createMarket(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size) {
 		return createOrder(clientId, clientOrderId, exchangeOrderId, side, size, 0, Type.MARKET, null);
 	}
-
+	
 	protected RejectReason validateOrder(Order order) {
 		return null;
 	}
@@ -655,6 +663,29 @@ public class OrderBook implements OrderListener {
 			return fillOrRest(order, exchangeOrderId);
 		}
 		
+	}
+	
+	public void rollTo(OrderBook newOrderBook) {
+		
+		
+	}
+	
+	public void expire() {
+		
+		Iterator<Order> iter = orders.iterator();
+		
+		while(iter.hasNext()) {
+			
+			Order order = iter.next();
+			
+			assert order.isTerminal() == false;
+			
+			if (order.getTimeInForce() != TimeInForce.DAY) continue;
+			
+			iter.remove(); // important otherwise you get a ConcurrentModificationException!
+			
+			order.cancel(timestamper.nanoEpoch(), CancelReason.EXPIRED);
+		}
 	}
 	
 	public final void purge() {

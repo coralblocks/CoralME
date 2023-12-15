@@ -307,11 +307,6 @@ public class Order {
     	return security;
     }
     
-    public final TimeInForce getTif() {
-    	
-    	return tif;
-    }
-    
     public void addListener(OrderListener listener) {
     	
     	/*
@@ -587,7 +582,9 @@ public class Order {
 		NO_LIQUIDITY	('L'),
 		PRICE			('E'),
 		CROSSED			('C'),
-		PURGED			('P');
+		PURGED			('P'),
+		EXPIRED			('D'),
+		ROLLED			('R');
 
 		private final char b;
 		public final static CharMap<CancelReason> ALL = new CharMap<CancelReason>();
