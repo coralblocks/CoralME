@@ -536,7 +536,7 @@ public class Order {
 		BAD_LOT				('L'),
 		UNKNOWN_SYMBOL		('U'),
 		DUPLICATE_EXCHANGE_ORDER_ID	('E'),
-		DUPBLICATE_CLIENT_ORDER_ID ('C');
+		DUPLICATE_CLIENT_ORDER_ID ('C');
 
 		private final char b;
 		public final static CharMap<RejectReason> ALL = new CharMap<RejectReason>();
