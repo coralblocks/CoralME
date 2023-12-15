@@ -114,6 +114,14 @@ public class OrderBook implements OrderListener {
 		listeners.remove(listener);
 	}
 	
+	public List<OrderBookListener> getListeners() {
+		return listeners;
+	}
+	
+	public final boolean isAllowTradeToSelf() {
+		return allowTradeToSelf;
+	}
+	
 	public Timestamper getTimestamper() {
 		return timestamper;
 	}
