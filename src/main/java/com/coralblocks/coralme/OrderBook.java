@@ -40,9 +40,9 @@ public class OrderBook implements OrderListener {
 	
 	public static enum State { NORMAL, LOCKED, CROSSED, ONESIDED, EMPTY }
 	
-	private final ObjectPool<Order> orderPool = new LinkedObjectPool<Order>(1024, Order.class);
+	private final ObjectPool<Order> orderPool = new LinkedObjectPool<Order>(8, Order.class);
 	
-	private final ObjectPool<PriceLevel> priceLevelPool = new LinkedObjectPool<PriceLevel>(1024, PriceLevel.class);
+	private final ObjectPool<PriceLevel> priceLevelPool = new LinkedObjectPool<PriceLevel>(8, PriceLevel.class);
 	
 	private long execId = 0;
 	
