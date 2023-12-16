@@ -40,9 +40,9 @@ public class OrderBook implements OrderListener {
 	
 	public static enum State { NORMAL, LOCKED, CROSSED, ONESIDED, EMPTY }
 	
-	private static final ObjectPool<Order> ORDER_POOL = new LinkedObjectPool<Order>(1024, Order.class);
+	private final ObjectPool<Order> orderPool = new LinkedObjectPool<Order>(1024, Order.class);
 	
-	private static final ObjectPool<PriceLevel> PRICE_LEVEL_POOL = new LinkedObjectPool<PriceLevel>(1024, PriceLevel.class);
+	private final ObjectPool<PriceLevel> priceLevelPool = new LinkedObjectPool<PriceLevel>(1024, PriceLevel.class);
 	
 	private long execId = 0;
 	
@@ -493,7 +493,7 @@ public class OrderBook implements OrderListener {
 		
 		if (foundPriceLevel == null) {
 			
-			priceLevel = PRICE_LEVEL_POOL.get();
+			priceLevel = priceLevelPool.get();
 
 			priceLevel.init(security, side, price);
 			
@@ -518,7 +518,7 @@ public class OrderBook implements OrderListener {
 			
 		} else if (foundPriceLevel.getPrice() != price) {
 			
-			priceLevel = PRICE_LEVEL_POOL.get();
+			priceLevel = priceLevelPool.get();
 			
 			priceLevel.init(security, side, price);
 			
@@ -757,7 +757,7 @@ public class OrderBook implements OrderListener {
 	
 	private Order getOrder(long clientId, CharSequence clientOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
 		
-		Order order = ORDER_POOL.get();
+		Order order = orderPool.get();
 		
 		order.init(clientId, clientOrderId, 0, security, side, size, price, type, tif);
 		
@@ -798,12 +798,12 @@ public class OrderBook implements OrderListener {
 			
 			levels[index]--;
 			
-			PRICE_LEVEL_POOL.release(priceLevel);
+			priceLevelPool.release(priceLevel);
 		}
 		
 		orders.remove(order.getId());
 		
-		ORDER_POOL.release(order);
+		orderPool.release(order);
 	}
 	
 	@Override
