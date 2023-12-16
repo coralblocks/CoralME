@@ -17,6 +17,9 @@ package com.coralblocks.coralme;
 
 import static org.junit.Assert.*;
 
+import java.util.Iterator;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -27,7 +30,6 @@ import com.coralblocks.coralme.Order.RejectReason;
 import com.coralblocks.coralme.Order.Side;
 import com.coralblocks.coralme.Order.TimeInForce;
 import com.coralblocks.coralme.util.DoubleUtils;
-
 
 public class OrderBookTest {
 	
@@ -426,6 +428,99 @@ public class OrderBookTest {
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
 		for(Order o : orders) called(listener, 1).onOrderTerminated(book, o.getCancelTime(), o);
+		
+		done(listener);
+	}
+	
+	@Test
+	public void test_Expire() {
+		
+		OrderBookListener listener = Mockito.mock(OrderBookListener.class);
+		
+		OrderBook book = new OrderBook("AAPL", listener);
+		
+		Order[] orders = new Order[6];
+		
+		orders[0] = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 500, 432.12, TimeInForce.DAY);
+		orders[1] = book.createLimit(CLIENT_ID, "2", 2, Side.BUY, 800, 432.10, TimeInForce.GTC);
+		orders[2] = book.createLimit(CLIENT_ID, "3", 3, Side.BUY, 200, 431.05, TimeInForce.DAY);
+		
+		orders[3] = book.createLimit(CLIENT_ID, "4", 4, Side.SELL, 600, 435.23, TimeInForce.GTC);
+		orders[4] = book.createLimit(CLIENT_ID, "5", 5, Side.SELL, 400, 435.33, TimeInForce.DAY);
+		orders[5] = book.createLimit(CLIENT_ID, "6", 6, Side.SELL, 500, 435.45, TimeInForce.GTC);
+		
+		clear(listener);
+		
+		Assert.assertEquals(6, book.getNumberOfOrders());
+		
+		book.expire();
+		
+		called(listener, 0).onOrderAccepted(null, 0, null);
+		for(Order o : orders) {
+			if (!o.isDay()) continue;
+			called(listener, 1).onOrderCanceled(book, o.getCancelTime(), o, CancelReason.EXPIRED);
+		}
+		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0);
+		called(listener, 0).onOrderRejected(null, 0, null, null);
+		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		for(Order o : orders) {
+			if (!o.isDay()) continue;
+			called(listener, 1).onOrderTerminated(book, o.getCancelTime(), o);
+		}
+		
+		done(listener);
+		
+		Assert.assertEquals(3, book.getNumberOfOrders());
+	}
+	
+	@Test
+	public void test_Roll_GTC() {
+		
+		OrderBookListener listener = Mockito.mock(OrderBookListener.class);
+		
+		OrderBook book = new OrderBook("AAPL", listener);
+		
+		Order[] orders = new Order[6];
+		
+		orders[0] = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 500, 432.12, TimeInForce.DAY);
+		orders[1] = book.createLimit(CLIENT_ID, "2", 2, Side.BUY, 800, 432.10, TimeInForce.GTC);
+		orders[2] = book.createLimit(CLIENT_ID, "3", 3, Side.BUY, 200, 431.05, TimeInForce.DAY);
+		
+		orders[3] = book.createLimit(CLIENT_ID, "4", 4, Side.SELL, 600, 435.23, TimeInForce.GTC);
+		orders[4] = book.createLimit(CLIENT_ID, "5", 5, Side.SELL, 400, 435.33, TimeInForce.DAY);
+		orders[5] = book.createLimit(CLIENT_ID, "6", 6, Side.SELL, 500, 435.45, TimeInForce.GTC);
+		
+		clear(listener);
+		
+		OrderBook newBook = new OrderBook(book);
+		
+		Assert.assertEquals(6, book.getNumberOfOrders());
+		Assert.assertEquals(0, newBook.getNumberOfOrders());
+		
+		book.rollTo(newBook);
+		
+		Assert.assertEquals(3, book.getNumberOfOrders());
+		Assert.assertEquals(3, newBook.getNumberOfOrders());
+		
+		// callbacks on new book
+		Iterator<Order> iter = newBook.getOrders().iterator();
+		while(iter.hasNext()) {
+			Order o = iter.next();
+			called(listener, 1).onOrderAccepted(newBook, o.getAcceptTime(), o);
+			called(listener, 1).onOrderRested(newBook, o.getRestTime(), o, o.getOriginalSize(), o.getPrice());
+		}
+		
+		// callbacks on previous book
+		for(Order o : orders) {
+			if (!o.isGTC()) continue;
+			called(listener, 1).onOrderCanceled(book, o.getCancelTime(), o, CancelReason.ROLLED);
+			called(listener, 1).onOrderTerminated(book, o.getCancelTime(), o);
+		}
+		
+		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0);
+		called(listener, 0).onOrderRejected(null, 0, null, null);
 		
 		done(listener);
 	}
