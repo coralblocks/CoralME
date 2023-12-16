@@ -157,6 +157,10 @@ public class OrderBook implements OrderListener {
 		return pl.head();
 	}
 	
+	public final LongMap<Order> getOrders() {
+		return orders;
+	}
+	
 	public final Order getOrder(long id) {
 		
 		return orders.get(id);
