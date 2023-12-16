@@ -39,6 +39,11 @@ public class OrderBookTest {
 	
 	private void done(OrderBookListener listener) {
 		Mockito.verifyNoMoreInteractions(listener);
+		Mockito.clearInvocations(listener);
+	}
+	
+	private void clear(OrderBookListener listener) {
+		Mockito.clearInvocations(listener);
 	}
 	
 	private static class OrderExecutedCaptor {
@@ -391,5 +396,37 @@ public class OrderBookTest {
 		assertEquals(200, sellOrder.getCanceledSize());
 		assertEquals(OrderBook.State.ONESIDED, book.getState());
 		assertEquals(false, book.hasAsks());
+	}
+	
+	@Test
+	public void test_Purge() {
+		
+		OrderBookListener listener = Mockito.mock(OrderBookListener.class);
+		
+		OrderBook book = new OrderBook("AAPL", listener);
+		
+		Order[] orders = new Order[6];
+		
+		orders[0] = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 500, 432.12, TimeInForce.DAY);
+		orders[1] = book.createLimit(CLIENT_ID, "2", 2, Side.BUY, 800, 432.10, TimeInForce.GTC);
+		orders[2] = book.createLimit(CLIENT_ID, "3", 3, Side.BUY, 200, 431.05, TimeInForce.DAY);
+		
+		orders[3] = book.createLimit(CLIENT_ID, "4", 4, Side.SELL, 600, 435.23, TimeInForce.GTC);
+		orders[4] = book.createLimit(CLIENT_ID, "5", 5, Side.SELL, 400, 435.33, TimeInForce.DAY);
+		orders[5] = book.createLimit(CLIENT_ID, "6", 6, Side.SELL, 500, 435.45, TimeInForce.GTC);
+		
+		clear(listener);
+		
+		book.purge();
+		
+		called(listener, 0).onOrderAccepted(null, 0, null);
+		for(Order o : orders) called(listener, 1).onOrderCanceled(book, o.getCancelTime(), o, CancelReason.PURGED);
+		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0);
+		called(listener, 0).onOrderRejected(null, 0, null, null);
+		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
+		for(Order o : orders) called(listener, 1).onOrderTerminated(book, o.getCancelTime(), o);
+		
+		done(listener);
 	}
 }
