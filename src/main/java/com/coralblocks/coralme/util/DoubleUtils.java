@@ -38,17 +38,6 @@ public class DoubleUtils {
 	}
 	
 	/**
-	 * Converts a double value to a long
-	 * 
-	 * @param value the double value to convert to a long
-	 * @param precision the number of decimals precision
-	 * @return the long representing the double value
-	 */
-	public static long toLong(double value, int precision) {
-		return Math.round(value * precision);
-	}
-	
-	/**
 	 * Converts a long value to a double with 8 decimals of precision.
 	 * 
 	 * @param value the long value to convert to a double
@@ -56,16 +45,5 @@ public class DoubleUtils {
 	 */
 	public static double toDouble(long value) {
 		return ((double) value) / ((double) MULTIPLIER);
-	}
-	
-	/**
-	 * Converts a long value to a double
-	 * 
-	 * @param value the long value to convert to a double
-	 * @param precision the number of decimals precision
-	 * @return the double representing the long value
-	 */
-	public static double toDouble(long value, int precision) {
-		return ((double) value) / ((double) precision);
 	}
 }

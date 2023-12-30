@@ -151,11 +151,6 @@ public class Order {
 		return DoubleUtils.toDouble(price);
 	}
 	
-	public final double getPriceAsDouble(int precision) {
-		
-		return DoubleUtils.toDouble(price, precision);
-	}
-	
     public final void setPriceLevel(PriceLevel priceLevel) {
     	
     	this.priceLevel = priceLevel;
