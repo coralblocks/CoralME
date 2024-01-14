@@ -66,6 +66,8 @@ public class PriceLevel implements OrderListener {
     	this.orders = 0;
     	
     	this.head = this.tail = null;
+    	
+    	this.next = this.prev = null;
     }
     
     public final long getPrice() {
