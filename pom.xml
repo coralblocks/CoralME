@@ -11,8 +11,8 @@
   </properties>
 
   <scm>
-    <connection>scm:svn:https://github.com/coralblocks/CoralME/trunk</connection>
-    <developerConnection>scm:svn:https://github.com/coralblocks/CoralME/trunk</developerConnection>
+    <connection>scm:git:https://github.com/coralblocks/CoralME</connection>
+    <developerConnection>scm:git:https://github.com/coralblocks/CoralME</developerConnection>
     <url>https://github.com/coralblocks/CoralME</url>
   </scm>
 
