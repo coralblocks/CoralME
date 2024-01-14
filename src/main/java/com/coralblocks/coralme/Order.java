@@ -123,6 +123,8 @@ public class Order {
     	this.isPendingCancel = false;
     	
     	this.pendingSize = -1;
+    	
+    	this.next = this.prev = null; // sanity!
     }
 	
 	public final void setPendingCancel() {
