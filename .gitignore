@@ -17,3 +17,9 @@ buildNumber.properties
 .classpath
 .settings/
 
+# IntelliJ IDEA
+.idea/
+
+# macOS ignore
+.DS_Store
+
