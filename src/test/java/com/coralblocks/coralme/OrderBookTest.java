@@ -530,7 +530,7 @@ public class OrderBookTest {
     	
     	for(int i = 0; i < 2; i++) {
         
-	    	OrderBook ob = new OrderBook("NYISO-MILLWD-1MWh-20240113-HE20-0-5000", i == 0);
+	    	OrderBook ob = new OrderBook("AAPL", i == 0);
 	
 	        ob.createLimit(100001L, "b77908b5-9755-45c3-bb73-dc3884e8c8a2", 3340L, Order.Side.SELL, 8L, 8100000000L, Order.TimeInForce.GTC);
 	        ob.createLimit(100003L, "15584205-ef97-456b-8101-3fab653d46cd", 3344L, Order.Side.BUY, 6L, 6375000000L, Order.TimeInForce.GTC);
