@@ -312,7 +312,7 @@ public class OrderBookTest {
 		assertEquals(2, captor.executeId.getAllValues().get(1).longValue());
 		assertEquals(1, captor.executeMatchId.getAllValues().get(1).longValue());
 		
-		Mockito.reset(listener);
+		clear(listener);
 		captor = new OrderExecutedCaptor();
 		
 		sellOrder = book.createLimit(CLIENT_ID, "3", 3, Side.SELL, 100, 430.00, TimeInForce.DAY);
@@ -358,7 +358,7 @@ public class OrderBookTest {
 		Order buyOrder = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 800, 432.12, TimeInForce.DAY);
 		book.createLimit(CLIENT_ID, "2", 2, Side.BUY, 400, 432.11, TimeInForce.DAY);
 		
-		Mockito.reset(listener);
+		clear(listener);
 		OrderExecutedCaptor captor = new OrderExecutedCaptor();
 		
 		Order sellOrder = book.createLimit(CLIENT_ID, "3", 3, Side.SELL, 1000, 432.12, TimeInForce.IOC);
