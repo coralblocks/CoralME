@@ -32,21 +32,6 @@ public class LinkedObjectPool<E> implements ObjectPool<E> {
 
 	private final Supplier<? extends E> supplier;
 
-	/**
-	 * Creates a LinkedObjectPool.
-	 *
-	 * @param initialSize the initial size of the pool (how many instance it will initially have)
-	 * @param klass the class with a default constructor that will be used to create the instances
-	 */
-    public LinkedObjectPool(int initialSize, Class<? extends E> klass) {
-        this(initialSize, () -> {
-            try {
-                return klass.getConstructor().newInstance();
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				throw new IllegalArgumentException("Failed to create instance of " + klass.getName(), e);
-            }
-        });
-    }
 
 	/**
 	 * Creates a LinkedObjectPool.
