@@ -20,7 +20,7 @@ package com.coralblocks.coralme.util;
  * 
  * <p>There are of course much better ways to get the epoch with nanosecond precision. And without producing any garbage for the GC.</p>
  */
-public class SystemTimestamper implements Timestamper {
+public final class SystemTimestamper implements Timestamper {
 	
 	/**
 	 * Simply returns System.currentTimeMillis * 1000000L.
@@ -30,6 +30,6 @@ public class SystemTimestamper implements Timestamper {
 	 */
 	@Override
 	public long nanoEpoch() {
-		return System.currentTimeMillis() * 1000000L;
+		return System.nanoTime();
 	}
 }

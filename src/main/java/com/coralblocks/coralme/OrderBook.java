@@ -15,6 +15,7 @@
  */
 package com.coralblocks.coralme;
 
+import com.coralblocks.coralme.util.ArrayObjectPool;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,9 +41,9 @@ public class OrderBook implements OrderListener {
 	
 	public static enum State { NORMAL, LOCKED, CROSSED, ONESIDED, EMPTY }
 	
-	private final ObjectPool<Order> orderPool = new LinkedObjectPool<Order>(8, Order.class);
+	private final ObjectPool<Order> orderPool = new ArrayObjectPool<Order>(32, Order::new);
 	
-	private final ObjectPool<PriceLevel> priceLevelPool = new LinkedObjectPool<PriceLevel>(8, PriceLevel.class);
+	private final ObjectPool<PriceLevel> priceLevelPool = new ArrayObjectPool<PriceLevel>(32, PriceLevel::new);
 	
 	private long execId = 0;
 	

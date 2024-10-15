@@ -15,91 +15,92 @@
  */
 package com.coralblocks.coralme.util;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.function.Supplier;
+
 /**
  * An object pool backed up by an internal linked list. Note that instances will be created on demand if the pool runs out of instances.
- * 
- * <p><b>NOTE:</b> This data structure is designed on purpose to be used by <b>single-threaded systems</b>, in other words, 
+ *
+ * <p><b>NOTE:</b> This data structure is designed on purpose to be used by <b>single-threaded systems</b>, in other words,
  *  it will break if used concurrently by multiple threads.</p>
- * 
+ *
  * @param <E> the type of objects this object pool will hold
  */
 public class LinkedObjectPool<E> implements ObjectPool<E> {
 
 	private final LinkedObjectList<E> queue;
 
-	private final Builder<E> builder;
+	private final Supplier<? extends E> supplier;
 
 	/**
 	 * Creates a LinkedObjectPool.
-	 * 
+	 *
 	 * @param initialSize the initial size of the pool (how many instance it will initially have)
 	 * @param klass the class with a default constructor that will be used to create the instances
 	 */
-	public LinkedObjectPool(int initialSize, final Class<E> klass) {
-
-		this(initialSize, new Builder<E>() {
-			@Override
-			public E newInstance() {
-				try {
-					return klass.newInstance();
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
-		});
-	}
+    public LinkedObjectPool(int initialSize, Class<? extends E> klass) {
+        this(initialSize, () -> {
+            try {
+                return klass.getConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				throw new IllegalArgumentException("Failed to create instance of " + klass.getName(), e);
+            }
+        });
+    }
 
 	/**
 	 * Creates a LinkedObjectPool.
-	 * 
+	 *
 	 * @param initialSize the initial size of the pool (how many instance it will initially have)
-	 * @param builder the builder that will be used to create the instances
+	 * @param s the supplier that will be used to create the instances
 	 */
-	public LinkedObjectPool(int initialSize, Builder<E> builder) {
+	public LinkedObjectPool(int initialSize, Supplier<? extends E> s) {
 
-		this.builder = builder;
+		supplier = s;
 
-		this.queue = new LinkedObjectList<E>(initialSize);
+		queue = new LinkedObjectList<>(initialSize);
 
 		for (int i = 0; i < initialSize; i++) {
-			queue.addLast(builder.newInstance());
+			queue.addLast(supplier.get());
 		}
 	}
-	
+
 	/**
 	 * The number of instance currently inside this pool. Note that if all the instances are checked-out from this pool, the size returned will be zero.
-	 * 
+	 *
 	 * @return the number of instance currently sitting inside this pool (and not checked-out by anyone)
 	 */
-	public int size() {
+	public final int size() {
+
 		return queue.size();
+
 	}
 
 	/**
 	 * Note that if the pool is empty, this method will instantiate and return a new instance. This will cause the pool to grow when this extra instance is
 	 * returned back to the pool.
-	 * 
+	 *
 	 * @return an instance from the pool
 	 */
 	@Override
-	public E get() {
+	public final E get() {
 
 		if (queue.isEmpty()) {
 
-			return builder.newInstance();
+			return supplier.get();
 
 		}
-		
+
 		return queue.removeLast();
 	}
 
 	/**
 	 * Returns an instance back to the pool. Note that this method can be used to grow the pool if the instance released was not in the pool in the first place.
-	 * 
+	 *
 	 * @param e the instance to return back to the pool (i.e. release to the pool)
 	 */
 	@Override
-	public void release(E e) {
+	public final void release(E e) {
 
 		queue.addLast(e);
 	}
