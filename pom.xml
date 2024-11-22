@@ -11,9 +11,9 @@
   </properties>
 
   <scm>
-    <connection>scm:git:https://github.com/coralblocks/CoralME</connection>
-    <developerConnection>scm:git:https://github.com/coralblocks/CoralME</developerConnection>
-    <url>https://github.com/coralblocks/CoralME</url>
+    <connection>scm:git:https://coralblocks@github.com/coralblocks/CoralME</connection>
+    <developerConnection>scm:git:https://coralblocks@github.com/coralblocks/CoralME</developerConnection>
+    <url>https://coralblocks@github.com/coralblocks/CoralME</url>
     <tag>HEAD</tag>
   </scm>
 
