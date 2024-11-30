@@ -27,7 +27,7 @@ public class StringUtils {
 	 * @param cs2 the second CharSequence
 	 * @return true if they represent the same String
 	 */
-	public final static boolean equals(CharSequence cs1, CharSequence cs2) {
+	public static final boolean equals(CharSequence cs1, CharSequence cs2) {
 		if (cs1.length() == cs2.length()) {
 			for (int i = 0; i < cs1.length(); i++) {
 				if (cs1.charAt(i) != cs2.charAt(i)) return false;

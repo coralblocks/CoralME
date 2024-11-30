@@ -37,7 +37,7 @@ public class NoGCTest {
 	private static final long CLIENT_ID = 1002L;
 
 	private static final boolean USE_BAD_SYSTEM_OUT_PRINT = false; // turn this on and you will see a lot of garbage from System.out.print
-	private final static StringBuilder sb = new StringBuilder(1024);
+	private static final StringBuilder sb = new StringBuilder(1024);
 	private static long orderId = 1;
 	
 	private static CharSequence getClientOrderId() {

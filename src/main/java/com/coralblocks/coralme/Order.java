@@ -25,9 +25,9 @@ import com.coralblocks.coralme.util.StringUtils;
 
 public class Order {
 
-	final static String EMPTY_CLIENT_ORDER_ID = "NULL";
+	static final String EMPTY_CLIENT_ORDER_ID = "NULL";
 	
-	public final static int CLIENT_ORDER_ID_MAX_LENGTH = 64;
+	public static final int CLIENT_ORDER_ID_MAX_LENGTH = 64;
 	
     private final List<OrderListener> listeners = new ArrayList<OrderListener>(64);
     
@@ -487,7 +487,7 @@ public class Order {
 
 		private final char b;
 		private final String fixCode;
-		public final static CharMap<TimeInForce> ALL = new CharMap<TimeInForce>();
+		public static final CharMap<TimeInForce> ALL = new CharMap<TimeInForce>();
 		
 		static {
 			for(TimeInForce tif : TimeInForce.values()) {
@@ -536,7 +536,7 @@ public class Order {
 		DUPLICATE_CLIENT_ORDER_ID ('C');
 
 		private final char b;
-		public final static CharMap<RejectReason> ALL = new CharMap<RejectReason>();
+		public static final CharMap<RejectReason> ALL = new CharMap<RejectReason>();
 		
 		static {
 			for(RejectReason rr : RejectReason.values()) {
@@ -559,7 +559,7 @@ public class Order {
 		NOT_FOUND		('F');
 		
 		private final char b;
-		public final static CharMap<CancelRejectReason> ALL = new CharMap<CancelRejectReason>();
+		public static final CharMap<CancelRejectReason> ALL = new CharMap<CancelRejectReason>();
 		
 		static {
 			for(CancelRejectReason crr : CancelRejectReason.values()) {
@@ -589,7 +589,7 @@ public class Order {
 		ROLLED			('R');
 
 		private final char b;
-		public final static CharMap<CancelReason> ALL = new CharMap<CancelReason>();
+		public static final CharMap<CancelReason> ALL = new CharMap<CancelReason>();
 		
 		static {
 			for(CancelReason cr : CancelReason.values()) {
@@ -616,7 +616,7 @@ public class Order {
 		NOT_FOUND		('F');
 
 		private final char b;
-		public final static CharMap<ReduceRejectReason> ALL = new CharMap<ReduceRejectReason>();
+		public static final CharMap<ReduceRejectReason> ALL = new CharMap<ReduceRejectReason>();
 		
 		static {
 			for(ReduceRejectReason rrr : ReduceRejectReason.values()) {
@@ -641,7 +641,7 @@ public class Order {
 
 		private final char b;
 		private final String fixCode;
-		public final static CharMap<Type> ALL = new CharMap<Type>();
+		public static final CharMap<Type> ALL = new CharMap<Type>();
 		
 		static {
 			for(Type t : Type.values()) {
@@ -680,7 +680,7 @@ public class Order {
 		
 		private final char b;
 		private final String fixCode;
-		public final static CharMap<ExecuteSide> ALL = new CharMap<ExecuteSide>();
+		public static final CharMap<ExecuteSide> ALL = new CharMap<ExecuteSide>();
 		
 		static {
 			for(ExecuteSide es : ExecuteSide.values()) {
@@ -720,7 +720,7 @@ public class Order {
 		private final char b;
 		private final String fixCode;
 		private final int index;
-		public final static CharMap<Side> ALL = new CharMap<Side>();
+		public static final CharMap<Side> ALL = new CharMap<Side>();
 		
 		static {
 			
