@@ -92,7 +92,10 @@
               <goal>jar</goal>
             </goals>
           </execution>
-        </executions>
+  	</executions>
+        <configuration>
+          <additionalOptions>-Xdoclint:none</additionalOptions>
+        </configuration>
       </plugin>
 
       <plugin>
@@ -180,7 +183,10 @@
               </goals>
             </execution>
           </executions>
-        </plugin>
+          <configuration>
+            <additionalOptions>-Xdoclint:none</additionalOptions>
+          </configuration>
+  	</plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>

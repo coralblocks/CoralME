@@ -16,9 +16,13 @@
 package com.coralblocks.coralme.util;
 
 /**
- * This utility class provides methods to work with <tt>String</tt>s and <tt>CharSequence</tt>s in an efficient way and without producing any garbage.
+ * This utility class provides methods to work with <code>String</code>s and <code>CharSequence</code>s in an efficient way and without producing any garbage.
  */
 public class StringUtils {
+	
+	private StringUtils() {
+		
+	}
 
 	/**
 	 * Checks if these two CharSequences represent the same String

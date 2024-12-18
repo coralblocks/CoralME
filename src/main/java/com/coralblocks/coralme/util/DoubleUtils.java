@@ -20,6 +20,10 @@ package com.coralblocks.coralme.util;
  */
 public class DoubleUtils {
 	
+	private DoubleUtils() {
+		
+	}
+	
 	/**
 	 * The precision we are using, which is 8 decimals.
 	 */

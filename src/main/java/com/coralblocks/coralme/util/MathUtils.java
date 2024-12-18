@@ -20,6 +20,10 @@ package com.coralblocks.coralme.util;
  */
 public class MathUtils {
 	
+	private MathUtils() {
+		
+	}
+	
 	/**
 	 * Is this long a power of two?
 	 * 
