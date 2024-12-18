@@ -26,13 +26,23 @@ import com.coralblocks.coralme.Order.Side;
 import com.coralblocks.coralme.Order.TimeInForce;
 import com.coralblocks.coralme.Order.Type;
 import com.coralblocks.coralme.util.DoubleUtils;
-import com.coralblocks.coralme.util.LinkedObjectPool;
 import com.coralblocks.coralme.util.LongMap;
-import com.coralblocks.coralme.util.ObjectPool;
 import com.coralblocks.coralme.util.SystemTimestamper;
 import com.coralblocks.coralme.util.Timestamper;
+import com.coralblocks.coralpool.ArrayObjectPool;
+import com.coralblocks.coralpool.ObjectPool;
 
 public class OrderBook implements OrderListener {
+	
+	/**
+	 * The default initial size of the {@link Order} object pool. Can be changed for tuning.
+	 */
+	public static int ORDER_POOL_INITIAL_SIZE = 128;
+	
+	/**
+	 * The default initial size of the {@link PriceLevel} object pool. Can be changed for tuning.
+	 */
+	public static int PRICE_LEVEL_POOL_INITIAL_SIZE = 64;
 	
 	private static final boolean DEFAULT_ALLOW_TRADE_TO_SELF = true;
 	
@@ -40,9 +50,9 @@ public class OrderBook implements OrderListener {
 	
 	public static enum State { NORMAL, LOCKED, CROSSED, ONESIDED, EMPTY }
 	
-	private final ObjectPool<Order> orderPool = new LinkedObjectPool<Order>(8, Order.class);
+	private final ObjectPool<Order> orderPool = new ArrayObjectPool<Order>(ORDER_POOL_INITIAL_SIZE, Order.class);
 	
-	private final ObjectPool<PriceLevel> priceLevelPool = new LinkedObjectPool<PriceLevel>(8, PriceLevel.class);
+	private final ObjectPool<PriceLevel> priceLevelPool = new ArrayObjectPool<PriceLevel>(PRICE_LEVEL_POOL_INITIAL_SIZE, PriceLevel.class);
 	
 	private long execId = 0;
 	

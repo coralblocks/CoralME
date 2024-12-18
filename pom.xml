@@ -20,6 +20,12 @@
   <dependencies>
 
     <dependency>
+      <groupId>com.coralblocks</groupId>
+      <artifactId>coralpool</artifactId>
+      <version>1.1.2</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.13.1</version>
@@ -127,6 +133,13 @@
 
     </plugins>
   </build>
+
+  <repositories>
+    <repository>
+        <id>github-coralpool</id>
+        <url>https://maven.pkg.github.com/coralblocks/CoralPool</url>
+    </repository>
+  </repositories>
 
   <distributionManagement>
     <repository>
