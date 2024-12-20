@@ -2,7 +2,8 @@
 A simple, fast and garbage-free matching engine order book that you can use as a starting point for your matching engines.
 
 <pre>
-<b>Note:</b> For a detailed discussion of how a <b>first-class electronic exchange</b> can be built from the ground up using<br/>the sequencer architecture you should refer to <a href="https://www.coralblocks.com/index.php/building-a-first-class-exchange-architecture-with-coralsequencer/">this article</a>.
+<b>Note:</b> For a detailed discussion of how a <b>first-class electronic exchange</b> can be built
+from the ground up using the <b>sequencer architecture</b> you should refer to <a href="https://www.coralblocks.com/index.php/building-a-first-class-exchange-architecture-with-coralsequencer/">this article</a>.
 </pre>
 
 ## What is it?
