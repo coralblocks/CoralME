@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.coralblocks</groupId>
   <artifactId>coralme</artifactId>
-  <version>1.7.5-SNAPSHOT</version>
+  <version>1.7.5</version>
 
   <properties>
     <maven.compiler.source>16</maven.compiler.source>
@@ -14,7 +14,7 @@
     <connection>scm:git:https://coralblocks@github.com/coralblocks/CoralME</connection>
     <developerConnection>scm:git:https://coralblocks@github.com/coralblocks/CoralME</developerConnection>
     <url>https://coralblocks@github.com/coralblocks/CoralME</url>
-    <tag>HEAD</tag>
+    <tag>1.7.5</tag>
   </scm>
 
   <dependencies>
