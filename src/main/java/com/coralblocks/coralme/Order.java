@@ -18,8 +18,8 @@ package com.coralblocks.coralme;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.coralblocks.coralds.map.CharMap;
 import com.coralblocks.coralme.util.CharEnum;
-import com.coralblocks.coralme.util.CharMap;
 import com.coralblocks.coralme.util.DoubleUtils;
 import com.coralblocks.coralme.util.StringUtils;
 

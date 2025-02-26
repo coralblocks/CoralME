@@ -26,6 +26,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.github.coralblocks</groupId>
+      <artifactId>CoralDS</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.13.1</version>
