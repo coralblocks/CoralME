@@ -326,7 +326,7 @@ public class Order {
         listeners.add(listener);
     }
     
-    public void accept(long id) {
+    void accept(long id) {
     	
     	this.id = id;
     	
@@ -340,7 +340,7 @@ public class Order {
         }
     }
     
-    public void rest() {
+    void rest() {
     	
     	this.isResting = true;
     	
@@ -354,7 +354,7 @@ public class Order {
         }
     }
     
-    public void reject(RejectReason reason) {
+    void reject(RejectReason reason) {
     	
     	this.totalSize = this.executedSize = 0;
     	
