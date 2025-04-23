@@ -370,6 +370,16 @@ public class Order {
         listeners.clear();
     }
     
+    /**
+     * Note that this method takes the newTotalSize and not the newOpenSize, in other words,
+     * you must include the execute size on your desired new total size.
+     * 
+     * <p><code>totalSize = openSize + executedSize</code></p>
+     * 
+     * <p><b>NOTE:</b> To work only with the open size you must use the method cancel instead.</p>
+     * 
+     * @param newTotalSize the desired new total size (open size + executed size)
+     */
     public void reduceTo(long newTotalSize) {
     	
     	if (newTotalSize <= executedSize) {
