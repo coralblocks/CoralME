@@ -84,7 +84,7 @@ public class Order {
     	
     }
     
-	public void init(Timestamper timestamper, long clientId, CharSequence clientOrderId, long exchangeOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
+	void init(Timestamper timestamper, long clientId, CharSequence clientOrderId, long exchangeOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
     	
 		this.timestamper = timestamper;
 		
@@ -132,11 +132,11 @@ public class Order {
     	this.next = this.prev = null; // sanity!
     }
 	
-	public final void setPendingCancel() {
+	final void setPendingCancel() {
 		this.isPendingCancel = true;
 	}
 	
-	public final void setPendingSize(long size) {
+	final void setPendingSize(long size) {
 		this.pendingSize = size;
 	}
 	
@@ -158,7 +158,7 @@ public class Order {
 		return DoubleUtils.toDouble(price);
 	}
 	
-    public final void setPriceLevel(PriceLevel priceLevel) {
+    final void setPriceLevel(PriceLevel priceLevel) {
     	
     	this.priceLevel = priceLevel;
     }
