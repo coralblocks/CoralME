@@ -175,7 +175,7 @@ public class Example {
 		// reduce order with id = 1 to 100 shares
 		
 		Order order = orderBook.getOrder(1);
-		order.reduceTo(orderBook.getTimestamper().nanoEpoch(), 100);
+		order.reduceTo(100);
 		
 		/*
 			-----> onOrderReduced called:
@@ -200,7 +200,7 @@ public class Example {
 		
 		// now cancel the order
 		
-		order.cancel(orderBook.getTimestamper().nanoEpoch());
+		order.cancel();
 		
 		/*
 			-----> onOrderCanceled called:
@@ -390,7 +390,7 @@ public class Example {
 		   100 @    148.14 (id=4)
 		   500 @    149.44 (id=2)
 		   100 @    149.44 (id=3)
-		  1900 @    159.00 (id=11)    <==== You order sat here after hitting some asks...
+		  1900 @    159.00 (id=11)    <==== Your order sat here after hitting some asks...
 		--------      1.00
 		  3000 @    160.00 (id=10)	 
 		*/

@@ -234,7 +234,7 @@ public class OrderBookTest {
 		
 		done(listener);
 		
-		order.reduceTo(book.getTimestamper().nanoEpoch(), 300);
+		order.reduceTo(300);
 		
 		called(listener, 0).onOrderAccepted(null, 0, null);
 		called(listener, 0).onOrderCanceled(null, 0, null, null);
@@ -246,7 +246,7 @@ public class OrderBookTest {
 		
 		done(listener);
 		
-		order.cancel(book.getTimestamper().nanoEpoch());
+		order.cancel();
 		
 		called(listener, 0).onOrderAccepted(null, 0, null);
 		called(listener, 1).onOrderCanceled(book, order.getCancelTime(), order, CancelReason.USER);

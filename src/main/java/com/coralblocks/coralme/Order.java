@@ -22,6 +22,7 @@ import com.coralblocks.coralds.map.CharMap;
 import com.coralblocks.coralme.util.CharEnum;
 import com.coralblocks.coralme.util.DoubleUtils;
 import com.coralblocks.coralme.util.StringUtils;
+import com.coralblocks.coralme.util.Timestamper;
 
 public class Order {
 
@@ -77,12 +78,16 @@ public class Order {
     
     private long pendingSize;
     
+    private Timestamper timestamper;
+    
     public Order() {
     	
     }
     
-	public void init(long clientId, CharSequence clientOrderId, long exchangeOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
+	public void init(Timestamper timestamper, long clientId, CharSequence clientOrderId, long exchangeOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
     	
+		this.timestamper = timestamper;
+		
 		this.clientId = clientId;
 		
     	this.clientOrderId.setLength(0);
@@ -321,55 +326,55 @@ public class Order {
         listeners.add(listener);
     }
     
-    public void accept(long time, long id) {
+    public void accept(long id) {
     	
     	this.id = id;
     	
-    	this.acceptTime = time;
+    	this.acceptTime = timestamper.nanoEpoch();
         
         int x = listeners.size();
         
         for(int i = x - 1; i >= 0; i--) {
         	
-        	listeners.get(i).onOrderAccepted(time, this);
+        	listeners.get(i).onOrderAccepted(this.acceptTime, this);
         }
     }
     
-    public void rest(long time) {
+    public void rest() {
     	
     	this.isResting = true;
     	
-    	this.restTime = time;
+    	this.restTime = timestamper.nanoEpoch();
         
         int x = listeners.size();
         
         for(int i = x - 1; i >= 0; i--) {
         	
-        	listeners.get(i).onOrderRested(time, this, getOpenSize(), getPrice());
+        	listeners.get(i).onOrderRested(this.restTime, this, getOpenSize(), getPrice());
         }
     }
     
-    public void reject(long time, RejectReason reason) {
+    public void reject(RejectReason reason) {
     	
     	this.totalSize = this.executedSize = 0;
     	
-    	this.rejectTime = time;
+    	this.rejectTime = timestamper.nanoEpoch();
     	
         int x = listeners.size();
         
         for(int i = x - 1; i >= 0; i--) {
         	
-        	listeners.get(i).onOrderRejected(time, this, reason);
+        	listeners.get(i).onOrderRejected(this.rejectTime, this, reason);
         }
         
         listeners.clear();
     }
     
-    public void reduceTo(long time, long newTotalSize) {
+    public void reduceTo(long newTotalSize) {
     	
     	if (newTotalSize <= executedSize) {
     		
-    		cancel(time, CancelReason.USER);
+    		cancel(CancelReason.USER);
     		
     		return;
     	}
@@ -381,26 +386,26 @@ public class Order {
     	
     	this.totalSize = newTotalSize;
     	
-    	this.reduceTime = time;
+    	this.reduceTime = timestamper.nanoEpoch();
     	
     	int x = listeners.size();
     	
     	for(int i = x - 1; i >= 0; i--) {
     		
-    		listeners.get(i).onOrderReduced(time, this, this.totalSize);
+    		listeners.get(i).onOrderReduced(this.reduceTime, this, this.totalSize);
     	}
     }
     
-    public void cancel(long time, long sizeToCancel) {
+    public void cancel(long sizeToCancel) {
     	
-    	cancel(time, sizeToCancel, CancelReason.USER);
+    	cancel(sizeToCancel, CancelReason.USER);
     }
     
-    public void cancel(long time, long sizeToCancel, CancelReason reason) {
+    public void cancel(long sizeToCancel, CancelReason reason) {
     	
     	if (sizeToCancel >= getOpenSize()) {
     		
-    		cancel(time, reason);
+    		cancel(reason);
     		
     		return;
     	}
@@ -409,48 +414,48 @@ public class Order {
     	
     	this.totalSize = newSize;
     	
-    	this.reduceTime = time;
+    	this.reduceTime = timestamper.nanoEpoch();
     	
     	int x = listeners.size();
     	
     	for(int i = x - 1; i >= 0; i--) {
     		
-    		listeners.get(i).onOrderReduced(time, this, newSize);
+    		listeners.get(i).onOrderReduced(this.reduceTime, this, newSize);
     	}
     }
     
-    public void cancel(long time) {
+    public void cancel() {
     	
-    	cancel(time, CancelReason.USER);
+    	cancel(CancelReason.USER);
     }
     
-    public void cancel(long time, CancelReason reason) {
+    public void cancel(CancelReason reason) {
     	
     	this.totalSize = this.executedSize;
     	
-    	this.cancelTime = time;
+    	this.cancelTime = timestamper.nanoEpoch();
     	
     	int x = listeners.size();
     	
     	for(int i = x - 1; i >= 0; i--) {
     		
-    		listeners.get(i).onOrderCanceled(time, this, reason);
+    		listeners.get(i).onOrderCanceled(this.cancelTime, this, reason);
     	}
     	
     	for(int i = x - 1; i >= 0; i--) {
     		
-    		listeners.get(i).onOrderTerminated(time, this);
+    		listeners.get(i).onOrderTerminated(this.cancelTime, this);
     	}
     	
     	listeners.clear();
     }
     
-    public void execute(long time, long sizeToExecute) {
+    void execute(long time, long sizeToExecute) {
     	
     	execute(time, ExecuteSide.TAKER, sizeToExecute, this.price, -1, -1);
     }
     
-    public void execute(long time, ExecuteSide execSide, long sizeToExecute, long priceExecuted, long executionId, long matchId) {
+    void execute(long time, ExecuteSide execSide, long sizeToExecute, long priceExecuted, long executionId, long matchId) {
     	
     	if (sizeToExecute > getOpenSize()) {
     		
@@ -465,14 +470,14 @@ public class Order {
     	
     	for(int i = x - 1; i >= 0; i--) {
     		
-    		listeners.get(i).onOrderExecuted(time, this, execSide, sizeToExecute, priceExecuted, executionId, matchId);
+    		listeners.get(i).onOrderExecuted(this.executeTime, this, execSide, sizeToExecute, priceExecuted, executionId, matchId);
     	}
     	
     	if (isTerminal()) {
     		
         	for(int i = x - 1; i >= 0; i--) {
         		
-        		listeners.get(i).onOrderTerminated(time, this);
+        		listeners.get(i).onOrderTerminated(this.executeTime, this);
         	}
     		
     		listeners.clear();

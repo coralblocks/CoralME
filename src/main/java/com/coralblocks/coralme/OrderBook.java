@@ -580,7 +580,7 @@ public class OrderBook implements OrderListener {
 		
 		if (type == Type.MARKET && order.getPrice() != 0) {
 			
-			order.reject(timestamper.nanoEpoch(), RejectReason.BAD_PRICE); // remember... the OrderListener callback will return the order to the pool...
+			order.reject(RejectReason.BAD_PRICE); // remember... the OrderListener callback will return the order to the pool...
 			
 			return order;
 		}
@@ -589,13 +589,13 @@ public class OrderBook implements OrderListener {
 
 		if (rejectReason != null) {
 		
-			order.reject(timestamper.nanoEpoch(), rejectReason); // remember... the OrderListener callback will return the order to the pool...
+			order.reject(rejectReason); // remember... the OrderListener callback will return the order to the pool...
 			
 			return order;
 		}
 
 		// always accept first...
-		order.accept(timestamper.nanoEpoch(), exchangeOrderId);
+		order.accept(exchangeOrderId);
 		
 		// walk through the book matching:
 
@@ -607,7 +607,7 @@ public class OrderBook implements OrderListener {
 			
 			if (type == Type.MARKET) {
 				
-				order.cancel(timestamper.nanoEpoch(), CancelReason.NO_LIQUIDITY);
+				order.cancel(CancelReason.NO_LIQUIDITY);
 					
 			} else {
 				
@@ -617,7 +617,7 @@ public class OrderBook implements OrderListener {
 					cancelReason = CancelReason.NO_LIQUIDITY;
 				}
 			
-				order.cancel(timestamper.nanoEpoch(), cancelReason);
+				order.cancel(cancelReason);
 			}
 		}
 		
@@ -630,13 +630,13 @@ public class OrderBook implements OrderListener {
 
 		if (rejectReason != null) {
 		
-			order.reject(timestamper.nanoEpoch(), rejectReason); // remember... the OrderListener callback will return the order to the pool...
+			order.reject(rejectReason); // remember... the OrderListener callback will return the order to the pool...
 			
 			return order;
 		}
 		
 		// always accept first:
-		order.accept(timestamper.nanoEpoch(), exchangeOrderId);
+		order.accept(exchangeOrderId);
 		
 		// something needs to be executed first...
 			
@@ -653,7 +653,7 @@ public class OrderBook implements OrderListener {
 			
 			CancelReason cancelReason = CancelReason.CROSSED;
 			
-			order.cancel(timestamper.nanoEpoch(), cancelReason);
+			order.cancel(cancelReason);
 			
 		} else {
 		
@@ -695,7 +695,7 @@ public class OrderBook implements OrderListener {
 					
 					newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
 					
-					o.cancel(timestamper.nanoEpoch(), CancelReason.ROLLED);
+					o.cancel(CancelReason.ROLLED);
 				}
 			}
 		}
@@ -710,7 +710,7 @@ public class OrderBook implements OrderListener {
 					
 					newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
 					
-					o.cancel(timestamper.nanoEpoch(), CancelReason.ROLLED);
+					o.cancel(CancelReason.ROLLED);
 				}
 			}
 		}
@@ -732,7 +732,7 @@ public class OrderBook implements OrderListener {
 			
 			iter.remove(); // important otherwise you get a ConcurrentModificationException!
 			
-			order.cancel(timestamper.nanoEpoch(), CancelReason.EXPIRED);
+			order.cancel(CancelReason.EXPIRED);
 		}
 	}
 	
@@ -748,7 +748,7 @@ public class OrderBook implements OrderListener {
 			
 			iter.remove(); // important otherwise you get a ConcurrentModificationException!
 			
-			order.cancel(timestamper.nanoEpoch(), CancelReason.PURGED);
+			order.cancel(CancelReason.PURGED);
 		}
 	}
 	
@@ -762,14 +762,14 @@ public class OrderBook implements OrderListener {
 		
 		orders.put(order.getId(), order);
 		
-		order.rest(timestamper.nanoEpoch());
+		order.rest();
 	}
 	
 	private Order getOrder(long clientId, CharSequence clientOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
 		
 		Order order = orderPool.get();
 		
-		order.init(clientId, clientOrderId, 0, security, side, size, price, type, tif);
+		order.init(timestamper, clientId, clientOrderId, 0, security, side, size, price, type, tif);
 		
 		order.addListener(this);
 		

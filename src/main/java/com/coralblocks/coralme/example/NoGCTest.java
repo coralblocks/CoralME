@@ -21,7 +21,6 @@ import com.coralblocks.coralme.Order.TimeInForce;
 import com.coralblocks.coralme.OrderBook;
 import com.coralblocks.coralme.OrderBookAdapter;
 import com.coralblocks.coralme.OrderBookListener;
-import com.coralblocks.coralme.util.Timestamper;
 
 /**
  * <p>Run this test with <b>-verbose:gc</b> and look for any GC activity. <b>You must not see any.</b></p>
@@ -77,8 +76,6 @@ public class NoGCTest {
 			
 			printIteration(i);
 			
-			Timestamper ts = book.getTimestamper();
-			
 			// Bids:
 			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY, 1000, 100.00, TimeInForce.DAY);
 			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY,  900,  99.00, TimeInForce.DAY);
@@ -108,11 +105,11 @@ public class NoGCTest {
 				for(int x = 0; x < 10; x++) sb.toString(); // but this produces garbage
 			}
 			
-			bidOrder.reduceTo(ts.nanoEpoch(), 100);
-			askOrder.reduceTo(ts.nanoEpoch(), 100);
+			bidOrder.reduceTo(100);
+			askOrder.reduceTo(100);
 			
-			bidOrder.cancel(ts.nanoEpoch());
-			askOrder.cancel(ts.nanoEpoch());
+			bidOrder.cancel();
+			askOrder.cancel();
 			
 			// Order rejects due odd lot
 			book.createLimit(CLIENT_ID, getClientOrderId(),  orderId++,  Side.BUY,  620, 103.00, TimeInForce.DAY);
