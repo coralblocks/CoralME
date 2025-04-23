@@ -67,10 +67,10 @@ java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.ex
 public interface OrderBookListener {
     
     public void onOrderReduced(OrderBook orderBook, long time, Order order, 
-                                 long reduceNewTotalSize);
+                                 long canceledSize, long reduceNewTotalSize);
     
     public void onOrderCanceled(OrderBook orderBook, long time, Order order, 
-                                  CancelReason cancelReason);
+                                  long canceledSize, CancelReason cancelReason);
     
     public void onOrderExecuted(OrderBook orderBook, long time, Order order, 
                                   ExecuteSide executeSide, long executeSize, 
