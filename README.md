@@ -250,6 +250,7 @@ order.cancel(100);
 	  time=1700598048053000000
 	  order=Order [id=1, clientId=1001, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=100, 
 					executedSize=0, canceledSize=100, price=150.44, type=LIMIT, tif=DAY]
+	  canceledSize=100
 	  reduceNewTotalSize=100	
 */
 
@@ -275,6 +276,7 @@ order.cancel();
 	  time=1700598048053000000
 	  order=Order [id=1, clientId=1001, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=0, 
 					executedSize=0, canceledSize=200, price=150.44, type=LIMIT, tif=DAY]
+	  canceledSize=100
 	  cancelReason=USER
 	
 	-----> onOrderTerminated called:
@@ -339,6 +341,7 @@ orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.BUY, 3
 	  time=1700598048055000000
 	  order=Order [id=9, clientId=1001, clientOrderId=9, side=BUY, security=AAPL, originalSize=3000, openSize=0, 
 					executedSize=200, canceledSize=2800, price=155.0, type=LIMIT, tif=IOC]
+	  canceledSize=2800
 	  cancelReason=MISSED
 	
 	-----> onOrderTerminated called:
