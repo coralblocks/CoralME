@@ -354,7 +354,7 @@ public class Order {
         }
     }
     
-    void reject(RejectReason reason) {
+    public void reject(RejectReason reason) {
     	
     	this.totalSize = this.executedSize = 0;
     	
