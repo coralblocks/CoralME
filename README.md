@@ -241,7 +241,7 @@ orderBook.showLevels();
 // reduce order with id = 1 to 100 shares
 
 Order order = orderBook.getOrder(1);
-order.reduceTo(orderBook.getTimestamper().nanoEpoch(), 100);
+order.reduceTo(100);
 
 /*
 	-----> onOrderReduced called:
@@ -266,7 +266,7 @@ orderBook.showLevels();
 
 // now cancel the order
 
-order.cancel(orderBook.getTimestamper().nanoEpoch());
+order.cancel();
 
 /*
 	-----> onOrderCanceled called:
