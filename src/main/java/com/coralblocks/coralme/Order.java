@@ -371,12 +371,15 @@ public class Order {
     }
     
     /**
-     * Note that this method takes the newTotalSize and not the newOpenSize, in other words,
-     * you must include the execute size on your desired new total size.
+     * Note that this method takes the <code>newTotalSize</code> and <i>NOT</i> the <code>newOpenSize</code>, in other words,
+     * you must include the current executed size on your desired <code>newTotalSize</code>.
      * 
      * <p><code>totalSize = openSize + executedSize</code></p>
      * 
      * <p><b>NOTE:</b> To work only with the open size you must use the method cancel instead.</p>
+     * 
+     * <p><i>Why does this method exist?</i> Because it is much safer and better to reduce to a new total size than to
+     * cancel open size. More details here: https://chatgpt.com/share/6808fbb1-d840-8013-82a8-9ae1854c7707
      * 
      * @param newTotalSize the desired new total size (open size + executed size)
      */
