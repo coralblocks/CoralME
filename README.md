@@ -33,7 +33,7 @@ The [OrderBookTest.java](https://github.com/coralblocks/CoralME/blob/main/src/te
 - ClientID, ClientOrderID and OrderID
 - ExecutionID and ExecutionMatchID
 - Can optionally check and disallow trade to self
-- Supports cancelation of open shares as well as reduction of total shares (executed + open)
+- Supports cancelation of open size as well as reduction of total size (executed + open)
 
 ## How can I check that it is zero garbage?
 Check [NoGCTest.java](https://github.com/coralblocks/CoralME/blob/main/src/main/java/com/coralblocks/coralme/example/NoGCTest.java) to see that it creates a book and populates this book with 10 orders _one million times_. And on each of these one million times it does a bunch of executions, rejects, cancelations, reduces, etc. Run this test with `-verbose:gc -Xms128m -Xmx256m` and you will always see **zero GC activity**. _No matter how many iterations you perform, the gc activity is always zero_. If you want to see some GC activity, you can turn on a flag that forces the creation of garbage by [producing some strings](https://github.com/coralblocks/CoralME/blob/bb9461313537987db43339e429b7314e58bbb784/src/main/java/com/coralblocks/coralme/example/NoGCTest.java#L103) in the middle of the loop.
