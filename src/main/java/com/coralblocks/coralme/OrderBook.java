@@ -817,24 +817,24 @@ public class OrderBook implements OrderListener {
 	}
 	
 	@Override
-    public void onOrderReduced(long time, Order order, long newSize) {
+    public void onOrderReduced(long time, Order order, long canceledSize, long newSize) {
 		
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
-			listeners.get(i).onOrderReduced(this, time, order, newSize);
+			listeners.get(i).onOrderReduced(this, time, order, canceledSize, newSize);
 		}
     }
 
 	@Override
-    public void onOrderCanceled(long time, Order order, CancelReason reason) {
+    public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason reason) {
 		
 		removeOrder(order);
 		
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
-			listeners.get(i).onOrderCanceled(this, time, order, reason);
+			listeners.get(i).onOrderCanceled(this, time, order, canceledSize, reason);
 		}
     }
 

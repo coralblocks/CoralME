@@ -22,12 +22,12 @@ import com.coralblocks.coralme.Order.RejectReason;
 public class OrderBookAdapter implements OrderBookListener {
     
 	@Override
-    public void onOrderReduced(OrderBook orderBook, long time, Order order, long reduceNewTotalSize) {
+    public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize) {
     	
     }
     
 	@Override
-    public void onOrderCanceled(OrderBook orderBook, long time, Order order, CancelReason cancelReason) {
+    public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize, CancelReason cancelReason) {
     	
     }
     

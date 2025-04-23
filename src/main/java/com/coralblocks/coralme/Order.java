@@ -397,6 +397,8 @@ public class Order {
     		newTotalSize = totalSize;
     	}
     	
+    	long canceledSize = this.totalSize - newTotalSize;
+    	
     	this.totalSize = newTotalSize;
     	
     	this.reduceTime = timestamper.nanoEpoch();
@@ -405,7 +407,7 @@ public class Order {
     	
     	for(int i = x - 1; i >= 0; i--) {
     		
-    		listeners.get(i).onOrderReduced(this.reduceTime, this, this.totalSize);
+    		listeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize);
     	}
     }
     
@@ -425,6 +427,8 @@ public class Order {
     	
     	long newSize = getOpenSize() - sizeToCancel + executedSize;
     	
+    	long canceledSize = this.totalSize - newSize;
+    	
     	this.totalSize = newSize;
     	
     	this.reduceTime = timestamper.nanoEpoch();
@@ -433,7 +437,7 @@ public class Order {
     	
     	for(int i = x - 1; i >= 0; i--) {
     		
-    		listeners.get(i).onOrderReduced(this.reduceTime, this, newSize);
+    		listeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, newSize);
     	}
     }
     
@@ -444,6 +448,8 @@ public class Order {
     
     public void cancel(CancelReason reason) {
     	
+    	long canceledSize = getOpenSize();
+    	
     	this.totalSize = this.executedSize;
     	
     	this.cancelTime = timestamper.nanoEpoch();
@@ -452,7 +458,7 @@ public class Order {
     	
     	for(int i = x - 1; i >= 0; i--) {
     		
-    		listeners.get(i).onOrderCanceled(this.cancelTime, this, reason);
+    		listeners.get(i).onOrderCanceled(this.cancelTime, this, canceledSize, reason);
     	}
     	
     	for(int i = x - 1; i >= 0; i--) {

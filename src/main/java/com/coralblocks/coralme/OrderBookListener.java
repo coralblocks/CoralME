@@ -21,9 +21,9 @@ import com.coralblocks.coralme.Order.RejectReason;
 
 public interface OrderBookListener {
     
-    public void onOrderReduced(OrderBook orderBook, long time, Order order, long reduceNewTotalSize);
+    public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize);
     
-    public void onOrderCanceled(OrderBook orderBook, long time, Order order, CancelReason cancelReason);
+    public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize, CancelReason cancelReason);
     
     public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide, long executeSize, long executePrice, long executeId, long executeMatchId);
     

@@ -51,23 +51,25 @@ public class OrderBookLogger implements OrderBookListener {
 	}
     
 	@Override
-    public void onOrderReduced(OrderBook orderBook, long time, Order order, long reduceNewTotalSize) {
+    public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize) {
 		if (!isOn) return;
     	System.out.println("-----> onOrderReduced called:");
     	System.out.println("  orderBook=" + orderBook);
     	System.out.println("  time=" + time);
     	System.out.println("  order=" + order);
+    	System.out.println("  canceledSize=" + canceledSize);
     	System.out.println("  reduceNewTotalSize=" + reduceNewTotalSize);
     	System.out.println();
     }
     
 	@Override
-    public void onOrderCanceled(OrderBook orderBook, long time, Order order, CancelReason cancelReason) {
+    public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize, CancelReason cancelReason) {
 		if (!isOn) return;
     	System.out.println("-----> onOrderCanceled called:");
     	System.out.println("  orderBook=" + orderBook);
     	System.out.println("  time=" + time);
     	System.out.println("  order=" + order);
+    	System.out.println("  canceledSize=" + canceledSize);
     	System.out.println("  cancelReason=" + cancelReason);
     	System.out.println();
     }
