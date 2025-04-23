@@ -238,10 +238,10 @@ orderBook.showLevels();
   1500 @    158.54 (orders=1) 
 */
 
-// reduce order with id = 1 to 100 shares
+// cancel 100 shares from order with id = 1
 
 Order order = orderBook.getOrder(1);
-order.reduceTo(100);
+order.cancel(100);
 
 /*
 	-----> onOrderReduced called:
