@@ -19,6 +19,7 @@ public class PriceLevelTest {
 		order.init(new SystemTimestamper(), 1, "1", 1, "TEST", Side.BUY, 50, 100, Type.LIMIT, TimeInForce.DAY);
 
 		Assert.assertFalse(level.isSizeDirty());
+		Assert.assertFalse(level.isSizeDirty());
 		level.addOrder(order);
 		Assert.assertTrue(level.isSizeDirty());
 
