@@ -179,7 +179,7 @@ public class PriceLevel implements OrderListener {
     	
         if (order.isTerminal()) {
         	
-        	removeOrder(order); // will make size dirty...
+        	removeOrder(order);
         	
         }
     }
