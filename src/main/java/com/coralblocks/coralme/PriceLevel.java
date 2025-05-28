@@ -30,8 +30,6 @@ public class PriceLevel implements OrderListener {
     
     private long size;
     
-    private boolean sizeDirty;
-    
     private int orders;
     
     private Order head = null;
@@ -42,7 +40,8 @@ public class PriceLevel implements OrderListener {
     
     PriceLevel prev = null;
     
-    public PriceLevel() {
+    
+    public PriceLevel() { // must be present for Mockito tests
     	
     }
     
@@ -51,7 +50,7 @@ public class PriceLevel implements OrderListener {
     	init(security, side, price);
     }
     
-    public void init(String security, Side side, long price) {
+    void init(String security, Side side, long price) {
     	
     	this.security = security;
     	
@@ -60,8 +59,6 @@ public class PriceLevel implements OrderListener {
     	this.side = side;
     	
     	this.size = 0;
-    	
-    	this.sizeDirty = false;
     	
     	this.orders = 0;
     	
@@ -105,7 +102,7 @@ public class PriceLevel implements OrderListener {
     	return tail;
     }
     
-    public void addOrder(Order order) {
+    void addOrder(Order order) {
         
         if (head == null) {
             
@@ -126,12 +123,10 @@ public class PriceLevel implements OrderListener {
         
         orders++;
         
-        sizeDirty = true;
-        
         order.addListener(this);
     }
     
-    public void removeOrder(Order order) {
+    private void removeOrder(Order order) {
         
         if (order.prev != null) {
             
@@ -154,59 +149,36 @@ public class PriceLevel implements OrderListener {
         }
 
         orders--;
-        
-        sizeDirty = true;
     }
     
     public final long getSize() {
 
-        if (sizeDirty) {
-
-            size = 0;
-
-            for(Order o = head; o != null; o = o.next) {
-
-                size += o.getOpenSize();
-            }
-
-            sizeDirty = false;
-        }
-
-        return size;
-    }
-
-    /**
-     * Check if the cached level size needs to be recalculated.
-     *
-     * @return {@code true} if {@link #getSize()} will recompute the level size
-     */
-    public final boolean isSizeDirty() {
-
-        return sizeDirty;
+    	return size;
     }
 
     @Override
     public void onOrderReduced(long time, Order order, long canceledSize, long newTotaSize) {
 
-        sizeDirty = true;
+        size -= canceledSize;
     }
 
     @Override
     public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason reason) {
+    	
+    	size -= canceledSize;
 
-        removeOrder(order); // will make size dirty...
+        removeOrder(order);
     }
 
     @Override
     public void onOrderExecuted(long time, Order order, ExecuteSide execSide, long sizeExecuted, long priceExecuted, long executionId, long matchId) {
 
+    	size -= sizeExecuted;
+    	
         if (order.isTerminal()) {
         	
         	removeOrder(order); // will make size dirty...
         	
-        } else {
-        	
-        	sizeDirty = true;        	
         }
     }
     
@@ -225,7 +197,7 @@ public class PriceLevel implements OrderListener {
 	@Override
     public void onOrderRested(long time, Order order, long restSize, long restPrice) {
 
-		// NOOP
+		size += restSize;
     }
 
 	@Override
