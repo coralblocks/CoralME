@@ -149,6 +149,8 @@ public class PriceLevel implements OrderListener {
         }
 
         orders--;
+        
+        // no need to remove listener here because the order object clears its listeners when it is recycled
     }
     
     public final long getSize() {
