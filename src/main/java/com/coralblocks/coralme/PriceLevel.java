@@ -40,14 +40,8 @@ public class PriceLevel implements OrderListener {
     
     PriceLevel prev = null;
     
-    
-    public PriceLevel() { // must be present for Mockito tests
+    PriceLevel() {
     	
-    }
-    
-    PriceLevel(String security, Side side, long price) {
-    	
-    	init(security, side, price);
     }
     
     void init(String security, Side side, long price) {

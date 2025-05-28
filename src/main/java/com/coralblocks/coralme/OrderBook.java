@@ -30,6 +30,7 @@ import com.coralblocks.coralme.util.DoubleUtils;
 import com.coralblocks.coralme.util.SystemTimestamper;
 import com.coralblocks.coralme.util.Timestamper;
 import com.coralblocks.coralpool.ArrayObjectPool;
+import com.coralblocks.coralpool.ObjectBuilder;
 import com.coralblocks.coralpool.ObjectPool;
 
 public class OrderBook implements OrderListener {
@@ -52,7 +53,7 @@ public class OrderBook implements OrderListener {
 	
 	private final ObjectPool<Order> orderPool = new ArrayObjectPool<Order>(ORDER_POOL_INITIAL_SIZE, Order.class);
 	
-	private final ObjectPool<PriceLevel> priceLevelPool = new ArrayObjectPool<PriceLevel>(PRICE_LEVEL_POOL_INITIAL_SIZE, PriceLevel.class);
+	private final ObjectPool<PriceLevel> priceLevelPool;
 	
 	private long execId = 0;
 	
@@ -120,6 +121,15 @@ public class OrderBook implements OrderListener {
 		this.timestamper = timestamper;
 		
 		this.allowTradeToSelf = allowTradeToSelf;
+		
+		ObjectBuilder<PriceLevel> priceLevelBuilder = new ObjectBuilder<PriceLevel>() {
+			@Override
+			public PriceLevel newInstance() {
+				return new PriceLevel();
+			}
+		};
+		
+		this.priceLevelPool = new ArrayObjectPool<PriceLevel>(PRICE_LEVEL_POOL_INITIAL_SIZE, priceLevelBuilder);
 		
 		if (listener != null) listeners.add(listener);
 	}
