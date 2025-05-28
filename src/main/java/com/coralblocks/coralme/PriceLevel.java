@@ -161,18 +161,30 @@ public class PriceLevel implements OrderListener {
     }
     
     public final long getSize() {
-        
+
         if (sizeDirty) {
-            
+
             size = 0;
-            
+
             for(Order o = head; o != null; o = o.next) {
-                
+
                 size += o.getOpenSize();
             }
+
+            sizeDirty = false;
         }
-        
+
         return size;
+    }
+
+    /**
+     * Check if the cached level size needs to be recalculated.
+     *
+     * @return {@code true} if {@link #getSize()} will recompute the level size
+     */
+    public final boolean isSizeDirty() {
+
+        return sizeDirty;
     }
 
     @Override
