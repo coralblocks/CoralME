@@ -124,8 +124,6 @@ public class PriceLevel implements OrderListener {
             order.next = null;
         }
         
-        size += order.getOpenSize();
-        
         orders++;
         
         sizeDirty = true;
@@ -196,19 +194,19 @@ public class PriceLevel implements OrderListener {
     @Override
     public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason reason) {
 
-        sizeDirty = true;
-        
-        removeOrder(order);
+        removeOrder(order); // will make size dirty...
     }
 
     @Override
     public void onOrderExecuted(long time, Order order, ExecuteSide execSide, long sizeExecuted, long priceExecuted, long executionId, long matchId) {
 
-        sizeDirty = true;
-        
         if (order.isTerminal()) {
         	
-        	removeOrder(order);
+        	removeOrder(order); // will make size dirty...
+        	
+        } else {
+        	
+        	sizeDirty = true;        	
         }
     }
     
