@@ -18,6 +18,7 @@ package com.coralblocks.coralme;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import com.coralblocks.coralds.map.LongMap;
 import com.coralblocks.coralme.Order.CancelReason;
@@ -50,6 +51,17 @@ public class OrderBook implements OrderListener {
 	private static final Timestamper TIMESTAMPER = new SystemTimestamper();
 	
 	public static enum State { NORMAL, LOCKED, CROSSED, ONESIDED, EMPTY }
+
+	public static enum TraversalOrder {
+		PRICE_TIME_PRIORITY(false),
+		REVERSE_PRICE_TIME_PRIORITY(true);
+
+		private final boolean reverse;
+
+		private TraversalOrder(boolean reverse) {
+			this.reverse = reverse;
+		}
+	}
 	
 	private final ObjectPool<Order> orderPool = new ArrayObjectPool<Order>(ORDER_POOL_INITIAL_SIZE, Order.class);
 	
@@ -66,6 +78,10 @@ public class OrderBook implements OrderListener {
 	private int[] levels = new int[] { 0, 0 };
 	
 	private final LongMap<Order> orders = new LongMap<Order>();
+
+	private final ReusableOrderIterator priceTimePriorityIterator = new ReusableOrderIterator(false);
+
+	private final ReusableOrderIterator reversePriceTimePriorityIterator = new ReusableOrderIterator(true);
 	
 	private final String security;
 	
@@ -194,8 +210,111 @@ public class OrderBook implements OrderListener {
 		return pl.head();
 	}
 	
-	public final LongMap<Order> getOrders() {
-		return orders;
+	/**
+	 * Returns the cached iterator for the requested traversal order, reset to the
+	 * beginning of the requested side. No iterator is allocated by this method.
+	 * <p>
+	 * {@link TraversalOrder#PRICE_TIME_PRIORITY} visits the best price first and
+	 * the oldest order first at each price. Its reverse visits the worst price
+	 * first and the newest order first at each price.
+	 * <p>
+	 * Orders may be canceled or reduced while traversal is in progress. The
+	 * iterator follows the live linked structure and skips orders removed before
+	 * they are returned. Orders added during traversal may or may not be visited,
+	 * depending on whether they are linked into a position the iterator has not
+	 * passed yet. {@link Iterator#remove()} is not supported.
+	 * <p>
+	 * The same iterator instance is reused for every traversal in the same
+	 * direction. Requesting it again resets any traversal using that instance.
+	 *
+	 * @param side the side to traverse
+	 * @param traversalOrder the order in which prices and orders are visited
+	 * @return the cached, reset iterator
+	 */
+	public final Iterator<Order> iterator(Side side, TraversalOrder traversalOrder) {
+		checkExternalListenerReentrancy("iterator");
+
+		ReusableOrderIterator iterator = traversalOrder.reverse
+				? reversePriceTimePriorityIterator
+				: priceTimePriorityIterator;
+		iterator.reset(side);
+		return iterator;
+	}
+
+	/**
+	 * Returns the cached price-time-priority iterator for the requested side.
+	 *
+	 * @param side the side to traverse
+	 * @return the cached, reset iterator
+	 * @see #iterator(Side, TraversalOrder)
+	 */
+	public final Iterator<Order> iterator(Side side) {
+		return iterator(side, TraversalOrder.PRICE_TIME_PRIORITY);
+	}
+
+	private final class ReusableOrderIterator implements Iterator<Order> {
+
+		private final boolean reverse;
+		private PriceLevel nextPriceLevel;
+		private Order nextOrder;
+
+		private ReusableOrderIterator(boolean reverse) {
+			this.reverse = reverse;
+		}
+
+		private void reset(Side side) {
+			nextPriceLevel = reverse ? tail[side.index()] : head[side.index()];
+			nextOrder = firstOrder(nextPriceLevel);
+		}
+
+		private Order firstOrder(PriceLevel priceLevel) {
+			if (priceLevel == null) return null;
+			return reverse ? priceLevel.tail() : priceLevel.head();
+		}
+
+		private void orderRemoved(Order order) {
+			if (nextOrder != order) return;
+
+			Order followingOrder = reverse ? order.prev : order.next;
+			if (followingOrder != null) {
+				nextOrder = followingOrder;
+			} else {
+				PriceLevel priceLevel = order.getPriceLevel();
+				nextPriceLevel = reverse ? priceLevel.prev : priceLevel.next;
+				nextOrder = firstOrder(nextPriceLevel);
+			}
+		}
+
+		@Override
+		public boolean hasNext() {
+			checkExternalListenerReentrancy("Iterator.hasNext");
+			return nextOrder != null;
+		}
+
+		@Override
+		public Order next() {
+			checkExternalListenerReentrancy("Iterator.next");
+			if (nextOrder == null) throw new NoSuchElementException();
+
+			Order order = nextOrder;
+			// Save the next links before the caller can cancel or terminally reduce
+			// this order and return it or its PriceLevel to an object pool.
+			Order followingOrder = reverse ? order.prev : order.next;
+
+			if (followingOrder != null) {
+				nextOrder = followingOrder;
+			} else {
+				nextPriceLevel = reverse ? nextPriceLevel.prev : nextPriceLevel.next;
+				nextOrder = firstOrder(nextPriceLevel);
+			}
+
+			return order;
+		}
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
 	}
 	
 	public final Order getOrder(long id) {
@@ -955,6 +1074,12 @@ public class OrderBook implements OrderListener {
 	private void removeOrder(Order order) {
 		
 		PriceLevel priceLevel = order.getPriceLevel();
+
+		if (priceLevel != null) {
+			// Advance cached traversals before pooled objects can be reused.
+			priceTimePriorityIterator.orderRemoved(order);
+			reversePriceTimePriorityIterator.orderRemoved(order);
+		}
 		
 		if (priceLevel != null && priceLevel.isEmpty()) {
 			

@@ -504,7 +504,14 @@ public class OrderBookTest {
 		Assert.assertEquals(3, newBook.getNumberOfOrders());
 		
 		// callbacks on new book
-		Iterator<Order> iter = newBook.getOrders().iterator();
+		Iterator<Order> iter = newBook.iterator(Side.BUY);
+		while(iter.hasNext()) {
+			Order o = iter.next();
+			called(listener, 1).onOrderAccepted(newBook, o.getAcceptTime(), o);
+			called(listener, 1).onOrderRested(newBook, o.getRestTime(), o, o.getOriginalSize(), o.getPrice());
+		}
+
+		iter = newBook.iterator(Side.SELL);
 		while(iter.hasNext()) {
 			Order o = iter.next();
 			called(listener, 1).onOrderAccepted(newBook, o.getAcceptTime(), o);

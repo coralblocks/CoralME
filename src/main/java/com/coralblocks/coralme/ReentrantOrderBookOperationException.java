@@ -17,7 +17,7 @@ package com.coralblocks.coralme;
 
 /**
  * Thrown when an external {@link OrderBookListener} or {@link OrderListener}
- * tries to mutate the same {@link OrderBook} while one of its callbacks is executing.
+ * tries to mutate or traverse the same {@link OrderBook} while one of its callbacks is executing.
  */
 public final class ReentrantOrderBookOperationException extends IllegalStateException {
 

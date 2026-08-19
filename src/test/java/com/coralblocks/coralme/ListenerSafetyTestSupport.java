@@ -23,7 +23,7 @@ import com.coralblocks.coralme.Order.TimeInForce;
 
 final class ListenerSafetyTestSupport {
 
-	static enum Mutation {
+	static enum GuardedOperation {
 		CREATE_LIMIT("createLimit") {
 			@Override
 			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
@@ -89,11 +89,17 @@ final class ListenerSafetyTestSupport {
 			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
 				book.rollTo(new OrderBook("OTHER"));
 			}
+		},
+		ITERATOR("iterator") {
+			@Override
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+				book.iterator(Side.BUY);
+			}
 		};
 
 		private final String expectedOperation;
 
-		private Mutation(String expectedOperation) {
+		private GuardedOperation(String expectedOperation) {
 			this.expectedOperation = expectedOperation;
 		}
 

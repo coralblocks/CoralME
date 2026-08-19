@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.coralblocks.coralme.ListenerSafetyTestSupport.Mutation;
+import com.coralblocks.coralme.ListenerSafetyTestSupport.GuardedOperation;
 import com.coralblocks.coralme.Order.CancelReason;
 import com.coralblocks.coralme.Order.ExecuteSide;
 import com.coralblocks.coralme.Order.RejectReason;
@@ -59,24 +59,24 @@ public class OrderBookListenerReentrancyMatrixTest {
 	public static Collection<Object[]> parameters() {
 		List<Object[]> parameters = new ArrayList<Object[]>();
 		for(Callback callback : Callback.values()) {
-			for(Mutation mutation : Mutation.values()) {
-				parameters.add(new Object[] { callback, mutation });
+			for(GuardedOperation operation : GuardedOperation.values()) {
+				parameters.add(new Object[] { callback, operation });
 			}
 		}
 		return parameters;
 	}
 
 	private final Callback callback;
-	private final Mutation mutation;
+	private final GuardedOperation operation;
 
-	public OrderBookListenerReentrancyMatrixTest(Callback callback, Mutation mutation) {
+	public OrderBookListenerReentrancyMatrixTest(Callback callback, GuardedOperation operation) {
 		this.callback = callback;
-		this.mutation = mutation;
+		this.operation = operation;
 	}
 
 	@Test
-	public void test_SameOrderBookMutationIsBlockedFromEveryCallback() {
-		Harness harness = new Harness(callback, mutation);
+	public void test_SameOrderBookGuardedOperationIsBlockedFromEveryCallback() {
+		Harness harness = new Harness(callback, operation);
 
 		harness.trigger();
 
@@ -90,7 +90,7 @@ public class OrderBookListenerReentrancyMatrixTest {
 		ReentrantOrderBookOperationException reentrantException =
 				(ReentrantOrderBookOperationException) listenerException.getListenerException();
 		assertSame(harness.book, reentrantException.getOrderBook());
-		assertEquals(mutation.expectedOperation(), reentrantException.getOperation());
+		assertEquals(operation.expectedOperation(), reentrantException.getOperation());
 		harness.assertConsistentState();
 
 		// The guard must always be cleared after the callback and after exception reporting.
@@ -100,7 +100,7 @@ public class OrderBookListenerReentrancyMatrixTest {
 	private static class Harness extends OrderBookAdapter {
 
 		private final Callback callback;
-		private final Mutation mutation;
+		private final GuardedOperation operation;
 		private final OrderBook book;
 		private final OrderBookListener listener = this;
 		private boolean attempted;
@@ -109,9 +109,9 @@ public class OrderBookListenerReentrancyMatrixTest {
 		private Order primaryOrder;
 		private Order secondaryOrder;
 
-		private Harness(Callback callback, Mutation mutation) {
+		private Harness(Callback callback, GuardedOperation operation) {
 			this.callback = callback;
-			this.mutation = mutation;
+			this.operation = operation;
 			this.book = callback == Callback.REJECTED ? new RejectingOrderBook() : new OrderBook("AAPL");
 			this.book.addListener(this);
 		}
@@ -176,8 +176,8 @@ public class OrderBookListenerReentrancyMatrixTest {
 		private void attempt(Callback currentCallback, Order order) {
 			if (attempted || callback != currentCallback) return;
 			attempted = true;
-			mutation.execute(book, order, listener);
-			throw new IllegalStateException("Reentrant mutation was not blocked: " + mutation);
+			operation.execute(book, order, listener);
+			throw new IllegalStateException("Reentrant operation was not blocked: " + operation);
 		}
 
 		@Override

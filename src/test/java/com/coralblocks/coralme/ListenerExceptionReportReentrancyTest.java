@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.coralblocks.coralme.ListenerSafetyTestSupport.Mutation;
+import com.coralblocks.coralme.ListenerSafetyTestSupport.GuardedOperation;
 import com.coralblocks.coralme.ListenerSafetyTestSupport.OrderListenerAdapter;
 import com.coralblocks.coralme.Order.Side;
 import com.coralblocks.coralme.Order.TimeInForce;
@@ -38,23 +38,23 @@ public class ListenerExceptionReportReentrancyTest {
 
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> parameters() {
-		return Arrays.asList(Arrays.stream(Mutation.values())
-				.map(mutation -> new Object[] { mutation })
+		return Arrays.asList(Arrays.stream(GuardedOperation.values())
+				.map(operation -> new Object[] { operation })
 				.toArray(Object[][]::new));
 	}
 
-	private final Mutation mutation;
+	private final GuardedOperation operation;
 
-	public ListenerExceptionReportReentrancyTest(Mutation mutation) {
-		this.mutation = mutation;
+	public ListenerExceptionReportReentrancyTest(GuardedOperation operation) {
+		this.operation = operation;
 	}
 
 	@Test
-	public void test_OrderBookListenerReportBlocksMutationWithoutRecursiveReport() {
+	public void test_OrderBookListenerReportBlocksGuardedOperationWithoutRecursiveReport() {
 		final RuntimeException originalFailure = new RuntimeException("original OrderBookListener failure");
 		final int[] reports = new int[1];
 		final Exception[] reportFailure = new Exception[1];
-		final boolean[] mutationReturned = new boolean[1];
+		final boolean[] operationReturned = new boolean[1];
 		final OrderBookListenerExceptions[] reported = new OrderBookListenerExceptions[1];
 		final OrderBook book = new OrderBook("AAPL");
 		final OrderBookListener[] listener = new OrderBookListener[1];
@@ -71,8 +71,8 @@ public class ListenerExceptionReportReentrancyTest {
 				reports[0]++;
 				reported[0] = exceptions;
 				try {
-					mutation.execute(orderBook, orderBook.getOrder(1), listener[0]);
-					mutationReturned[0] = true;
+					operation.execute(orderBook, orderBook.getOrder(1), listener[0]);
+					operationReturned[0] = true;
 				} catch(Exception e) {
 					reportFailure[0] = e;
 					throw e;
@@ -85,7 +85,7 @@ public class ListenerExceptionReportReentrancyTest {
 		order.reduceTo(60);
 
 		assertEquals(1, reports[0]);
-		assertFalse(mutationReturned[0]);
+		assertFalse(operationReturned[0]);
 		assertEquals(1, reported[0].size());
 		assertSame(originalFailure, reported[0].get(0).getListenerException());
 		assertReentrantFailure(reportFailure[0], book);
@@ -95,11 +95,11 @@ public class ListenerExceptionReportReentrancyTest {
 	}
 
 	@Test
-	public void test_OrderListenerReportBlocksMutationWithoutRecursiveReport() {
+	public void test_OrderListenerReportBlocksGuardedOperationWithoutRecursiveReport() {
 		final RuntimeException originalFailure = new RuntimeException("original OrderListener failure");
 		final int[] reports = new int[1];
 		final Exception[] reportFailure = new Exception[1];
-		final boolean[] mutationReturned = new boolean[1];
+		final boolean[] operationReturned = new boolean[1];
 		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
 		final OrderBook book = new OrderBook("AAPL");
 		final OrderBookListener registeredBookListener = new OrderBookAdapter();
@@ -117,8 +117,8 @@ public class ListenerExceptionReportReentrancyTest {
 				reports[0]++;
 				reported[0] = exceptions;
 				try {
-					mutation.execute(book, order, registeredBookListener);
-					mutationReturned[0] = true;
+					operation.execute(book, order, registeredBookListener);
+					operationReturned[0] = true;
 				} catch(Exception e) {
 					reportFailure[0] = e;
 					throw e;
@@ -129,7 +129,7 @@ public class ListenerExceptionReportReentrancyTest {
 		order.reduceTo(60);
 
 		assertEquals(1, reports[0]);
-		assertFalse(mutationReturned[0]);
+		assertFalse(operationReturned[0]);
 		assertEquals(1, reported[0].size());
 		assertSame(originalFailure, reported[0].get(0).getListenerException());
 		assertReentrantFailure(reportFailure[0], book);
@@ -142,6 +142,6 @@ public class ListenerExceptionReportReentrancyTest {
 		assertTrue(failure instanceof ReentrantOrderBookOperationException);
 		ReentrantOrderBookOperationException reentrantException = (ReentrantOrderBookOperationException) failure;
 		assertSame(book, reentrantException.getOrderBook());
-		assertEquals(mutation.expectedOperation(), reentrantException.getOperation());
+		assertEquals(operation.expectedOperation(), reentrantException.getOperation());
 	}
 }
