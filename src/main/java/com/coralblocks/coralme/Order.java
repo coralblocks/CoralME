@@ -420,11 +420,11 @@ public class Order {
 				discardListenerExceptions();
 			}
 
-			orderBook.onOrderCallbacksFinished(callbacksCompleted);
-
 			if (callbacksCompleted) {
 				reportListenerExceptionsIfNecessary();
 			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
     }
     
@@ -460,11 +460,11 @@ public class Order {
 				discardListenerExceptions();
 			}
 
-			orderBook.onOrderCallbacksFinished(callbacksCompleted);
-
 			if (callbacksCompleted) {
 				reportListenerExceptionsIfNecessary();
 			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
     }
     
@@ -503,12 +503,12 @@ public class Order {
 				discardListenerExceptions();
 			}
 
-			orderBook.onOrderCallbacksFinished(callbacksCompleted);
-
 			if (callbacksCompleted) {
 				reportListenerExceptionsIfNecessary();
 				if (listenerExceptions == null) externalListeners.clear();
 			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
     }
     
@@ -573,11 +573,11 @@ public class Order {
 				discardListenerExceptions();
 			}
 
-			orderBook.onOrderCallbacksFinished(callbacksCompleted);
-
 			if (callbacksCompleted) {
 				reportListenerExceptionsIfNecessary();
 			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
     }
     
@@ -631,11 +631,11 @@ public class Order {
 				discardListenerExceptions();
 			}
 
-			orderBook.onOrderCallbacksFinished(callbacksCompleted);
-
 			if (callbacksCompleted) {
 				reportListenerExceptionsIfNecessary();
 			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
     }
     
@@ -698,12 +698,12 @@ public class Order {
 				discardListenerExceptions();
 			}
 
-			orderBook.onOrderCallbacksFinished(callbacksCompleted);
-
 			if (callbacksCompleted) {
 				reportListenerExceptionsIfNecessary();
 				if (listenerExceptions == null) externalListeners.clear();
 			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
     }
     
@@ -772,12 +772,12 @@ public class Order {
 				discardListenerExceptions();
 			}
 
-			orderBook.onOrderCallbacksFinished(callbacksCompleted);
-
 			if (callbacksCompleted) {
 				reportListenerExceptionsIfNecessary();
 				if (isTerminal() && listenerExceptions == null) externalListeners.clear();
 			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
     }
     

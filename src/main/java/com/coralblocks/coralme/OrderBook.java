@@ -793,8 +793,8 @@ public class OrderBook implements OrderListener {
 				discardOrderBookListenerExceptions();
 				discardDeferredOrderListenerExceptionReports();
 			} else if (!deferListenerExceptionReporting) {
-				reportOrderBookListenerExceptionsIfNecessary();
 				reportDeferredOrderListenerExceptions();
+				reportOrderBookListenerExceptionsIfNecessary();
 			}
 		}
 	}
@@ -852,8 +852,8 @@ public class OrderBook implements OrderListener {
 				discardOrderBookListenerExceptions();
 				discardDeferredOrderListenerExceptionReports();
 			} else if (!deferListenerExceptionReporting) {
-				reportOrderBookListenerExceptionsIfNecessary();
 				reportDeferredOrderListenerExceptions();
+				reportOrderBookListenerExceptionsIfNecessary();
 			}
 		}
 	}
@@ -888,8 +888,8 @@ public class OrderBook implements OrderListener {
 				discardOrderBookListenerExceptions();
 				discardDeferredOrderListenerExceptionReports();
 			} else if (!deferListenerExceptionReporting) {
-				reportOrderBookListenerExceptionsIfNecessary();
 				reportDeferredOrderListenerExceptions();
+				reportOrderBookListenerExceptionsIfNecessary();
 			}
 		}
 	}
@@ -922,8 +922,8 @@ public class OrderBook implements OrderListener {
 				discardOrderBookListenerExceptions();
 				discardDeferredOrderListenerExceptionReports();
 			} else if (!deferListenerExceptionReporting) {
-				reportOrderBookListenerExceptionsIfNecessary();
 				reportDeferredOrderListenerExceptions();
+				reportOrderBookListenerExceptionsIfNecessary();
 			}
 		}
 	}
