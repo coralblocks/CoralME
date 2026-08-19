@@ -58,6 +58,9 @@ public interface OrderBookListener {
                                 long restSize, long restPrice);
 
     public void onOrderTerminated(OrderBook orderBook, long time, Order order);
+
+    public void onExceptionsThrown(OrderBook orderBook,
+                                     OrderBookListenerExceptions exceptions);
     
 }
 ```
@@ -467,8 +470,6 @@ java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.ex
 ```
  
  
-
-
 
 
 

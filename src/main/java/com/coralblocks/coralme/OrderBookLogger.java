@@ -131,4 +131,16 @@ public class OrderBookLogger implements OrderBookListener {
     	System.out.println("  order=" + order);
     	System.out.println();
 	}
+
+	@Override
+	public void onExceptionsThrown(OrderBook orderBook, OrderBookListenerExceptions exceptions) {
+		if (!isOn) return;
+		System.out.println("-----> onExceptionsThrown called:");
+		System.out.println("  orderBook=" + orderBook);
+		System.out.println("  exceptions=" + exceptions.size());
+		for(OrderBookListenerException exception : exceptions) {
+			exception.printStackTrace(System.out);
+		}
+		System.out.println();
+	}
 }

@@ -72,6 +72,10 @@ public class OrderBook implements OrderListener {
 	private long lastExecutedPrice = Long.MAX_VALUE;
 	
 	private final List<OrderBookListener> listeners = new ArrayList<OrderBookListener>(8);
+
+	private boolean deferListenerExceptionReporting;
+
+	private OrderBookListenerExceptions listenerExceptions;
 	
 	private final Timestamper timestamper;
 	
@@ -579,7 +583,36 @@ public class OrderBook implements OrderListener {
 	public Order createMarket(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size) {
 		return createOrder(clientId, clientOrderId, exchangeOrderId, side, size, 0, Type.MARKET, null);
 	}
-	
+
+	private void collectListenerException(OrderBookListener listener, OrderBookListenerException.Callback callback, long time, Order order, Exception exception) {
+		collectListenerException(listener, callback, time, order, -1, -1, exception);
+	}
+
+	private void collectListenerException(OrderBookListener listener, OrderBookListenerException.Callback callback, long time, Order order,
+			long executionId, long matchId, Exception exception) {
+		if (listenerExceptions == null) listenerExceptions = new OrderBookListenerExceptions();
+		listenerExceptions.add(new OrderBookListenerException(listener, callback, time, order, executionId, matchId, exception));
+	}
+
+	private void reportListenerExceptionsIfNecessary() {
+
+		if (listenerExceptions == null) return; // don't report if no exceptions were collected
+
+		OrderBookListenerExceptions exceptions = listenerExceptions;
+		listenerExceptions = null;
+
+		int size = listeners.size();
+
+		for(int i = 0; i < size; i++) {
+			try {
+				listeners.get(i).onExceptionsThrown(this, exceptions);
+			} catch(Exception ignored) {
+				// Exceptions thrown while reporting listener exceptions are intentionally swallowed...
+				// For someone to throw an exception here would be very silly
+			}
+		}
+	}
+
 	protected RejectReason validateOrder(Order order) {
 		return null;
 	}
@@ -676,17 +709,23 @@ public class OrderBook implements OrderListener {
 	
 	final Order createOrder(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size, long price, Type type,TimeInForce tif) {
 		
-		Order order = getOrder(clientId, clientOrderId, security, side, size, price, type, tif);
+		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
+		deferListenerExceptionReporting = true;
 		
-		if (tif == TimeInForce.IOC || type == Type.MARKET) {
+		try {
 			
-			return fillOrCancel(order, exchangeOrderId);
+			Order order = getOrder(clientId, clientOrderId, security, side, size, price, type, tif);
+
+			if (tif == TimeInForce.IOC || type == Type.MARKET) {
+				return fillOrCancel(order, exchangeOrderId);
+			} else {
+				return fillOrRest(order, exchangeOrderId);
+			}
 			
-		} else {
-			
-			return fillOrRest(order, exchangeOrderId);
+		} finally {
+			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
+			if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
 		}
-		
 	}
 	
 	public long rollTo(OrderBook newOrderBook) {
@@ -694,71 +733,96 @@ public class OrderBook implements OrderListener {
 	}
 	
 	public long rollTo(OrderBook newOrderBook, long firstExchangeOrderId) {
+
+		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
+		deferListenerExceptionReporting = true;
 		
-		if (hasBids()) {
+		try {
+			if (hasBids()) {
 			
-			for(PriceLevel pl = head(Side.BUY); pl != null; pl = pl.next) {
+				for(PriceLevel pl = head(Side.BUY); pl != null; pl = pl.next) {
 				
-				for(Order o = pl.head(); o != null; o = o.next) {
+					for(Order o = pl.head(); o != null; o = o.next) {
 					
-					if (o.getTimeInForce() != TimeInForce.GTC) continue;
+						if (o.getTimeInForce() != TimeInForce.GTC) continue;
 					
-					newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
+						newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
 					
-					o.cancel(CancelReason.ROLLED);
+						o.cancel(CancelReason.ROLLED);
+					}
 				}
 			}
-		}
-		
-		if (hasAsks()) {
+
+			if (hasAsks()) {
 			
-			for(PriceLevel pl = head(Side.SELL); pl != null; pl = pl.next) {
+				for(PriceLevel pl = head(Side.SELL); pl != null; pl = pl.next) {
 				
-				for(Order o = pl.head(); o != null; o = o.next) {
+					for(Order o = pl.head(); o != null; o = o.next) {
 					
-					if (o.getTimeInForce() != TimeInForce.GTC) continue;
+						if (o.getTimeInForce() != TimeInForce.GTC) continue;
 					
-					newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
+						newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
 					
-					o.cancel(CancelReason.ROLLED);
+						o.cancel(CancelReason.ROLLED);
+					}
 				}
 			}
+
+			return firstExchangeOrderId;
+
+		} finally {
+			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
+			if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
 		}
-		
-		return firstExchangeOrderId;
 	}
 	
 	public void expire() {
 		
-		Iterator<Order> iter = orders.iterator();
+		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
+		deferListenerExceptionReporting = true;
 		
-		while(iter.hasNext()) {
+		try {
+			Iterator<Order> iter = orders.iterator();
+
+			while(iter.hasNext()) {
+				Order order = iter.next();
+
+				assert order.isTerminal() == false;
+
+				if (order.getTimeInForce() != TimeInForce.DAY) continue;
+
+				iter.remove(); // important otherwise you get a ConcurrentModificationException!
+
+				order.cancel(CancelReason.EXPIRED);
+			}
 			
-			Order order = iter.next();
-			
-			assert order.isTerminal() == false;
-			
-			if (order.getTimeInForce() != TimeInForce.DAY) continue;
-			
-			iter.remove(); // important otherwise you get a ConcurrentModificationException!
-			
-			order.cancel(CancelReason.EXPIRED);
+		} finally {
+			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
+			if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
 		}
 	}
 	
 	public final void purge() {
 		
-		Iterator<Order> iter = orders.iterator();
+		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
+		deferListenerExceptionReporting = true;
 		
-		while(iter.hasNext()) {
+		try {
+			Iterator<Order> iter = orders.iterator();
+
+			while(iter.hasNext()) {
+				Order order = iter.next();
+
+				assert order.isTerminal() == false;
+
+				iter.remove(); // important otherwise you get a ConcurrentModificationException!
+
+				order.cancel(CancelReason.PURGED);
+			}
 			
-			Order order = iter.next();
-			
-			assert order.isTerminal() == false;
-			
-			iter.remove(); // important otherwise you get a ConcurrentModificationException!
-			
-			order.cancel(CancelReason.PURGED);
+		} finally {
+			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
+			if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
 		}
 	}
 	
@@ -832,9 +896,16 @@ public class OrderBook implements OrderListener {
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
-			listeners.get(i).onOrderReduced(this, time, order, canceledSize, newSize);
+			OrderBookListener listener = listeners.get(i);
+			try {
+				listener.onOrderReduced(this, time, order, canceledSize, newSize);
+			} catch(Exception e) {
+				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REDUCED, time, order, e);
+			}
 		}
-    }
+
+		if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
+	}
 
 	@Override
     public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason reason) {
@@ -844,9 +915,17 @@ public class OrderBook implements OrderListener {
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
-			listeners.get(i).onOrderCanceled(this, time, order, canceledSize, reason);
+			OrderBookListener listener = listeners.get(i);
+			try {
+				listener.onOrderCanceled(this, time, order, canceledSize, reason);
+			} catch(Exception e) {
+				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_CANCELED, time, order, e);
+			}
 		}
-    }
+
+		// No reporting check is needed here because every cancellation is immediately followed by
+		// onOrderTerminated, which decides whether exceptions from both callbacks should be reported
+	}
 
 	@Override
     public void onOrderExecuted(long time, Order order, ExecuteSide execSide, long sizeExecuted, long priceExecuted, long executionId, long matchId) {
@@ -859,9 +938,18 @@ public class OrderBook implements OrderListener {
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
-			listeners.get(i).onOrderExecuted(this, time, order, execSide, sizeExecuted, priceExecuted, executionId, matchId);
+			OrderBookListener listener = listeners.get(i);
+			try {
+				listener.onOrderExecuted(this, time, order, execSide, sizeExecuted, priceExecuted, executionId, matchId);
+			} catch(Exception e) {
+				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_EXECUTED, time, order, executionId, matchId, e);
+			}
 		}
-    }
+
+		// Execution is an intermediate callback, so listener exceptions must not be reported here.
+		// Any operation that executes an order must defer reporting until all affected orders have
+		// been updated and the complete OrderBook operation has finished.
+	}
 
 	@Override
 	public void onOrderAccepted(long time, Order order) {
@@ -869,9 +957,17 @@ public class OrderBook implements OrderListener {
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
-			listeners.get(i).onOrderAccepted(this, time, order);
+			OrderBookListener listener = listeners.get(i);
+			try {
+				listener.onOrderAccepted(this, time, order);
+			} catch(Exception e) {
+				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_ACCEPTED, time, order, e);
+			}
 		}
-		
+
+		// Acceptance is an intermediate callback, so listener exceptions must not be reported here.
+		// Any operation that accepts an order must defer reporting until the complete OrderBook
+		// operation has finished.
 	}
 	
 	@Override
@@ -882,8 +978,15 @@ public class OrderBook implements OrderListener {
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
-			listeners.get(i).onOrderRejected(this, time, order, reason);
+			OrderBookListener listener = listeners.get(i);
+			try {
+				listener.onOrderRejected(this, time, order, reason);
+			} catch(Exception e) {
+				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REJECTED, time, order, e);
+			}
 		}
+
+		if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
 	}
 
 	@Override
@@ -892,9 +995,18 @@ public class OrderBook implements OrderListener {
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
-			listeners.get(i).onOrderRested(this, time, order, restSize, restPrice);
+			OrderBookListener listener = listeners.get(i);
+			try {
+				listener.onOrderRested(this, time, order, restSize, restPrice);
+			} catch(Exception e) {
+				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_RESTED, time, order, e);
+			}
 		}
-    }
+
+		// Resting is part of the operation that accepts and processes an order, so listener exceptions
+		// must not be reported here. That operation must report after the complete OrderBook operation
+		// has finished.
+	}
 	
 	@Override
 	public void onOrderTerminated(long time, Order order) {
@@ -902,8 +1014,17 @@ public class OrderBook implements OrderListener {
 		int size = listeners.size();
 		
 		for(int i = 0; i < size; i++) {
-			listeners.get(i).onOrderTerminated(this, time, order);
+			OrderBookListener listener = listeners.get(i);
+			try {
+				listener.onOrderTerminated(this, time, order);
+			} catch(Exception e) {
+				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_TERMINATED, time, order, e);
+			}
 		}
+
+		// A termination can complete a standalone Order cancellation, so report here unless a
+		// complete OrderBook operation is still responsible for collecting further exceptions.
+		if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
 	}
 	
 	@Override

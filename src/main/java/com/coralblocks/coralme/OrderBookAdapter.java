@@ -55,4 +55,9 @@ public class OrderBookAdapter implements OrderBookListener {
 	public void onOrderTerminated(OrderBook orderBook, long time, Order order) {
 		
 	}
+
+	@Override
+	public void onExceptionsThrown(OrderBook orderBook, OrderBookListenerExceptions exceptions) {
+
+	}
 }
