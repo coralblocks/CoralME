@@ -34,5 +34,11 @@ public interface OrderListener {
     public void onOrderRested(long time, Order order, long restSize, long restPrice);
     
     public void onOrderTerminated(long time, Order order);
+
+	/**
+	 * Called after the complete {@link OrderBook} operation when one or more external
+	 * {@link OrderListener} callbacks throw. Exceptions thrown by this reporting callback are ignored.
+	 */
+	public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions);
     
 }

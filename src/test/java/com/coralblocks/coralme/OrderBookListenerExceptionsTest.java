@@ -159,7 +159,7 @@ public class OrderBookListenerExceptionsTest {
 		OrderBook book = new OrderBook("AAPL", externalListener);
 		book.createLimit(1, "maker-1", 1, Side.SELL, 50, 100, TimeInForce.GTC);
 		Order maker2 = book.createLimit(1, "maker-2", 2, Side.SELL, 50, 101, TimeInForce.GTC);
-		maker2.addListener(internalListener);
+		maker2.addInternalListener(internalListener);
 
 		try {
 			book.createLimit(2, "taker", 3, Side.BUY, 100, 101, TimeInForce.GTC);
@@ -465,7 +465,7 @@ public class OrderBookListenerExceptionsTest {
 
 		Order order = new Order();
 		order.init(book, book.getTimestamper(), 7, "reject", 11, book.getSecurity(), Side.SELL, 100, 100, Type.LIMIT, TimeInForce.GTC);
-		order.addListener(book);
+		order.addInternalListener(book);
 		order.reject(RejectReason.TRADING_HALTED);
 
 		assertTrue(order.isTerminal());
@@ -625,6 +625,10 @@ public class OrderBookListenerExceptionsTest {
 
 		@Override
 		public void onOrderTerminated(long time, Order order) {
+		}
+
+		@Override
+		public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
 		}
 	}
 }

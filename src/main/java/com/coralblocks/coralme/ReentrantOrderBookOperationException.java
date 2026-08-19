@@ -16,8 +16,8 @@
 package com.coralblocks.coralme;
 
 /**
- * Thrown when an external {@link OrderBookListener} tries to mutate the same
- * {@link OrderBook} while one of its callbacks is executing.
+ * Thrown when an external {@link OrderBookListener} or {@link OrderListener}
+ * tries to mutate the same {@link OrderBook} while one of its callbacks is executing.
  */
 public final class ReentrantOrderBookOperationException extends IllegalStateException {
 
@@ -25,7 +25,7 @@ public final class ReentrantOrderBookOperationException extends IllegalStateExce
 	private final String operation;
 
 	ReentrantOrderBookOperationException(OrderBook orderBook, String operation) {
-		super("Cannot perform " + operation + " on OrderBook " + orderBook + " from an OrderBookListener callback");
+		super("Cannot perform " + operation + " on OrderBook " + orderBook + " from an external listener callback");
 		this.orderBook = orderBook;
 		this.operation = operation;
 	}

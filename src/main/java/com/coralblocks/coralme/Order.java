@@ -30,7 +30,11 @@ public class Order {
 	
 	public static final int CLIENT_ORDER_ID_MAX_LENGTH = 64;
 	
-    private final List<OrderListener> listeners = new ArrayList<OrderListener>(64);
+	private final List<OrderListener> internalListeners = new ArrayList<OrderListener>(2);
+
+	private final List<OrderListener> externalListeners = new ArrayList<OrderListener>(64);
+
+	private OrderListenerExceptions listenerExceptions;
     
     private Side side;
     
@@ -318,19 +322,71 @@ public class Order {
     	return security;
     }
     
+	/**
+	 * Adds an external listener. Exceptions thrown by this listener are collected
+	 * and reported through {@link OrderListener#onExceptionsThrown(Order, OrderListenerExceptions)}.
+	 */
     public void addListener(OrderListener listener) {
 
 		orderBook.checkExternalListenerReentrancy("Order.addListener");
-    	
-    	/*
-    	 * It is very important that the OrderListener from OrderBook be executed LAST, in other words, it 
-    	 * should be executed AFTER the OrderListener from PriceLevel, so the level can be removed if empty.
-    	 * 
-    	 * That's why the listeners will be called from last to first.
-    	 */
-    	
-        listeners.add(listener);
+
+        externalListeners.add(listener);
     }
+
+	void addInternalListener(OrderListener listener) {
+		internalListeners.add(listener);
+	}
+
+	private void collectListenerException(OrderListener listener, OrderListenerException.Callback callback,
+			long time, Order order, Exception exception) {
+		collectListenerException(listener, callback, time, order, -1, -1, exception);
+	}
+
+	private void collectListenerException(OrderListener listener, OrderListenerException.Callback callback,
+			long time, Order order, long executionId, long matchId, Exception exception) {
+		if (listenerExceptions == null) listenerExceptions = new OrderListenerExceptions();
+		listenerExceptions.add(new OrderListenerException(listener, callback, time, order,
+				executionId, matchId, exception));
+	}
+
+	final void discardListenerExceptions() {
+		listenerExceptions = null;
+		if (isTerminal()) externalListeners.clear();
+	}
+
+	private void reportListenerExceptionsIfNecessary() {
+		if (listenerExceptions == null) return;
+
+		if (orderBook.isOrderListenerExceptionReportingDeferred()) {
+			orderBook.deferOrderListenerExceptionReport(this);
+			return;
+		}
+
+		reportListenerExceptions();
+	}
+
+	final void reportListenerExceptions() {
+		if (listenerExceptions == null) return;
+
+		OrderListenerExceptions exceptions = listenerExceptions;
+		listenerExceptions = null;
+		int size = externalListeners.size();
+
+		for(int i = 0; i < size; i++) {
+			OrderListener listener = externalListeners.get(i);
+			orderBook.enterExternalListenerCallback();
+			try {
+				listener.onExceptionsThrown(this, exceptions);
+			} catch(Exception ignored) {
+				// Exceptions thrown while reporting listener exceptions are intentionally swallowed...
+				// For someone to throw an exception here would be very silly
+			} finally {
+				orderBook.exitExternalListenerCallback();
+			}
+		}
+
+		if (isTerminal()) externalListeners.clear();
+	}
     
     void accept(long id) {
     	
@@ -338,12 +394,38 @@ public class Order {
     	
     	this.acceptTime = timestamper.nanoEpoch();
         
-        int x = listeners.size();
-        
-        for(int i = x - 1; i >= 0; i--) {
-        	
-        	listeners.get(i).onOrderAccepted(this.acceptTime, this);
-        }
+		boolean callbacksCompleted = false;
+
+		try {
+			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+				internalListeners.get(i).onOrderAccepted(this.acceptTime, this);
+			}
+
+			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+				OrderListener listener = externalListeners.get(i);
+				orderBook.enterExternalListenerCallback();
+				try {
+					listener.onOrderAccepted(this.acceptTime, this);
+				} catch(Exception e) {
+					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_ACCEPTED,
+							this.acceptTime, this, e);
+				} finally {
+					orderBook.exitExternalListenerCallback();
+				}
+			}
+
+			callbacksCompleted = true;
+		} finally {
+			if (!callbacksCompleted) {
+				discardListenerExceptions();
+			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
+
+			if (callbacksCompleted) {
+				reportListenerExceptionsIfNecessary();
+			}
+		}
     }
     
     void rest() {
@@ -352,12 +434,38 @@ public class Order {
     	
     	this.restTime = timestamper.nanoEpoch();
         
-        int x = listeners.size();
-        
-        for(int i = x - 1; i >= 0; i--) {
-        	
-        	listeners.get(i).onOrderRested(this.restTime, this, getOpenSize(), getPrice());
-        }
+		boolean callbacksCompleted = false;
+
+		try {
+			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+				internalListeners.get(i).onOrderRested(this.restTime, this, getOpenSize(), getPrice());
+			}
+
+			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+				OrderListener listener = externalListeners.get(i);
+				orderBook.enterExternalListenerCallback();
+				try {
+					listener.onOrderRested(this.restTime, this, getOpenSize(), getPrice());
+				} catch(Exception e) {
+					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_RESTED,
+							this.restTime, this, e);
+				} finally {
+					orderBook.exitExternalListenerCallback();
+				}
+			}
+
+			callbacksCompleted = true;
+		} finally {
+			if (!callbacksCompleted) {
+				discardListenerExceptions();
+			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
+
+			if (callbacksCompleted) {
+				reportListenerExceptionsIfNecessary();
+			}
+		}
     }
     
     public void reject(RejectReason reason) {
@@ -368,14 +476,40 @@ public class Order {
     	
     	this.rejectTime = timestamper.nanoEpoch();
     	
-        int x = listeners.size();
-        
-        for(int i = x - 1; i >= 0; i--) {
-        	
-        	listeners.get(i).onOrderRejected(this.rejectTime, this, reason);
-        }
-        
-        listeners.clear();
+		boolean callbacksCompleted = false;
+
+		try {
+			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+				internalListeners.get(i).onOrderRejected(this.rejectTime, this, reason);
+			}
+
+			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+				OrderListener listener = externalListeners.get(i);
+				orderBook.enterExternalListenerCallback();
+				try {
+					listener.onOrderRejected(this.rejectTime, this, reason);
+				} catch(Exception e) {
+					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_REJECTED,
+							this.rejectTime, this, e);
+				} finally {
+					orderBook.exitExternalListenerCallback();
+				}
+			}
+
+			internalListeners.clear();
+			callbacksCompleted = true;
+		} finally {
+			if (!callbacksCompleted) {
+				discardListenerExceptions();
+			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
+
+			if (callbacksCompleted) {
+				reportListenerExceptionsIfNecessary();
+				if (listenerExceptions == null) externalListeners.clear();
+			}
+		}
     }
     
     /**
@@ -413,12 +547,38 @@ public class Order {
     	
     	this.reduceTime = timestamper.nanoEpoch();
     	
-    	int x = listeners.size();
-    	
-    	for(int i = x - 1; i >= 0; i--) {
-    		
-    		listeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize);
-    	}
+		boolean callbacksCompleted = false;
+
+		try {
+			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+				internalListeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize);
+			}
+
+			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+				OrderListener listener = externalListeners.get(i);
+				orderBook.enterExternalListenerCallback();
+				try {
+					listener.onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize);
+				} catch(Exception e) {
+					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_REDUCED,
+							this.reduceTime, this, e);
+				} finally {
+					orderBook.exitExternalListenerCallback();
+				}
+			}
+
+			callbacksCompleted = true;
+		} finally {
+			if (!callbacksCompleted) {
+				discardListenerExceptions();
+			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
+
+			if (callbacksCompleted) {
+				reportListenerExceptionsIfNecessary();
+			}
+		}
     }
     
     public void cancel(long sizeToCancel) {
@@ -445,12 +605,38 @@ public class Order {
     	
     	this.reduceTime = timestamper.nanoEpoch();
     	
-    	int x = listeners.size();
-    	
-    	for(int i = x - 1; i >= 0; i--) {
-    		
-    		listeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, newSize);
-    	}
+		boolean callbacksCompleted = false;
+
+		try {
+			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+				internalListeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, newSize);
+			}
+
+			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+				OrderListener listener = externalListeners.get(i);
+				orderBook.enterExternalListenerCallback();
+				try {
+					listener.onOrderReduced(this.reduceTime, this, canceledSize, newSize);
+				} catch(Exception e) {
+					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_REDUCED,
+							this.reduceTime, this, e);
+				} finally {
+					orderBook.exitExternalListenerCallback();
+				}
+			}
+
+			callbacksCompleted = true;
+		} finally {
+			if (!callbacksCompleted) {
+				discardListenerExceptions();
+			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
+
+			if (callbacksCompleted) {
+				reportListenerExceptionsIfNecessary();
+			}
+		}
     }
     
     public void cancel() {
@@ -468,19 +654,57 @@ public class Order {
     	
     	this.cancelTime = timestamper.nanoEpoch();
     	
-    	int x = listeners.size();
-    	
-    	for(int i = x - 1; i >= 0; i--) {
-    		
-    		listeners.get(i).onOrderCanceled(this.cancelTime, this, canceledSize, reason);
-    	}
-    	
-    	for(int i = x - 1; i >= 0; i--) {
-    		
-    		listeners.get(i).onOrderTerminated(this.cancelTime, this);
-    	}
-    	
-    	listeners.clear();
+		boolean callbacksCompleted = false;
+
+		try {
+			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+				internalListeners.get(i).onOrderCanceled(this.cancelTime, this, canceledSize, reason);
+			}
+
+			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+				OrderListener listener = externalListeners.get(i);
+				orderBook.enterExternalListenerCallback();
+				try {
+					listener.onOrderCanceled(this.cancelTime, this, canceledSize, reason);
+				} catch(Exception e) {
+					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_CANCELED,
+							this.cancelTime, this, e);
+				} finally {
+					orderBook.exitExternalListenerCallback();
+				}
+			}
+
+			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+				internalListeners.get(i).onOrderTerminated(this.cancelTime, this);
+			}
+
+			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+				OrderListener listener = externalListeners.get(i);
+				orderBook.enterExternalListenerCallback();
+				try {
+					listener.onOrderTerminated(this.cancelTime, this);
+				} catch(Exception e) {
+					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_TERMINATED,
+							this.cancelTime, this, e);
+				} finally {
+					orderBook.exitExternalListenerCallback();
+				}
+			}
+
+			internalListeners.clear();
+			callbacksCompleted = true;
+		} finally {
+			if (!callbacksCompleted) {
+				discardListenerExceptions();
+			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
+
+			if (callbacksCompleted) {
+				reportListenerExceptionsIfNecessary();
+				if (listenerExceptions == null) externalListeners.clear();
+			}
+		}
     }
     
     void execute(long time, long sizeToExecute) {
@@ -499,22 +723,62 @@ public class Order {
     	
     	this.executeTime = time;
     	
-    	int x = listeners.size();
-    	
-    	for(int i = x - 1; i >= 0; i--) {
-    		
-    		listeners.get(i).onOrderExecuted(this.executeTime, this, execSide, sizeToExecute, priceExecuted, executionId, matchId);
-    	}
-    	
-    	if (isTerminal()) {
-    		
-        	for(int i = x - 1; i >= 0; i--) {
-        		
-        		listeners.get(i).onOrderTerminated(this.executeTime, this);
-        	}
-    		
-    		listeners.clear();
-    	}
+		boolean callbacksCompleted = false;
+
+		try {
+			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+				internalListeners.get(i).onOrderExecuted(this.executeTime, this, execSide, sizeToExecute,
+						priceExecuted, executionId, matchId);
+			}
+
+			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+				OrderListener listener = externalListeners.get(i);
+				orderBook.enterExternalListenerCallback();
+				try {
+					listener.onOrderExecuted(this.executeTime, this, execSide, sizeToExecute,
+							priceExecuted, executionId, matchId);
+				} catch(Exception e) {
+					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_EXECUTED,
+							this.executeTime, this, executionId, matchId, e);
+				} finally {
+					orderBook.exitExternalListenerCallback();
+				}
+			}
+
+			if (isTerminal()) {
+				for(int i = internalListeners.size() - 1; i >= 0; i--) {
+					internalListeners.get(i).onOrderTerminated(this.executeTime, this);
+				}
+
+				for(int i = externalListeners.size() - 1; i >= 0; i--) {
+					OrderListener listener = externalListeners.get(i);
+					orderBook.enterExternalListenerCallback();
+					try {
+						listener.onOrderTerminated(this.executeTime, this);
+					} catch(Exception e) {
+						collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_TERMINATED,
+								this.executeTime, this, e);
+					} finally {
+						orderBook.exitExternalListenerCallback();
+					}
+				}
+
+				internalListeners.clear();
+			}
+
+			callbacksCompleted = true;
+		} finally {
+			if (!callbacksCompleted) {
+				discardListenerExceptions();
+			}
+
+			orderBook.onOrderCallbacksFinished(callbacksCompleted);
+
+			if (callbacksCompleted) {
+				reportListenerExceptionsIfNecessary();
+				if (isTerminal() && listenerExceptions == null) externalListeners.clear();
+			}
+		}
     }
     
 	public static enum TimeInForce implements CharEnum { 

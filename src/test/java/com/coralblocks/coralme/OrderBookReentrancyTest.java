@@ -23,7 +23,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.coralblocks.coralme.Order.CancelReason;
 import com.coralblocks.coralme.Order.ExecuteSide;
+import com.coralblocks.coralme.Order.RejectReason;
 import com.coralblocks.coralme.Order.Side;
 import com.coralblocks.coralme.Order.TimeInForce;
 import com.coralblocks.coralme.OrderBookListenerException.Callback;
@@ -191,11 +193,200 @@ public class OrderBookReentrancyTest {
 		assertReentrantFailure(reported[0].get(0), book, "addListener");
 	}
 
+	@Test
+	public void test_ReentrantOrderBookOperationFromOrderListenerIsBlockedAndReported() {
+		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
+		final OrderBook book = new OrderBook("AAPL");
+		final Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
+
+		OrderListener listener = new OrderListenerAdapter() {
+			@Override
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+				book.createLimit(2, "reentrant", 2, Side.BUY, 100, 99, TimeInForce.GTC);
+			}
+
+			@Override
+			public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
+				reported[0] = exceptions;
+			}
+		};
+
+		order.addListener(listener);
+		order.reduceTo(60);
+
+		assertEquals(60, order.getTotalSize());
+		assertFalse(order.isTerminal());
+		assertSame(order, book.getOrder(1));
+		assertNull(book.getOrder(2));
+		assertEquals(1, reported[0].size());
+		OrderListenerException listenerException = reported[0].get(0);
+		assertSame(listener, listenerException.getListener());
+		assertEquals(OrderListenerException.Callback.ON_ORDER_REDUCED, listenerException.getCallback());
+		assertReentrantFailure(listenerException, book, "createLimit");
+	}
+
+	@Test
+	public void test_ReentrantOrderMutationFromOrderListenerIsBlockedBeforeStateChanges() {
+		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
+		final OrderBook book = new OrderBook("AAPL");
+		final Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
+
+		OrderListener listener = new OrderListenerAdapter() {
+			@Override
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+				order.cancel();
+			}
+
+			@Override
+			public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
+				reported[0] = exceptions;
+			}
+		};
+
+		order.addListener(listener);
+		order.reduceTo(60);
+
+		assertEquals(60, order.getTotalSize());
+		assertEquals(60, order.getOpenSize());
+		assertFalse(order.isTerminal());
+		assertSame(order, book.getOrder(1));
+		assertEquals(1, reported[0].size());
+		assertReentrantFailure(reported[0].get(0), book, "Order.cancel");
+	}
+
+	@Test
+	public void test_ReentrantOrderListenerRegistrationFromOrderListenerIsBlocked() {
+		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
+		final OrderBook book = new OrderBook("AAPL");
+		final Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
+		final OrderListener marker = new OrderListenerAdapter();
+
+		OrderListener listener = new OrderListenerAdapter() {
+			@Override
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+				order.addListener(marker);
+			}
+
+			@Override
+			public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
+				reported[0] = exceptions;
+			}
+		};
+
+		order.addListener(listener);
+		order.reduceTo(60);
+
+		assertEquals(1, reported[0].size());
+		assertReentrantFailure(reported[0].get(0), book, "Order.addListener");
+	}
+
+	@Test
+	public void test_OperationOnDifferentOrderBookFromOrderListenerIsAllowed() {
+		final int[] reports = new int[1];
+		final OrderBook otherBook = new OrderBook("MSFT");
+		OrderBook book = new OrderBook("AAPL");
+		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
+
+		order.addListener(new OrderListenerAdapter() {
+			@Override
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+				otherBook.createLimit(2, "other", 2, Side.SELL, 200, 200, TimeInForce.GTC);
+			}
+
+			@Override
+			public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
+				reports[0]++;
+			}
+		});
+
+		order.reduceTo(60);
+
+		assertEquals(0, reports[0]);
+		assertEquals(1, book.getNumberOfOrders());
+		assertEquals(1, otherBook.getNumberOfOrders());
+	}
+
+	@Test
+	public void test_ReentryFromOrderListenerExceptionReportIsBlockedWithoutRecursiveReporting() {
+		final RuntimeException listenerFailure = new RuntimeException("listener");
+		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
+		final int[] reports = new int[1];
+		final OrderBook book = new OrderBook("AAPL");
+		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
+
+		order.addListener(new OrderListenerAdapter() {
+			@Override
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+				throw listenerFailure;
+			}
+
+			@Override
+			public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
+				reports[0]++;
+				reported[0] = exceptions;
+				book.createLimit(2, "reentrant", 2, Side.BUY, 100, 99, TimeInForce.GTC);
+			}
+		});
+
+		order.reduceTo(60);
+
+		assertEquals(1, reports[0]);
+		assertEquals(1, reported[0].size());
+		assertSame(listenerFailure, reported[0].get(0).getListenerException());
+		assertNull(book.getOrder(2));
+		book.createLimit(3, "after-report", 3, Side.BUY, 100, 98, TimeInForce.GTC);
+		assertEquals(2, book.getNumberOfOrders());
+	}
+
 	private void assertReentrantFailure(OrderBookListenerException listenerException, OrderBook book, String operation) {
 		assertTrue(listenerException.getListenerException() instanceof ReentrantOrderBookOperationException);
 		ReentrantOrderBookOperationException reentrantException =
 				(ReentrantOrderBookOperationException) listenerException.getListenerException();
 		assertSame(book, reentrantException.getOrderBook());
 		assertEquals(operation, reentrantException.getOperation());
+	}
+
+	private void assertReentrantFailure(OrderListenerException listenerException, OrderBook book, String operation) {
+		assertTrue(listenerException.getListenerException() instanceof ReentrantOrderBookOperationException);
+		ReentrantOrderBookOperationException reentrantException =
+				(ReentrantOrderBookOperationException) listenerException.getListenerException();
+		assertSame(book, reentrantException.getOrderBook());
+		assertEquals(operation, reentrantException.getOperation());
+	}
+
+	private static class OrderListenerAdapter implements OrderListener {
+
+		@Override
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+		}
+
+		@Override
+		public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason cancelReason) {
+		}
+
+		@Override
+		public void onOrderExecuted(long time, Order order, ExecuteSide executeSide, long executeSize,
+				long executePrice, long executeId, long executeMatchId) {
+		}
+
+		@Override
+		public void onOrderAccepted(long time, Order order) {
+		}
+
+		@Override
+		public void onOrderRejected(long time, Order order, RejectReason rejectReason) {
+		}
+
+		@Override
+		public void onOrderRested(long time, Order order, long restSize, long restPrice) {
+		}
+
+		@Override
+		public void onOrderTerminated(long time, Order order) {
+		}
+
+		@Override
+		public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
+		}
 	}
 }
