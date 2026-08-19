@@ -64,6 +64,7 @@ public class ListenerDifferentOrderBookMutationTest {
 	public void test_OrderBookListenerCanMutateDifferentOrderBookFromEveryCallback() {
 		final OrderBook otherBook = new OrderBook("MSFT");
 		final int[] mutations = new int[1];
+		final int[] traversals = new int[1];
 		final int[] reports = new int[1];
 		OrderBook book = callback == Callback.REJECTED ? new RejectingOrderBook() : new OrderBook("AAPL");
 
@@ -72,6 +73,7 @@ public class ListenerDifferentOrderBookMutationTest {
 				if (mutations[0] != 0 || callback != currentCallback) return;
 				mutations[0]++;
 				otherBook.createLimit(1, "other", 1, Side.BUY, 100, 100, TimeInForce.GTC);
+				if (otherBook.iterator(Side.BUY).next() == otherBook.getOrder(1)) traversals[0]++;
 			}
 
 			@Override
@@ -121,6 +123,7 @@ public class ListenerDifferentOrderBookMutationTest {
 		triggerOrderBookCallback(book);
 
 		assertEquals(1, mutations[0]);
+		assertEquals(1, traversals[0]);
 		assertEquals(0, reports[0]);
 		assertEquals(1, otherBook.getNumberOfOrders());
 	}
@@ -129,6 +132,7 @@ public class ListenerDifferentOrderBookMutationTest {
 	public void test_OrderListenerCanMutateDifferentOrderBookFromEveryCallback() {
 		final OrderBook otherBook = new OrderBook("MSFT");
 		final int[] mutations = new int[1];
+		final int[] traversals = new int[1];
 		final int[] reports = new int[1];
 		OrderBook book = new OrderBook("AAPL");
 		Order order = new Order();
@@ -139,6 +143,7 @@ public class ListenerDifferentOrderBookMutationTest {
 				if (mutations[0] != 0 || callback != currentCallback) return;
 				mutations[0]++;
 				otherBook.createLimit(1, "other", 1, Side.BUY, 100, 100, TimeInForce.GTC);
+				if (otherBook.iterator(Side.BUY).next() == otherBook.getOrder(1)) traversals[0]++;
 			}
 
 			@Override
@@ -186,6 +191,7 @@ public class ListenerDifferentOrderBookMutationTest {
 		triggerOrderCallback(order);
 
 		assertEquals(1, mutations[0]);
+		assertEquals(1, traversals[0]);
 		assertEquals(0, reports[0]);
 		assertEquals(1, otherBook.getNumberOfOrders());
 	}

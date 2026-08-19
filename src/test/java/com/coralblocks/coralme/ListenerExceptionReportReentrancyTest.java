@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,6 +58,7 @@ public class ListenerExceptionReportReentrancyTest {
 		final boolean[] operationReturned = new boolean[1];
 		final OrderBookListenerExceptions[] reported = new OrderBookListenerExceptions[1];
 		final OrderBook book = new OrderBook("AAPL");
+		final Iterator<Order> iterator = book.iterator(Side.BUY);
 		final OrderBookListener[] listener = new OrderBookListener[1];
 
 		listener[0] = new OrderBookAdapter() {
@@ -71,7 +73,7 @@ public class ListenerExceptionReportReentrancyTest {
 				reports[0]++;
 				reported[0] = exceptions;
 				try {
-					operation.execute(orderBook, orderBook.getOrder(1), listener[0]);
+					operation.execute(orderBook, orderBook.getOrder(1), listener[0], iterator);
 					operationReturned[0] = true;
 				} catch(Exception e) {
 					reportFailure[0] = e;
@@ -105,6 +107,7 @@ public class ListenerExceptionReportReentrancyTest {
 		final OrderBookListener registeredBookListener = new OrderBookAdapter();
 		book.addListener(registeredBookListener);
 		final Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
+		final Iterator<Order> iterator = book.iterator(Side.BUY);
 
 		order.addListener(new OrderListenerAdapter() {
 			@Override
@@ -117,7 +120,7 @@ public class ListenerExceptionReportReentrancyTest {
 				reports[0]++;
 				reported[0] = exceptions;
 				try {
-					operation.execute(book, order, registeredBookListener);
+					operation.execute(book, order, registeredBookListener, iterator);
 					operationReturned[0] = true;
 				} catch(Exception e) {
 					reportFailure[0] = e;

@@ -15,6 +15,8 @@
  */
 package com.coralblocks.coralme;
 
+import java.util.Iterator;
+
 import com.coralblocks.coralme.Order.CancelReason;
 import com.coralblocks.coralme.Order.ExecuteSide;
 import com.coralblocks.coralme.Order.RejectReason;
@@ -26,74 +28,100 @@ final class ListenerSafetyTestSupport {
 	static enum GuardedOperation {
 		CREATE_LIMIT("createLimit") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				book.createLimit(90, "reentrant-limit", 90, Side.BUY, 10, 1, TimeInForce.GTC);
 			}
 		},
 		CREATE_MARKET("createMarket") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				book.createMarket(91, "reentrant-market", 91, Side.BUY, 10);
 			}
 		},
 		CANCEL_ORDER("Order.cancel") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				order.cancel();
 			}
 		},
 		REDUCE_ORDER("Order.reduceTo") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				order.reduceTo(order.getTotalSize() - 1);
 			}
 		},
 		REJECT_ORDER("Order.reject") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				order.reject(RejectReason.BAD_TYPE);
 			}
 		},
 		ADD_ORDER_BOOK_LISTENER("addListener") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				book.addListener(new OrderBookAdapter());
 			}
 		},
 		REMOVE_ORDER_BOOK_LISTENER("removeListener") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				book.removeListener(registeredBookListener);
 			}
 		},
 		ADD_ORDER_LISTENER("Order.addListener") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				order.addListener(new OrderListenerAdapter());
 			}
 		},
 		PURGE("purge") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				book.purge();
 			}
 		},
 		EXPIRE("expire") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				book.expire();
 			}
 		},
 		ROLL_TO("rollTo") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				book.rollTo(new OrderBook("OTHER"));
 			}
 		},
 		ITERATOR("iterator") {
 			@Override
-			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener) {
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
 				book.iterator(Side.BUY);
+			}
+		},
+		ITERATOR_HAS_NEXT("Iterator.hasNext") {
+			@Override
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
+				iterator.hasNext();
+			}
+		},
+		ITERATOR_NEXT("Iterator.next") {
+			@Override
+			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+					Iterator<Order> iterator) {
+				iterator.next();
 			}
 		};
 
@@ -107,7 +135,8 @@ final class ListenerSafetyTestSupport {
 			return expectedOperation;
 		}
 
-		abstract void execute(OrderBook book, Order order, OrderBookListener registeredBookListener);
+		abstract void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
+				Iterator<Order> iterator);
 	}
 
 	static class OrderListenerAdapter implements OrderListener {

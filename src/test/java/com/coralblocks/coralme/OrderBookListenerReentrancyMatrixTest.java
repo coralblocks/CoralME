@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
@@ -103,6 +104,7 @@ public class OrderBookListenerReentrancyMatrixTest {
 		private final GuardedOperation operation;
 		private final OrderBook book;
 		private final OrderBookListener listener = this;
+		private final Iterator<Order> iterator;
 		private boolean attempted;
 		private int reports;
 		private OrderBookListenerExceptions reported;
@@ -113,6 +115,7 @@ public class OrderBookListenerReentrancyMatrixTest {
 			this.callback = callback;
 			this.operation = operation;
 			this.book = callback == Callback.REJECTED ? new RejectingOrderBook() : new OrderBook("AAPL");
+			this.iterator = book.iterator(Side.BUY);
 			this.book.addListener(this);
 		}
 
@@ -176,7 +179,7 @@ public class OrderBookListenerReentrancyMatrixTest {
 		private void attempt(Callback currentCallback, Order order) {
 			if (attempted || callback != currentCallback) return;
 			attempted = true;
-			operation.execute(book, order, listener);
+			operation.execute(book, order, listener, iterator);
 			throw new IllegalStateException("Reentrant operation was not blocked: " + operation);
 		}
 

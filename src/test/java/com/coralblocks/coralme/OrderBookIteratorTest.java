@@ -355,6 +355,92 @@ public class OrderBookIteratorTest {
 	}
 
 	@Test
+	public void test_BlockedIteratorNextFromOrderBookListenerDoesNotAdvanceCursor() {
+		OrderBook book = createBuyBook();
+		Iterator<Order> iterator = book.iterator(Side.BUY);
+		OrderBookListenerExceptions[] reported = new OrderBookListenerExceptions[1];
+		book.addListener(new OrderBookAdapter() {
+			@Override
+			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
+					long reduceNewTotalSize) {
+				iterator.next();
+			}
+
+			@Override
+			public void onExceptionsThrown(OrderBook orderBook, OrderBookListenerExceptions exceptions) {
+				reported[0] = exceptions;
+			}
+		});
+
+		book.getOrder(1).reduceTo(80);
+
+		assertEquals(1, reported[0].size());
+		ReentrantOrderBookOperationException failure =
+				(ReentrantOrderBookOperationException) reported[0].get(0).getListenerException();
+		assertEquals("Iterator.next", failure.getOperation());
+		assertOrderIds(iterator, 1, 2, 3, 4);
+	}
+
+	@Test
+	public void test_BlockedIteratorNextFromOrderListenerDoesNotAdvanceCursor() {
+		OrderBook book = createBuyBook();
+		Iterator<Order> iterator = book.iterator(Side.BUY);
+		OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
+		Order order = book.getOrder(1);
+		order.addListener(new ListenerSafetyTestSupport.OrderListenerAdapter() {
+			@Override
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+				iterator.next();
+			}
+
+			@Override
+			public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
+				reported[0] = exceptions;
+			}
+		});
+
+		order.reduceTo(80);
+
+		assertEquals(1, reported[0].size());
+		ReentrantOrderBookOperationException failure =
+				(ReentrantOrderBookOperationException) reported[0].get(0).getListenerException();
+		assertEquals("Iterator.next", failure.getOperation());
+		assertOrderIds(iterator, 1, 2, 3, 4);
+	}
+
+	@Test
+	public void test_BlockedIteratorNextFromExceptionReportDoesNotAdvanceCursor() {
+		OrderBook book = createBuyBook();
+		Iterator<Order> iterator = book.iterator(Side.BUY);
+		RuntimeException originalFailure = new RuntimeException("listener failure");
+		Exception[] reportFailure = new Exception[1];
+		book.addListener(new OrderBookAdapter() {
+			@Override
+			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
+					long reduceNewTotalSize) {
+				throw originalFailure;
+			}
+
+			@Override
+			public void onExceptionsThrown(OrderBook orderBook, OrderBookListenerExceptions exceptions) {
+				try {
+					iterator.next();
+				} catch(Exception e) {
+					reportFailure[0] = e;
+				}
+			}
+		});
+
+		book.getOrder(1).reduceTo(80);
+
+		assertTrue(reportFailure[0] instanceof ReentrantOrderBookOperationException);
+		ReentrantOrderBookOperationException failure =
+				(ReentrantOrderBookOperationException) reportFailure[0];
+		assertEquals("Iterator.next", failure.getOperation());
+		assertOrderIds(iterator, 1, 2, 3, 4);
+	}
+
+	@Test
 	public void test_RepeatedTraversalCancellationAndPoolReuse() {
 		OrderBook book = new OrderBook("AAPL");
 
