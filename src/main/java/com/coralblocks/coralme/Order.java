@@ -79,12 +79,16 @@ public class Order {
     private long pendingSize;
     
     private Timestamper timestamper;
+
+	private OrderBook orderBook;
     
     public Order() {
     	
     }
     
-	void init(Timestamper timestamper, long clientId, CharSequence clientOrderId, long exchangeOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
+	void init(OrderBook orderBook, Timestamper timestamper, long clientId, CharSequence clientOrderId, long exchangeOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
+
+		this.orderBook = orderBook;
     	
 		this.timestamper = timestamper;
 		
@@ -315,6 +319,8 @@ public class Order {
     }
     
     public void addListener(OrderListener listener) {
+
+		orderBook.checkExternalListenerReentrancy("Order.addListener");
     	
     	/*
     	 * It is very important that the OrderListener from OrderBook be executed LAST, in other words, it 
@@ -355,6 +361,8 @@ public class Order {
     }
     
     public void reject(RejectReason reason) {
+
+		orderBook.checkExternalListenerReentrancy("Order.reject");
     	
     	this.totalSize = this.executedSize = 0;
     	
@@ -384,6 +392,8 @@ public class Order {
      * @param newTotalSize the desired new total size (open size + executed size)
      */
     public void reduceTo(long newTotalSize) {
+
+		orderBook.checkExternalListenerReentrancy("Order.reduceTo");
     	
     	if (newTotalSize <= executedSize) {
     		
@@ -417,6 +427,8 @@ public class Order {
     }
     
     public void cancel(long sizeToCancel, CancelReason reason) {
+
+		orderBook.checkExternalListenerReentrancy("Order.cancel");
     	
     	if (sizeToCancel >= getOpenSize()) {
     		
@@ -447,6 +459,8 @@ public class Order {
     }
     
     public void cancel(CancelReason reason) {
+
+		orderBook.checkExternalListenerReentrancy("Order.cancel");
     	
     	long canceledSize = getOpenSize();
     	

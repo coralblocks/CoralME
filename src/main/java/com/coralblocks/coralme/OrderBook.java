@@ -73,6 +73,8 @@ public class OrderBook implements OrderListener {
 	
 	private final List<OrderBookListener> listeners = new ArrayList<OrderBookListener>(8);
 
+	private boolean externalListenerCallbackInProgress;
+
 	private boolean deferListenerExceptionReporting;
 
 	private OrderBookListenerExceptions listenerExceptions;
@@ -112,9 +114,8 @@ public class OrderBook implements OrderListener {
 	
 	public OrderBook(OrderBook orderBook) {
 		this(orderBook.getSecurity(), orderBook.getTimestamper(), null, orderBook.isAllowTradeToSelf());
-		 List<OrderBookListener> listeners = orderBook.getListeners();
-		 for(int i = 0; i < listeners.size(); i++) {
-			 addListener(listeners.get(i));
+		 for(int i = 0; i < orderBook.listeners.size(); i++) {
+			 addListener(orderBook.listeners.get(i));
 		 }
 	}
 
@@ -139,15 +140,17 @@ public class OrderBook implements OrderListener {
 	}
 	
 	public void addListener(OrderBookListener listener) {
+		checkExternalListenerReentrancy("addListener");
 		if (!listeners.contains(listener)) listeners.add(listener);
 	}
 	
 	public void removeListener(OrderBookListener listener) {
+		checkExternalListenerReentrancy("removeListener");
 		listeners.remove(listener);
 	}
-	
-	public List<OrderBookListener> getListeners() {
-		return listeners;
+
+	final void checkExternalListenerReentrancy(String operation) {
+		if (externalListenerCallbackInProgress) throw new ReentrantOrderBookOperationException(this, operation);
 	}
 	
 	public final boolean isAllowTradeToSelf() {
@@ -567,10 +570,12 @@ public class OrderBook implements OrderListener {
 	}
 
 	public Order createLimit(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size, long price, TimeInForce tif) {
+		checkExternalListenerReentrancy("createLimit");
 		return createOrder(clientId, clientOrderId, exchangeOrderId, side, size, price, Type.LIMIT, tif);
 	}
 	
 	public Order createMarket(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size) {
+		checkExternalListenerReentrancy("createMarket");
 		return createOrder(clientId, clientOrderId, exchangeOrderId, side, size, 0, Type.MARKET, null);
 	}
 
@@ -594,11 +599,15 @@ public class OrderBook implements OrderListener {
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
+			OrderBookListener listener = listeners.get(i);
+			externalListenerCallbackInProgress = true;
 			try {
-				listeners.get(i).onExceptionsThrown(this, exceptions);
+				listener.onExceptionsThrown(this, exceptions);
 			} catch(Exception ignored) {
 				// Exceptions thrown while reporting listener exceptions are intentionally swallowed...
 				// For someone to throw an exception here would be very silly
+			} finally {
+				externalListenerCallbackInProgress = false;
 			}
 		}
 	}
@@ -698,6 +707,8 @@ public class OrderBook implements OrderListener {
 	}
 	
 	final Order createOrder(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size, long price, Type type,TimeInForce tif) {
+
+		checkExternalListenerReentrancy("createOrder");
 		
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
@@ -728,6 +739,9 @@ public class OrderBook implements OrderListener {
 	}
 	
 	public long rollTo(OrderBook newOrderBook, long firstExchangeOrderId) {
+
+		checkExternalListenerReentrancy("rollTo");
+		newOrderBook.checkExternalListenerReentrancy("rollTo");
 
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
@@ -775,6 +789,8 @@ public class OrderBook implements OrderListener {
 	}
 	
 	public void expire() {
+
+		checkExternalListenerReentrancy("expire");
 		
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
@@ -804,6 +820,8 @@ public class OrderBook implements OrderListener {
 	}
 	
 	public final void purge() {
+
+		checkExternalListenerReentrancy("purge");
 		
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
@@ -847,7 +865,7 @@ public class OrderBook implements OrderListener {
 		
 		Order order = orderPool.get();
 		
-		order.init(timestamper, clientId, clientOrderId, 0, security, side, size, price, type, tif);
+		order.init(this, timestamper, clientId, clientOrderId, 0, security, side, size, price, type, tif);
 		
 		order.addListener(this);
 		
@@ -896,15 +914,20 @@ public class OrderBook implements OrderListener {
 	
 	@Override
     public void onOrderReduced(long time, Order order, long canceledSize, long newSize) {
+
+		checkExternalListenerReentrancy("onOrderReduced");
 		
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
 			OrderBookListener listener = listeners.get(i);
+			externalListenerCallbackInProgress = true;
 			try {
 				listener.onOrderReduced(this, time, order, canceledSize, newSize);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REDUCED, time, order, e);
+			} finally {
+				externalListenerCallbackInProgress = false;
 			}
 		}
 
@@ -913,6 +936,8 @@ public class OrderBook implements OrderListener {
 
 	@Override
     public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason reason) {
+
+		checkExternalListenerReentrancy("onOrderCanceled");
 		
 		removeOrder(order);
 		
@@ -920,10 +945,13 @@ public class OrderBook implements OrderListener {
 
 		for(int i = 0; i < size; i++) {
 			OrderBookListener listener = listeners.get(i);
+			externalListenerCallbackInProgress = true;
 			try {
 				listener.onOrderCanceled(this, time, order, canceledSize, reason);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_CANCELED, time, order, e);
+			} finally {
+				externalListenerCallbackInProgress = false;
 			}
 		}
 
@@ -933,6 +961,8 @@ public class OrderBook implements OrderListener {
 
 	@Override
     public void onOrderExecuted(long time, Order order, ExecuteSide execSide, long sizeExecuted, long priceExecuted, long executionId, long matchId) {
+
+		checkExternalListenerReentrancy("onOrderExecuted");
 		
 		if (order.isTerminal()) {
 			
@@ -943,10 +973,13 @@ public class OrderBook implements OrderListener {
 
 		for(int i = 0; i < size; i++) {
 			OrderBookListener listener = listeners.get(i);
+			externalListenerCallbackInProgress = true;
 			try {
 				listener.onOrderExecuted(this, time, order, execSide, sizeExecuted, priceExecuted, executionId, matchId);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_EXECUTED, time, order, executionId, matchId, e);
+			} finally {
+				externalListenerCallbackInProgress = false;
 			}
 		}
 
@@ -957,15 +990,20 @@ public class OrderBook implements OrderListener {
 
 	@Override
 	public void onOrderAccepted(long time, Order order) {
+
+		checkExternalListenerReentrancy("onOrderAccepted");
 		
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
 			OrderBookListener listener = listeners.get(i);
+			externalListenerCallbackInProgress = true;
 			try {
 				listener.onOrderAccepted(this, time, order);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_ACCEPTED, time, order, e);
+			} finally {
+				externalListenerCallbackInProgress = false;
 			}
 		}
 
@@ -976,6 +1014,8 @@ public class OrderBook implements OrderListener {
 	
 	@Override
 	public void onOrderRejected(long time, Order order, Order.RejectReason reason) {
+
+		checkExternalListenerReentrancy("onOrderRejected");
 	
 		removeOrder(order);
 		
@@ -983,10 +1023,13 @@ public class OrderBook implements OrderListener {
 
 		for(int i = 0; i < size; i++) {
 			OrderBookListener listener = listeners.get(i);
+			externalListenerCallbackInProgress = true;
 			try {
 				listener.onOrderRejected(this, time, order, reason);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REJECTED, time, order, e);
+			} finally {
+				externalListenerCallbackInProgress = false;
 			}
 		}
 
@@ -995,15 +1038,20 @@ public class OrderBook implements OrderListener {
 
 	@Override
     public void onOrderRested(long time, Order order, long restSize, long restPrice) {
+
+		checkExternalListenerReentrancy("onOrderRested");
 	    
 		int size = listeners.size();
 
 		for(int i = 0; i < size; i++) {
 			OrderBookListener listener = listeners.get(i);
+			externalListenerCallbackInProgress = true;
 			try {
 				listener.onOrderRested(this, time, order, restSize, restPrice);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_RESTED, time, order, e);
+			} finally {
+				externalListenerCallbackInProgress = false;
 			}
 		}
 
@@ -1014,15 +1062,20 @@ public class OrderBook implements OrderListener {
 	
 	@Override
 	public void onOrderTerminated(long time, Order order) {
+
+		checkExternalListenerReentrancy("onOrderTerminated");
 		
 		int size = listeners.size();
 		
 		for(int i = 0; i < size; i++) {
 			OrderBookListener listener = listeners.get(i);
+			externalListenerCallbackInProgress = true;
 			try {
 				listener.onOrderTerminated(this, time, order);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_TERMINATED, time, order, e);
+			} finally {
+				externalListenerCallbackInProgress = false;
 			}
 		}
 
