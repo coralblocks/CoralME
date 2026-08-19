@@ -711,20 +711,25 @@ public class OrderBook implements OrderListener {
 		
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
+		boolean operationCompleted = false;
 		
 		try {
 			
 			Order order = getOrder(clientId, clientOrderId, security, side, size, price, type, tif);
 
 			if (tif == TimeInForce.IOC || type == Type.MARKET) {
-				return fillOrCancel(order, exchangeOrderId);
+				order = fillOrCancel(order, exchangeOrderId);
 			} else {
-				return fillOrRest(order, exchangeOrderId);
+				order = fillOrRest(order, exchangeOrderId);
 			}
+
+			operationCompleted = true;
+			return order;
 			
 		} finally {
 			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
-			if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
+			if (!operationCompleted) listenerExceptions = null;
+			else if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
 		}
 	}
 	
@@ -736,6 +741,7 @@ public class OrderBook implements OrderListener {
 
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
+		boolean operationCompleted = false;
 		
 		try {
 			if (hasBids()) {
@@ -768,11 +774,13 @@ public class OrderBook implements OrderListener {
 				}
 			}
 
+			operationCompleted = true;
 			return firstExchangeOrderId;
 
 		} finally {
 			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
-			if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
+			if (!operationCompleted) listenerExceptions = null;
+			else if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
 		}
 	}
 	
@@ -780,11 +788,13 @@ public class OrderBook implements OrderListener {
 		
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
+		boolean operationCompleted = false;
 		
 		try {
 			Iterator<Order> iter = orders.iterator();
 
 			while(iter.hasNext()) {
+				
 				Order order = iter.next();
 
 				assert order.isTerminal() == false;
@@ -795,10 +805,13 @@ public class OrderBook implements OrderListener {
 
 				order.cancel(CancelReason.EXPIRED);
 			}
+
+			operationCompleted = true;
 			
 		} finally {
 			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
-			if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
+			if (!operationCompleted) listenerExceptions = null;
+			else if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
 		}
 	}
 	
@@ -806,8 +819,10 @@ public class OrderBook implements OrderListener {
 		
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
+		boolean operationCompleted = false;
 		
 		try {
+			
 			Iterator<Order> iter = orders.iterator();
 
 			while(iter.hasNext()) {
@@ -819,10 +834,13 @@ public class OrderBook implements OrderListener {
 
 				order.cancel(CancelReason.PURGED);
 			}
+
+			operationCompleted = true;
 			
 		} finally {
 			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
-			if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
+			if (!operationCompleted) listenerExceptions = null;
+			else if (!deferListenerExceptionReporting) reportListenerExceptionsIfNecessary();
 		}
 	}
 	

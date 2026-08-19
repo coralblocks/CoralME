@@ -130,6 +130,54 @@ public class OrderBookListenerExceptionsTest {
 	}
 
 	@Test
+	public void test_InternalListenerExceptionPropagatesAndDiscardsCollectedExternalExceptions() {
+		final RuntimeException externalFailure = new RuntimeException("external listener");
+		final RuntimeException internalFailure = new RuntimeException("internal listener");
+		final int[] reports = new int[1];
+
+		final OrderListener internalListener = new InternalOrderListenerAdapter() {
+			@Override
+			public void onOrderExecuted(long time, Order order, ExecuteSide executeSide, long executeSize,
+					long executePrice, long executeId, long executeMatchId) {
+				throw internalFailure;
+			}
+		};
+
+		OrderBookAdapter externalListener = new OrderBookAdapter() {
+			@Override
+			public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
+				if (order.getId() == 2) order.addListener(internalListener);
+			}
+
+			@Override
+			public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide,
+					long executeSize, long executePrice, long executeId, long executeMatchId) {
+				throw externalFailure;
+			}
+
+			@Override
+			public void onExceptionsThrown(OrderBook orderBook, OrderBookListenerExceptions exceptions) {
+				reports[0]++;
+			}
+		};
+
+		OrderBook book = new OrderBook("AAPL", externalListener);
+		book.createLimit(1, "maker", 1, Side.SELL, 100, 100, TimeInForce.GTC);
+
+		try {
+			book.createLimit(2, "taker", 2, Side.BUY, 100, 100, TimeInForce.GTC);
+			fail("Expected the internal listener exception");
+		} catch(RuntimeException e) {
+			assertSame(internalFailure, e);
+		}
+
+		assertEquals(0, reports[0]);
+
+		book.createLimit(3, "unrelated", 3, Side.BUY, 100, 90, TimeInForce.GTC);
+		assertEquals(0, reports[0]);
+	}
+
+	@Test
 	public void test_ExecutionListenerExceptionsAreAggregatedAfterBothSidesComplete() {
 		final RuntimeException failure1 = new RuntimeException("listener-1");
 		final RuntimeException failure2 = new RuntimeException("listener-2");
@@ -549,5 +597,37 @@ public class OrderBookListenerExceptionsTest {
 		assertEquals(orderId, exception.getOrderId());
 		assertTrue(exception.getExecutionId() > 0);
 		assertEquals(matchId, exception.getMatchId());
+	}
+
+	private static class InternalOrderListenerAdapter implements OrderListener {
+
+		@Override
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+		}
+
+		@Override
+		public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason cancelReason) {
+		}
+
+		@Override
+		public void onOrderExecuted(long time, Order order, ExecuteSide executeSide, long executeSize,
+				long executePrice, long executeId, long executeMatchId) {
+		}
+
+		@Override
+		public void onOrderAccepted(long time, Order order) {
+		}
+
+		@Override
+		public void onOrderRejected(long time, Order order, RejectReason rejectReason) {
+		}
+
+		@Override
+		public void onOrderRested(long time, Order order, long restSize, long restPrice) {
+		}
+
+		@Override
+		public void onOrderTerminated(long time, Order order) {
+		}
 	}
 }
