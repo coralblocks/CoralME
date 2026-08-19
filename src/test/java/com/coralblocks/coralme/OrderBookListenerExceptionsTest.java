@@ -145,11 +145,6 @@ public class OrderBookListenerExceptionsTest {
 
 		OrderBookAdapter externalListener = new OrderBookAdapter() {
 			@Override
-			public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
-				if (order.getId() == 2) order.addListener(internalListener);
-			}
-
-			@Override
 			public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide,
 					long executeSize, long executePrice, long executeId, long executeMatchId) {
 				throw externalFailure;
@@ -162,10 +157,12 @@ public class OrderBookListenerExceptionsTest {
 		};
 
 		OrderBook book = new OrderBook("AAPL", externalListener);
-		book.createLimit(1, "maker", 1, Side.SELL, 100, 100, TimeInForce.GTC);
+		book.createLimit(1, "maker-1", 1, Side.SELL, 50, 100, TimeInForce.GTC);
+		Order maker2 = book.createLimit(1, "maker-2", 2, Side.SELL, 50, 101, TimeInForce.GTC);
+		maker2.addInternalListener(internalListener);
 
 		try {
-			book.createLimit(2, "taker", 2, Side.BUY, 100, 100, TimeInForce.GTC);
+			book.createLimit(2, "taker", 3, Side.BUY, 100, 101, TimeInForce.GTC);
 			fail("Expected the internal listener exception");
 		} catch(RuntimeException e) {
 			assertSame(internalFailure, e);
@@ -173,7 +170,7 @@ public class OrderBookListenerExceptionsTest {
 
 		assertEquals(0, reports[0]);
 
-		book.createLimit(3, "unrelated", 3, Side.BUY, 100, 90, TimeInForce.GTC);
+		book.createLimit(3, "unrelated", 4, Side.BUY, 100, 90, TimeInForce.GTC);
 		assertEquals(0, reports[0]);
 	}
 
@@ -467,8 +464,8 @@ public class OrderBookListenerExceptionsTest {
 		book.addListener(observer);
 
 		Order order = new Order();
-		order.init(book.getTimestamper(), 7, "reject", 11, book.getSecurity(), Side.SELL, 100, 100, Type.LIMIT, TimeInForce.GTC);
-		order.addListener(book);
+		order.init(book, book.getTimestamper(), 7, "reject", 11, book.getSecurity(), Side.SELL, 100, 100, Type.LIMIT, TimeInForce.GTC);
+		order.addInternalListener(book);
 		order.reject(RejectReason.TRADING_HALTED);
 
 		assertTrue(order.isTerminal());
@@ -628,6 +625,10 @@ public class OrderBookListenerExceptionsTest {
 
 		@Override
 		public void onOrderTerminated(long time, Order order) {
+		}
+
+		@Override
+		public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
 		}
 	}
 }

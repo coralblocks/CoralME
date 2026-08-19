@@ -117,7 +117,7 @@ public class PriceLevel implements OrderListener {
         
         orders++;
         
-        order.addListener(this);
+		order.addInternalListener(this);
     }
     
     private void removeOrder(Order order) {
@@ -200,5 +200,11 @@ public class PriceLevel implements OrderListener {
 	public void onOrderTerminated(long time, Order order) {
 		
 		// NOOP
+	}
+
+	@Override
+	public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
+
+		// Internal OrderListeners do not receive external listener exception reports
 	}
 }
