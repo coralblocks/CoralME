@@ -17,6 +17,9 @@ CoralME is an order book data-structure that matches orders based on price-time 
 - Price improvement for fills
 - MARKET and LIMIT order types
 - IOC, GTC and DAY
+- Re-entry protection for listener callbacks
+- Listener exception isolation and reporting
+- Garbage-free forward and reverse price-time order iteration
 - MAKER (of liquidity) and TAKER (of liquidity) execution sides
 - NORMAL, CROSSED, LOCKED, ONESIDED and EMPTY book states
 - ClientID, ClientOrderID and OrderID
@@ -470,7 +473,6 @@ java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.ex
 ```
  
  
-
 
 
 
