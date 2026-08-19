@@ -468,9 +468,19 @@ public class Order {
 		}
     }
     
-    public void reject(RejectReason reason) {
+	/**
+	 * Rejects this Order before it has been accepted.
+	 *
+	 * @param reason the rejection reason
+	 * @throws IllegalStateException if this Order is resting, accepted, or was already rejected
+	 */
+	public void reject(RejectReason reason) {
 
 		orderBook.checkExternalListenerReentrancy("Order.reject");
+
+		if (isResting || acceptTime != -1 || rejectTime != -1) {
+			throw new IllegalStateException("Order can only be rejected once and before acceptance");
+		}
     	
     	this.totalSize = this.executedSize = 0;
     	
