@@ -225,8 +225,6 @@ public class OrderBook implements OrderListener {
 		
 		PriceLevel bestAsk = head[Side.SELL.index()];
 		
-		assert bestBid != null && bestAsk != null;
-		
 		return bestAsk.getPrice() - bestBid.getPrice();
 	}
 	
@@ -288,16 +286,12 @@ public class OrderBook implements OrderListener {
 		
 		int index = Side.BUY.index();
 		
-		assert head[index] != null;
-		
 		return head[index].getPrice();
 	}
 	
 	public final long getBestAskPrice() {
 		
 		int index = Side.SELL.index();
-		
-		assert head[index] != null;
 		
 		return head[index].getPrice();
 	}
@@ -311,16 +305,12 @@ public class OrderBook implements OrderListener {
 		
 		int index = Side.BUY.index();
 		
-		assert head[index] != null;
-		
 		return head[index].getSize();
 	}
 	
 	public final long getBestAskSize() {
 		
 		int index = Side.SELL.index();
-		
-		assert head[index] != null;
 		
 		return head[index].getSize();
 	}
@@ -797,8 +787,6 @@ public class OrderBook implements OrderListener {
 				
 				Order order = iter.next();
 
-				assert order.isTerminal() == false;
-
 				if (order.getTimeInForce() != TimeInForce.DAY) continue;
 
 				iter.remove(); // important otherwise you get a ConcurrentModificationException!
@@ -827,8 +815,6 @@ public class OrderBook implements OrderListener {
 
 			while(iter.hasNext()) {
 				Order order = iter.next();
-
-				assert order.isTerminal() == false;
 
 				iter.remove(); // important otherwise you get a ConcurrentModificationException!
 
