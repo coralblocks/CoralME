@@ -561,14 +561,14 @@ public class Order {
 
 		try {
 			for(int i = internalListeners.size() - 1; i >= 0; i--) {
-				internalListeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize);
+				internalListeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize, CancelReason.USER);
 			}
 
 			for(int i = externalListeners.size() - 1; i >= 0; i--) {
 				OrderListener listener = externalListeners.get(i);
 				orderBook.enterExternalListenerCallback();
 				try {
-					listener.onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize);
+					listener.onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize, CancelReason.USER);
 				} catch(Exception e) {
 					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_REDUCED,
 							this.reduceTime, this, e);
@@ -619,14 +619,14 @@ public class Order {
 
 		try {
 			for(int i = internalListeners.size() - 1; i >= 0; i--) {
-				internalListeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, newSize);
+				internalListeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, newSize, reason);
 			}
 
 			for(int i = externalListeners.size() - 1; i >= 0; i--) {
 				OrderListener listener = externalListeners.get(i);
 				orderBook.enterExternalListenerCallback();
 				try {
-					listener.onOrderReduced(this.reduceTime, this, canceledSize, newSize);
+					listener.onOrderReduced(this.reduceTime, this, canceledSize, newSize, reason);
 				} catch(Exception e) {
 					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_REDUCED,
 							this.reduceTime, this, e);

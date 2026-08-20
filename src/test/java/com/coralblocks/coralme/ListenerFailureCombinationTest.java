@@ -45,7 +45,7 @@ public class ListenerFailureCombinationTest {
 		OrderBookListener reentrantBookListener = new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				order.cancel();
 			}
 
@@ -58,7 +58,7 @@ public class ListenerFailureCombinationTest {
 		OrderBookListener ordinaryBookListener = new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				throw bookFailure;
 			}
 
@@ -74,7 +74,7 @@ public class ListenerFailureCombinationTest {
 		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		OrderListener reentrantOrderListener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				book.purge();
 			}
 
@@ -86,7 +86,7 @@ public class ListenerFailureCombinationTest {
 		};
 		OrderListener ordinaryOrderListener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				throw orderFailure;
 			}
 
@@ -183,7 +183,7 @@ public class ListenerFailureCombinationTest {
 		book.addListener(new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				throw callbackFailure;
 			}
 
@@ -203,7 +203,7 @@ public class ListenerFailureCombinationTest {
 		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				throw callbackFailure;
 			}
 
@@ -239,7 +239,7 @@ public class ListenerFailureCombinationTest {
 		OrderBook book = new OrderBook("AAPL", new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				throw failure;
 			}
 
@@ -252,7 +252,7 @@ public class ListenerFailureCombinationTest {
 		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				throw failure;
 			}
 

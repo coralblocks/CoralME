@@ -179,7 +179,7 @@ public class InternalListenerFailureIsolationTest {
 
 		@Override
 		public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-				long reduceNewTotalSize) {
+				long reduceNewTotalSize, CancelReason cancelReason) {
 			fail(Callback.REDUCED);
 		}
 
@@ -236,7 +236,7 @@ public class InternalListenerFailureIsolationTest {
 		}
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 			fail(Callback.REDUCED);
 		}
 

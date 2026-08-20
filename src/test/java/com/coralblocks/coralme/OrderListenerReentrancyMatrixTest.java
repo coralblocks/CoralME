@@ -182,7 +182,7 @@ public class OrderListenerReentrancyMatrixTest {
 		}
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 			attempt(Callback.REDUCED);
 		}
 

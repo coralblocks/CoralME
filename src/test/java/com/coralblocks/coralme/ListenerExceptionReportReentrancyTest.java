@@ -31,6 +31,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.coralblocks.coralme.ListenerSafetyTestSupport.GuardedOperation;
 import com.coralblocks.coralme.ListenerSafetyTestSupport.OrderListenerAdapter;
+import com.coralblocks.coralme.Order.CancelReason;
 import com.coralblocks.coralme.Order.Side;
 import com.coralblocks.coralme.Order.TimeInForce;
 
@@ -64,7 +65,7 @@ public class ListenerExceptionReportReentrancyTest {
 		listener[0] = new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				throw originalFailure;
 			}
 
@@ -111,7 +112,7 @@ public class ListenerExceptionReportReentrancyTest {
 
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				throw originalFailure;
 			}
 

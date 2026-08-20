@@ -324,14 +324,14 @@ public class OrderBookListenerExceptionsTest {
 
 		OrderBookAdapter throwingListener = new OrderBookAdapter() {
 			@Override
-			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				throw failure;
 			}
 		};
 
 		OrderBookAdapter observer = new OrderBookAdapter() {
 			@Override
-			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				reductionCallbacks[0]++;
 			}
 
@@ -390,7 +390,7 @@ public class OrderBookListenerExceptionsTest {
 
 		OrderBookAdapter observer = new OrderBookAdapter() {
 			@Override
-			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				reductions[0]++;
 			}
 
@@ -599,7 +599,7 @@ public class OrderBookListenerExceptionsTest {
 	private static class InternalOrderListenerAdapter implements OrderListener {
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 		}
 
 		@Override

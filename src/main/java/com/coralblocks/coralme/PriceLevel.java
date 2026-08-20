@@ -153,7 +153,7 @@ public class PriceLevel implements OrderListener {
     }
 
     @Override
-    public void onOrderReduced(long time, Order order, long canceledSize, long newTotaSize) {
+    public void onOrderReduced(long time, Order order, long canceledSize, long newTotalSize, CancelReason cancelReason) {
 
         size -= canceledSize;
     }

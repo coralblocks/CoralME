@@ -51,7 +51,8 @@ The [OrderBookTest.java](https://github.com/coralblocks/CoralME/blob/main/src/te
 public interface OrderBookListener {
     
     public void onOrderReduced(OrderBook orderBook, long time, Order order, 
-                                 long canceledSize, long reduceNewTotalSize);
+                                 long canceledSize, long reduceNewTotalSize,
+                                 CancelReason cancelReason);
     
     public void onOrderCanceled(OrderBook orderBook, long time, Order order, 
                                   long canceledSize, CancelReason cancelReason);
@@ -238,7 +239,8 @@ order.cancel(100);
 	  order=Order [id=1, clientId=1001, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=100, 
 					executedSize=0, canceledSize=100, price=150.44, type=LIMIT, tif=DAY]
 	  canceledSize=100
-	  reduceNewTotalSize=100	
+	  reduceNewTotalSize=100
+	  cancelReason=USER
 */
 
 orderBook.showLevels();
@@ -481,4 +483,3 @@ java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.ex
 ```
  
  
-

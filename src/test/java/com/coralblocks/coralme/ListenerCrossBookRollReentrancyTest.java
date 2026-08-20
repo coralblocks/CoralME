@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.coralblocks.coralme.ListenerSafetyTestSupport.OrderListenerAdapter;
+import com.coralblocks.coralme.Order.CancelReason;
 import com.coralblocks.coralme.Order.Side;
 import com.coralblocks.coralme.Order.TimeInForce;
 
@@ -65,7 +66,7 @@ public class ListenerCrossBookRollReentrancyTest {
 		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
 		callbackOrder.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				source.rollTo(callbackBook);
 			}
 

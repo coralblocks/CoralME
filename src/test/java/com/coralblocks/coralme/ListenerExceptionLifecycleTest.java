@@ -147,7 +147,7 @@ public class ListenerExceptionLifecycleTest {
 		OrderBook book = new OrderBook("AAPL", new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				throw failure;
 			}
 
@@ -159,7 +159,7 @@ public class ListenerExceptionLifecycleTest {
 		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				throw failure;
 			}
 
@@ -202,7 +202,7 @@ public class ListenerExceptionLifecycleTest {
 		OrderBook book = new OrderBook("AAPL", new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				throw failure;
 			}
 
@@ -214,7 +214,7 @@ public class ListenerExceptionLifecycleTest {
 		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				throw failure;
 			}
 

@@ -132,14 +132,14 @@ public class OrderListenerExceptionsTest {
 
 		OrderListener throwingListener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				throw failure;
 			}
 		};
 
 		OrderListener observer = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order reducedOrder, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order reducedOrder, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				reductions[0]++;
 				assertSame(order, book.getOrder(order.getId()));
 				assertEquals(60, order.getPriceLevel().getSize());
@@ -334,7 +334,7 @@ public class OrderListenerExceptionsTest {
 	private static class OrderListenerAdapter implements OrderListener {
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 		}
 
 		@Override

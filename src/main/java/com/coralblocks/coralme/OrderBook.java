@@ -1118,7 +1118,7 @@ public class OrderBook implements OrderListener {
 	}
 	
 	@Override
-    public void onOrderReduced(long time, Order order, long canceledSize, long newSize) {
+    public void onOrderReduced(long time, Order order, long canceledSize, long newSize, CancelReason reason) {
 
 		checkExternalListenerReentrancy("onOrderReduced");
 		
@@ -1128,7 +1128,7 @@ public class OrderBook implements OrderListener {
 			OrderBookListener listener = listeners.get(i);
 			enterExternalListenerCallback();
 			try {
-				listener.onOrderReduced(this, time, order, canceledSize, newSize);
+				listener.onOrderReduced(this, time, order, canceledSize, newSize, reason);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REDUCED, time, order, e);
 			} finally {

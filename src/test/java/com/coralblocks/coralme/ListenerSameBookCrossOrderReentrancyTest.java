@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.coralblocks.coralme.ListenerSafetyTestSupport.OrderListenerAdapter;
+import com.coralblocks.coralme.Order.CancelReason;
 import com.coralblocks.coralme.Order.Side;
 import com.coralblocks.coralme.Order.TimeInForce;
 
@@ -86,7 +87,7 @@ public class ListenerSameBookCrossOrderReentrancyTest {
 		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
 		triggeringOrder.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				protectedOrder.cancel();
 			}
 
@@ -113,7 +114,7 @@ public class ListenerSameBookCrossOrderReentrancyTest {
 		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
 		triggeringOrder.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				protectedOrder.addListener(new OrderListenerAdapter());
 			}
 

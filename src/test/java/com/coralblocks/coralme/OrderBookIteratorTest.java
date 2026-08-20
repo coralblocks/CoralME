@@ -30,6 +30,7 @@ import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
+import com.coralblocks.coralme.Order.CancelReason;
 import com.coralblocks.coralme.Order.Side;
 import com.coralblocks.coralme.Order.TimeInForce;
 import com.coralblocks.coralme.OrderBook.TraversalOrder;
@@ -334,7 +335,7 @@ public class OrderBookIteratorTest {
 		OrderBookAdapter listener = new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				iterator.hasNext();
 			}
 
@@ -362,7 +363,7 @@ public class OrderBookIteratorTest {
 		book.addListener(new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				iterator.next();
 			}
 
@@ -389,7 +390,7 @@ public class OrderBookIteratorTest {
 		Order order = book.getOrder(1);
 		order.addListener(new ListenerSafetyTestSupport.OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				iterator.next();
 			}
 
@@ -417,7 +418,7 @@ public class OrderBookIteratorTest {
 		book.addListener(new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				throw originalFailure;
 			}
 

@@ -66,7 +66,7 @@ public class OrderBookNoSelfTradeTest {
 		called(listener, 1).onOrderAccepted(book, buyOrder.getAcceptTime(), buyOrder);
 		called(listener, 0).onOrderCanceled(null, 0, null, 0, null);
 		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
-		called(listener, 0).onOrderReduced(null, 0, null, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 1).onOrderRested(book, buyOrder.getRestTime(), buyOrder, buyOrder.getOriginalSize(), buyOrder.getPrice());
 		called(listener, 0).onOrderTerminated(null, 0, null);
@@ -82,7 +82,7 @@ public class OrderBookNoSelfTradeTest {
 		called(listener, 2).onOrderExecuted(captor.book.capture(), captor.time.capture(), captor.order.capture(), captor.executeSide.capture(), 
 											captor.executeSize.capture(), captor.executePrice.capture(), captor.executeId.capture(), 
 											captor.executeMatchId.capture());
-		called(listener, 0).onOrderReduced(null, 0, null, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
 		called(listener, 1).onOrderTerminated(book, sellOrder.getExecuteTime(), sellOrder);
@@ -117,7 +117,7 @@ public class OrderBookNoSelfTradeTest {
 		called(listener, 2).onOrderExecuted(captor.book.capture(), captor.time.capture(), captor.order.capture(), captor.executeSide.capture(), 
 											captor.executeSize.capture(), captor.executePrice.capture(), captor.executeId.capture(), 
 											captor.executeMatchId.capture());
-		called(listener, 0).onOrderReduced(null, 0, null, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
 		called(listener, 1).onOrderTerminated(book, sellOrder.getExecuteTime(), sellOrder);
@@ -163,7 +163,7 @@ public class OrderBookNoSelfTradeTest {
 		called(listener, 2).onOrderExecuted(captor.book.capture(), captor.time.capture(), captor.order.capture(), captor.executeSide.capture(), 
 											captor.executeSize.capture(), captor.executePrice.capture(), captor.executeId.capture(), 
 											captor.executeMatchId.capture());
-		called(listener, 0).onOrderReduced(null, 0, null, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
 		called(listener, 2).onOrderTerminated(captor.book.capture(), captor.time.capture(), captor.order.capture());
@@ -211,7 +211,7 @@ public class OrderBookNoSelfTradeTest {
 		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
 		called(listener, 1).onOrderCanceled(book, sellOrder.getCancelTime(), sellOrder, 100, CancelReason.MISSED);
 		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
-		called(listener, 0).onOrderReduced(null, 0, null, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
 		called(listener, 1).onOrderTerminated(book, sellOrder.getCancelTime(), sellOrder);
@@ -239,7 +239,7 @@ public class OrderBookNoSelfTradeTest {
 		called(listener, 2).onOrderExecuted(captor.book.capture(), captor.time.capture(), captor.order.capture(), captor.executeSide.capture(), 
 											captor.executeSize.capture(), captor.executePrice.capture(), captor.executeId.capture(), 
 											captor.executeMatchId.capture());
-		called(listener, 0).onOrderReduced(null, 0, null, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
 		called(listener, 2).onOrderTerminated(captor.book.capture(), captor.time.capture(), captor.order.capture());
@@ -283,7 +283,7 @@ public class OrderBookNoSelfTradeTest {
 		called(listener, 1).onOrderAccepted(book, buyOrder.getAcceptTime(), buyOrder);
 		called(listener, 0).onOrderCanceled(null, 0, null, 0, null);
 		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
-		called(listener, 0).onOrderReduced(null, 0, null, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 1).onOrderRested(book, buyOrder.getRestTime(), buyOrder, buyOrder.getOriginalSize(), buyOrder.getPrice());
 		called(listener, 0).onOrderTerminated(null, 0, null);
@@ -295,7 +295,7 @@ public class OrderBookNoSelfTradeTest {
 		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
 		called(listener, 1).onOrderCanceled(book, sellOrder.getCancelTime(), sellOrder, 500, CancelReason.CROSSED);
 		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
-		called(listener, 0).onOrderReduced(null, 0, null, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
 		called(listener, 1).onOrderTerminated(book, sellOrder.getCancelTime(), sellOrder);
@@ -307,7 +307,7 @@ public class OrderBookNoSelfTradeTest {
 		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
 		called(listener, 1).onOrderCanceled(book, sellOrder.getCancelTime(), sellOrder, 400, CancelReason.CROSSED);
 		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
-		called(listener, 0).onOrderReduced(null, 0, null, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
 		called(listener, 1).onOrderTerminated(book, sellOrder.getCancelTime(), sellOrder);
@@ -319,7 +319,7 @@ public class OrderBookNoSelfTradeTest {
 		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
 		called(listener, 0).onOrderCanceled(null, 0, null, 0, null);
 		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
-		called(listener, 0).onOrderReduced(null, 0, null, 0, 0);
+		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 1).onOrderRested(book, sellOrder.getRestTime(), sellOrder, sellOrder.getOriginalSize(), sellOrder.getPrice());
 		called(listener, 0).onOrderTerminated(null, 0, null);

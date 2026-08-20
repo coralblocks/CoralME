@@ -46,7 +46,7 @@ public class ListenerExceptionOrderingTest {
 		OrderBookAdapter throwingOrderBookListener = new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				events.add("book-throwing-reduced");
 				throw orderBookFailure;
 			}
@@ -61,7 +61,7 @@ public class ListenerExceptionOrderingTest {
 		OrderBookAdapter observingOrderBookListener = new OrderBookAdapter() {
 			@Override
 			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
-					long reduceNewTotalSize) {
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				events.add("book-observer-reduced");
 			}
 
@@ -79,7 +79,7 @@ public class ListenerExceptionOrderingTest {
 
 		OrderListener throwingOrderListener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				events.add("order-throwing-reduced");
 				throw orderFailure;
 			}
@@ -93,7 +93,7 @@ public class ListenerExceptionOrderingTest {
 
 		OrderListener observingOrderListener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 				events.add("order-observer-reduced");
 			}
 
@@ -390,7 +390,7 @@ public class ListenerExceptionOrderingTest {
 	private static class OrderListenerAdapter implements OrderListener {
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
 		}
 
 		@Override

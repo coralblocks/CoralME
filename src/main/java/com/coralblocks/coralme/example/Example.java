@@ -184,7 +184,8 @@ public class Example {
 			  order=Order [id=1, clientId=1001, clientOrderId=1, side=BUY, security=AAPL, originalSize=200, openSize=100, 
 			  				executedSize=0, canceledSize=100, price=150.44, type=LIMIT, tif=DAY]
 			  canceledSize=100			  				
-			  reduceNewTotalSize=100	
+			  reduceNewTotalSize=100
+			  cancelReason=USER
 		*/
 		
 		orderBook.showLevels();
