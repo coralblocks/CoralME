@@ -962,6 +962,8 @@ public class OrderBook {
 
 			if (size <= 0) {
 				order.reject(RejectReason.BAD_SIZE);
+			} else if (clientOrderId.length() > Order.CLIENT_ORDER_ID_MAX_LENGTH) {
+				order.reject(RejectReason.BAD_CLIENT_ORDER_ID);
 			} else if (order.getSide() == null) {
 				order.reject(RejectReason.BAD_SIDE);
 			} else if (type == Type.LIMIT && tif == null) {

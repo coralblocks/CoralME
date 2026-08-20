@@ -35,6 +35,7 @@ public class Order {
 
 	static final String EMPTY_CLIENT_ORDER_ID = "NULL";
 	
+	/** Maximum number of characters accepted in a client order ID. */
 	public static final int CLIENT_ORDER_ID_MAX_LENGTH = 64;
 	
 	/*
@@ -111,8 +112,10 @@ public class Order {
 		
 		this.clientId = clientId;
 		
-    	this.clientOrderId.setLength(0);
-    	this.clientOrderId.append(clientOrderId);
+		// Cap the pooled buffer before OrderBook rejects an overlong ID.
+		int clientOrderIdLength = Math.min(clientOrderId.length(), CLIENT_ORDER_ID_MAX_LENGTH);
+		this.clientOrderId.setLength(0);
+		this.clientOrderId.append(clientOrderId, 0, clientOrderIdLength);
     	
     	this.side = side;
     	
@@ -894,7 +897,8 @@ public class Order {
 		BAD_LOT				('L'),
 		UNKNOWN_SYMBOL		('U'),
 		DUPLICATE_EXCHANGE_ORDER_ID	('E'),
-		DUPLICATE_CLIENT_ORDER_ID ('C');
+		DUPLICATE_CLIENT_ORDER_ID ('C'),
+		BAD_CLIENT_ORDER_ID	('7');
 
 		private final char b;
 		public static final CharMap<RejectReason> ALL = new CharMap<RejectReason>();
