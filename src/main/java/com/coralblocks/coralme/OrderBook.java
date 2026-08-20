@@ -200,7 +200,6 @@ public class OrderBook {
 	 *
 	 * @return true when trade to self is allowed
 	 */
-
 	public final boolean isAllowTradeToSelf() {
 		return allowTradeToSelf;
 	}
