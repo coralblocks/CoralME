@@ -846,10 +846,11 @@ public class Order {
 
 		private final char b;
 		private final String fixCode;
+		private static final TimeInForce[] VALUES = values();
 		public static final CharMap<TimeInForce> ALL = new CharMap<TimeInForce>();
 		
 		static {
-			for(TimeInForce tif : TimeInForce.values()) {
+			for(TimeInForce tif : VALUES) {
 				if (ALL.put(tif.getChar(), tif) != null) throw new IllegalStateException("Duplicate: " + tif);
 			}
 		}
@@ -860,7 +861,7 @@ public class Order {
 		}
 		
 		public static final TimeInForce fromFixCode(CharSequence sb) {
-			for(TimeInForce s : TimeInForce.values()) {
+			for(TimeInForce s : VALUES) {
 				if (StringUtils.equals(s.getFixCode(), sb)) {
 					return s;
 				}
@@ -1001,10 +1002,11 @@ public class Order {
 
 		private final char b;
 		private final String fixCode;
+		private static final Type[] VALUES = values();
 		public static final CharMap<Type> ALL = new CharMap<Type>();
 		
 		static {
-			for(Type t : Type.values()) {
+			for(Type t : VALUES) {
 				if (ALL.put(t.getChar(), t) != null) throw new IllegalStateException("Duplicate: " + t);
 			}
 		}
@@ -1015,7 +1017,7 @@ public class Order {
 		}
 		
 		public static final Type fromFixCode(CharSequence sb) {
-			for(Type s : Type.values()) {
+			for(Type s : VALUES) {
 				if (StringUtils.equals(s.getFixCode(), sb)) {
 					return s;
 				}
@@ -1040,10 +1042,11 @@ public class Order {
 		
 		private final char b;
 		private final String fixCode;
+		private static final ExecuteSide[] VALUES = values();
 		public static final CharMap<ExecuteSide> ALL = new CharMap<ExecuteSide>();
 		
 		static {
-			for(ExecuteSide es : ExecuteSide.values()) {
+			for(ExecuteSide es : VALUES) {
 				if (ALL.put(es.getChar(), es) != null) throw new IllegalStateException("Duplicate: " + es);
 			}
 		}
@@ -1054,7 +1057,7 @@ public class Order {
 		}
 		
 		public static final ExecuteSide fromFixCode(CharSequence sb) {
-			for(ExecuteSide s : ExecuteSide.values()) {
+			for(ExecuteSide s : VALUES) {
 				if (StringUtils.equals(s.getFixCode(), sb)) {
 					return s;
 				}
@@ -1080,11 +1083,12 @@ public class Order {
 		private final char b;
 		private final String fixCode;
 		private final int index;
+		private static final Side[] VALUES = values();
 		public static final CharMap<Side> ALL = new CharMap<Side>();
 		
 		static {
 			
-			for(Side s : Side.values()) {
+			for(Side s : VALUES) {
 				if (ALL.put(s.getChar(), s) != null) throw new IllegalStateException("Duplicate: " + s);
 			}
 			
@@ -1100,7 +1104,7 @@ public class Order {
 		}
 		
 		public static final Side fromFixCode(CharSequence sb) {
-			for(Side s : Side.values()) {
+			for(Side s : VALUES) {
 				if (StringUtils.equals(s.getFixCode(), sb)) {
 					return s;
 				}
