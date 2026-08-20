@@ -31,7 +31,7 @@ CoralME is an order book data-structure that matches orders based on price-time 
 
 CoralME supports both `OrderBookListener` and `OrderListener`. These external listeners cannot reenter the same order book while any of their listener callback methods are executing. A reentrant attempt throws a `ReentrantOrderBookOperationException`, and the requested operation is not executed.
 
-An exception thrown by any ordinary external listener callback does not interrupt the current order book operation or prevent the remaining listeners from running. CoralME collects these exceptions and reports them after one complete `OrderBook` operation through the corresponding listener type's `onExceptionsThrown` method. Exceptions thrown from `onExceptionsThrown` are ignored so that exception reporting cannot recurse.
+An exception thrown by any external listener callback does not interrupt the current order book operation or prevent the remaining listeners from running. CoralME collects these exceptions and reports them after one complete `OrderBook` operation through the corresponding listener type's `onExceptionsThrown` method. Exceptions thrown from `onExceptionsThrown` are ignored so that exception reporting cannot recurse.
 
 A listener that wants to modify or traverse the order book, modify one of its orders, or change listener registration must defer that work until the current `OrderBook` operation and all listener callbacks have finished. In an event-loop architecture, you can enqueue the work for a later iteration of the same thread that owns CoralME.
 
