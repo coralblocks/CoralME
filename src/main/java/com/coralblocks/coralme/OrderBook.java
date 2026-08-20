@@ -324,6 +324,14 @@ public class OrderBook implements OrderListener {
 		}
 	}
 	
+	/**
+	 * Returns the resting order with the given exchange order ID, or null if none exists.
+	 * Exchange order IDs must be unique among resting orders. After an order becomes
+	 * terminal and is removed from the order book, its ID may be reused.
+	 *
+	 * @param id the exchange order ID
+	 * @return the resting order, or null if the ID is not in use
+	 */
 	public final Order getOrder(long id) {
 		
 		return orders.get(id);
@@ -916,6 +924,8 @@ public class OrderBook implements OrderListener {
 				order.reject(RejectReason.BAD_SIDE);
 			} else if (exchangeOrderId <= 0) {
 				order.reject(RejectReason.BAD_EXCHANGE_ORDER_ID);
+			} else if (orders.containsKey(exchangeOrderId)) {
+				order.reject(RejectReason.DUPLICATE_EXCHANGE_ORDER_ID);
 			} else if (tif == TimeInForce.IOC || type == Type.MARKET) {
 				order = fillOrCancel(order, exchangeOrderId);
 			} else {
@@ -940,7 +950,15 @@ public class OrderBook implements OrderListener {
 	public long rollTo(OrderBook newOrderBook) {
 		return rollTo(newOrderBook, 1);
 	}
-	
+
+	/**
+	 * Rolls this order book's GTC orders to another order book for the same security.
+	 * Exchange order IDs already used by resting orders in the destination are skipped.
+	 *
+	 * @param newOrderBook the destination order book
+	 * @param firstExchangeOrderId the first exchange order ID to consider
+	 * @return the next exchange order ID after those considered by the roll
+	 */
 	public long rollTo(OrderBook newOrderBook, long firstExchangeOrderId) {
 
 		checkExternalListenerReentrancy("rollTo");
@@ -966,7 +984,9 @@ public class OrderBook implements OrderListener {
 					for(Order o = pl.head(); o != null; o = o.next) {
 					
 						if (o.getTimeInForce() != TimeInForce.GTC) continue;
-					
+
+						while(newOrderBook.orders.containsKey(firstExchangeOrderId)) firstExchangeOrderId++;
+
 						Order rolledOrder = newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
 					
 						if (rolledOrder.isAccepted()) o.cancel(CancelReason.ROLLED);
@@ -981,7 +1001,9 @@ public class OrderBook implements OrderListener {
 					for(Order o = pl.head(); o != null; o = o.next) {
 					
 						if (o.getTimeInForce() != TimeInForce.GTC) continue;
-					
+
+						while(newOrderBook.orders.containsKey(firstExchangeOrderId)) firstExchangeOrderId++;
+
 						Order rolledOrder = newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
 					
 						if (rolledOrder.isAccepted()) o.cancel(CancelReason.ROLLED);

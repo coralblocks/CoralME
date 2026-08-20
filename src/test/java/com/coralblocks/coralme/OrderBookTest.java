@@ -598,7 +598,7 @@ public class OrderBookTest {
 		}) {
 			@Override
 			protected RejectReason validateOrder(Order order) {
-				return validations[0]++ == 1 ? RejectReason.DUPLICATE_EXCHANGE_ORDER_ID : null;
+				return validations[0]++ == 1 ? RejectReason.BAD_LOT : null;
 			}
 		};
 		Order destinationOrder = destination.createLimit(CLIENT_ID, "destination", 10, Side.BUY, 50, 400.00, TimeInForce.GTC);
@@ -607,13 +607,13 @@ public class OrderBookTest {
 
 		long nextExchangeOrderId = source.rollTo(destination, 10);
 
-		Assert.assertEquals(12, nextExchangeOrderId);
+		Assert.assertEquals(13, nextExchangeOrderId);
 		Assert.assertSame(sourceBid, source.getOrder(1));
 		Assert.assertFalse(sourceBid.isTerminal());
 		Assert.assertTrue(sourceAsk.isTerminal());
 		Assert.assertEquals(1, source.getNumberOfOrders());
 		Assert.assertSame(destinationOrder, destination.getOrder(10));
-		Assert.assertNotNull(destination.getOrder(11));
+		Assert.assertNotNull(destination.getOrder(12));
 		Assert.assertEquals(2, destination.getNumberOfOrders());
 		Assert.assertEquals(1, sourceCancellations[0]);
 		Assert.assertEquals(1, destinationRejections[0]);
