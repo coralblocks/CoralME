@@ -196,7 +196,7 @@ public class OrderBookNoSelfTradeTest {
 	}
 	
 	@Test
-	public void test_IoC_Miss_Due_To_Trade_To_Self() {
+	public void test_IoC_Cancels_Incoming_Due_To_Trade_To_Self() {
 		
 		OrderBookListener listener = Mockito.mock(OrderBookListener.class);
 		
@@ -209,7 +209,7 @@ public class OrderBookNoSelfTradeTest {
 		Order sellOrder = book.createLimit(CID_1, "2", 2, Side.SELL, 100, 432.12, TimeInForce.IOC);
 		
 		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
-		called(listener, 1).onOrderCanceled(book, sellOrder.getCancelTime(), sellOrder, 100, CancelReason.MISSED);
+		called(listener, 1).onOrderCanceled(book, sellOrder.getCancelTime(), sellOrder, 100, CancelReason.CROSSED);
 		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
 		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
@@ -220,7 +220,7 @@ public class OrderBookNoSelfTradeTest {
 	}
 	
 	@Test
-	public void test_Skip_Trade_To_Self() {
+	public void test_Cancel_Incoming_Instead_Of_Skipping_Self_Order() {
 		
 		OrderBookListener listener = Mockito.mock(OrderBookListener.class);
 		
@@ -230,45 +230,81 @@ public class OrderBookNoSelfTradeTest {
 		Order buyOrder = book.createLimit(CID_2, "1", 2, Side.BUY, 400, 432.11, TimeInForce.DAY);
 		
 		Mockito.reset(listener);
-		OrderExecutedCaptor captor = new OrderExecutedCaptor();
-		
 		Order sellOrder = book.createLimit(CID_1, "2", 3, Side.SELL, 1000, 432.10, TimeInForce.IOC);
 		
 		called(listener, 1).onOrderAccepted(book, sellOrder.getAcceptTime(), sellOrder);
-		called(listener, 1).onOrderCanceled(book, sellOrder.getCancelTime(), sellOrder, 600, CancelReason.MISSED);
-		called(listener, 2).onOrderExecuted(captor.book.capture(), captor.time.capture(), captor.order.capture(), captor.executeSide.capture(), 
-											captor.executeSize.capture(), captor.executePrice.capture(), captor.executeId.capture(), 
-											captor.executeMatchId.capture());
+		called(listener, 1).onOrderCanceled(book, sellOrder.getCancelTime(), sellOrder, 1000, CancelReason.CROSSED);
+		called(listener, 0).onOrderExecuted(null, 0, null, null, 0, 0, 0, 0);
 		called(listener, 0).onOrderReduced(null, 0, null, 0, 0, null);
 		called(listener, 0).onOrderRejected(null, 0, null, null);
 		called(listener, 0).onOrderRested(null, 0, null, 0, 0);
-		called(listener, 2).onOrderTerminated(captor.book.capture(), captor.time.capture(), captor.order.capture());
+		called(listener, 1).onOrderTerminated(book, sellOrder.getCancelTime(), sellOrder);
 		
 		done(listener);
-		
-		assertEquals(book, captor.book.getAllValues().get(0));
-		assertEquals(buyOrder.getExecuteTime(), captor.time.getAllValues().get(0).longValue());
-		assertEquals(buyOrder, captor.order.getAllValues().get(0));
-		assertEquals(ExecuteSide.MAKER, captor.executeSide.getAllValues().get(0));
-		assertEquals(400, captor.executeSize.getAllValues().get(0).longValue());
-		assertEquals(DoubleUtils.toLong(432.11), captor.executePrice.getAllValues().get(0).longValue());
-		assertEquals(1, captor.executeId.getAllValues().get(0).longValue());
-		assertEquals(1, captor.executeMatchId.getAllValues().get(0).longValue());
-		
-		assertEquals(book, captor.book.getAllValues().get(1));
-		assertEquals(sellOrder.getExecuteTime(), captor.time.getAllValues().get(1).longValue());
-		assertEquals(sellOrder, captor.order.getAllValues().get(1));
-		assertEquals(ExecuteSide.TAKER, captor.executeSide.getAllValues().get(1));
-		assertEquals(400, captor.executeSize.getAllValues().get(1).longValue());
-		assertEquals(DoubleUtils.toLong(432.11), captor.executePrice.getAllValues().get(1).longValue());
-		assertEquals(2, captor.executeId.getAllValues().get(1).longValue());
-		assertEquals(1, captor.executeMatchId.getAllValues().get(1).longValue());
 	
 		assertEquals(true, sellOrder.isTerminal());
-		assertEquals(1, book.getNumberOfOrders());
-		assertEquals(600, sellOrder.getCanceledSize());
+		assertEquals(2, book.getNumberOfOrders());
+		assertEquals(1000, sellOrder.getCanceledSize());
+		assertEquals(800, book.getOrder(1).getOpenSize());
+		assertEquals(400, buyOrder.getOpenSize());
 		assertEquals(OrderBook.State.ONESIDED, book.getState());
 		assertEquals(false, book.hasAsks());
+	}
+
+	@Test
+	public void test_Fill_Orders_Ahead_Then_Cancel_Incoming_At_First_Self_Order() {
+
+		long[] executionIds = new long[4];
+		long[] matchIds = new long[4];
+		int[] executions = new int[1];
+		long[] canceledSize = new long[1];
+		CancelReason[] cancelReason = new CancelReason[1];
+		OrderBook book = new OrderBook("AAPL", new OrderBookAdapter() {
+			@Override
+			public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide,
+					long executeSize, long executePrice, long executeId, long executeMatchId) {
+				executionIds[executions[0]] = executeId;
+				matchIds[executions[0]] = executeMatchId;
+				executions[0]++;
+			}
+
+			@Override
+			public void onOrderCanceled(OrderBook orderBook, long time, Order order, long size,
+					CancelReason reason) {
+				canceledSize[0] = size;
+				cancelReason[0] = reason;
+			}
+		}, false);
+
+		Order orderAhead = book.createLimit(CID_2, "ahead", 1, Side.BUY, 100, 100, TimeInForce.DAY);
+		Order selfOrder = book.createLimit(CID_1, "self", 2, Side.BUY, 100, 100, TimeInForce.DAY);
+		Order orderBehind = book.createLimit(CID_2, "behind", 3, Side.BUY, 100, 100, TimeInForce.DAY);
+
+		Order incoming = book.createLimit(CID_1, "incoming", 4, Side.SELL, 300, 100, TimeInForce.IOC);
+
+		assertEquals(2, executions[0]);
+		assertEquals(1, executionIds[0]);
+		assertEquals(2, executionIds[1]);
+		assertEquals(1, matchIds[0]);
+		assertEquals(1, matchIds[1]);
+		assertEquals(200, canceledSize[0]);
+		assertSame(CancelReason.CROSSED, cancelReason[0]);
+		assertTrue(orderAhead.isTerminal());
+		assertEquals(100, incoming.getExecutedSize());
+		assertEquals(200, incoming.getCanceledSize());
+		assertTrue(incoming.isTerminal());
+		assertEquals(100, selfOrder.getOpenSize());
+		assertEquals(100, orderBehind.getOpenSize());
+		assertEquals(2, book.getNumberOfOrders());
+		assertSame(selfOrder, book.getBestBidOrder());
+
+		book.createLimit(9999, "next-incoming", 5, Side.SELL, 100, 100, TimeInForce.IOC);
+
+		assertEquals(4, executions[0]);
+		assertEquals(3, executionIds[2]);
+		assertEquals(4, executionIds[3]);
+		assertEquals(2, matchIds[2]);
+		assertEquals(2, matchIds[3]);
 	}
 	
 	@Test

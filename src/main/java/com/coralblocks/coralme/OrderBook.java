@@ -187,6 +187,14 @@ public class OrderBook {
 	final void exitExternalListenerCallback() {
 		externalListenerCallbackInProgress = false;
 	}
+
+	/**
+	 * Returns whether orders from the same client may trade. When disabled, an
+	 * incoming order is canceled with {@link CancelReason#CROSSED} when it reaches
+	 * the first eligible resting order from the same client.
+	 *
+	 * @return true when trade to self is allowed
+	 */
 	
 	public final boolean isAllowTradeToSelf() {
 		return allowTradeToSelf;
@@ -621,7 +629,10 @@ public class OrderBook {
 
 				nextOrder = o.next;
 				
-				if (!allowTradeToSelf && o.getClientId() == order.getClientId()) continue;
+				if (!allowTradeToSelf && o.getClientId() == order.getClientId()) {
+					order.cancel(CancelReason.CROSSED);
+					break OUTER;
+				}
 				
 				long sizeToExecute = Math.min(order.getOpenSize(), o.getOpenSize());
 				

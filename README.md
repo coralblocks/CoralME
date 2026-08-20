@@ -24,7 +24,8 @@ CoralME is an order book data-structure that matches orders based on price-time 
 - NORMAL, CROSSED, LOCKED, ONESIDED and EMPTY book states
 - ClientID, ClientOrderID and OrderID
 - ExecutionID and ExecutionMatchID
-- Can optionally check and disallow trade to self
+- Optional cancel-incoming self-trade prevention: when trade to self is disabled,
+  the incoming remainder is canceled at the first eligible resting order from the same client
 - Supports cancelation of open size as well as [reduction of total size](https://chatgpt.com/share/6808fbb1-d840-8013-82a8-9ae1854c7707) (executed + open)
 
 ## Listener Safety
