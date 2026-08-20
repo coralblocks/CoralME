@@ -18,7 +18,7 @@ CoralME is an order book data-structure that matches orders based on price-time 
 - MARKET and LIMIT order types
 - IOC, GTC and DAY
 - Re-entry protection for listeners to prevent nested operations that could corrupt order book state
-- Listener exception isolation and reporting so a failing listener cannot interrupt the current order book operation or prevent the remaining listeners from running
+- Listener exception isolation and reporting so a failing listener cannot interrupt the current order book operation
 - Garbage-free forward and reverse price-time order iteration
 - MAKER (of liquidity) and TAKER (of liquidity) execution sides
 - NORMAL, CROSSED, LOCKED, ONESIDED and EMPTY book states
