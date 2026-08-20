@@ -30,14 +30,21 @@ public class DoubleUtils {
 	public static final int PRECISION = 8;
 	
 	private static final long MULTIPLIER = (long) Math.pow(10, PRECISION);
+	private static final double MIN_VALUE = ((double) Long.MIN_VALUE) / MULTIPLIER;
+	private static final double MAX_VALUE = ((double) Long.MAX_VALUE) / MULTIPLIER;
 	
 	/**
 	 * Converts a double value to a long, rounding to 8 decimals of precision.
 	 * 
 	 * @param value the double value to convert to a long
 	 * @return the long representing the double value
+	 * @throws IllegalArgumentException if the value is not finite or cannot be represented as a long
 	 */
 	public static long toLong(double value) {
+		if (!Double.isFinite(value) || value < MIN_VALUE || value > MAX_VALUE) {
+			throw new IllegalArgumentException("Double value is out of range: " + value);
+		}
+
 		return Math.round(value * MULTIPLIER);
 	}
 	

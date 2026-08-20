@@ -41,4 +41,38 @@ public class DoubleUtilsTest {
 		
 		Assert.assertTrue(l1 == l2);
 	}
+
+	@Test
+	public void testLimits() {
+
+		double minValue = DoubleUtils.toDouble(Long.MIN_VALUE);
+		double maxValue = DoubleUtils.toDouble(Long.MAX_VALUE);
+
+		Assert.assertEquals(Long.MIN_VALUE, DoubleUtils.toLong(minValue));
+		Assert.assertEquals(Long.MAX_VALUE, DoubleUtils.toLong(maxValue));
+
+		assertInvalid(Math.nextDown(minValue));
+		assertInvalid(Math.nextUp(maxValue));
+	}
+
+	@Test
+	public void testInvalidValues() {
+
+		assertInvalid(Double.NaN);
+		assertInvalid(Double.NEGATIVE_INFINITY);
+		assertInvalid(Double.POSITIVE_INFINITY);
+		assertInvalid(-1e12);
+		assertInvalid(1e12);
+		assertInvalid(2e12);
+	}
+
+	private void assertInvalid(double value) {
+
+		try {
+			DoubleUtils.toLong(value);
+			Assert.fail("Expected invalid value to be rejected: " + value);
+		} catch(IllegalArgumentException e) {
+			// Expected.
+		}
+	}
 }
