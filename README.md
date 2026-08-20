@@ -466,29 +466,28 @@ orderBook.showOrders();
     
 ```
 ## How can I check that it is zero garbage?
-Check [NoGCTest.java](https://github.com/coralblocks/CoralME/blob/main/src/main/java/com/coralblocks/coralme/example/NoGCTest.java) to see that it creates a book and populates this book with 10 orders _one million times_. And on each of these one million times it does a bunch of executions, rejects, cancelations, reduces, etc. Run this test with `-verbose:gc -Xms128m -Xmx256m` and you will always see **zero GC activity**. _No matter how many iterations you perform, the gc activity is always zero_. If you want to see some GC activity, you can turn on a flag that forces the creation of garbage by [producing some strings](https://github.com/coralblocks/CoralME/blob/bb9461313537987db43339e429b7314e58bbb784/src/main/java/com/coralblocks/coralme/example/NoGCTest.java#L103) in the middle of the loop.
+Check [NoGCTest.java](https://github.com/coralblocks/CoralME/blob/main/src/main/java/com/coralblocks/coralme/example/NoGCTest.java) to see that it creates a book and populates this book with 10 orders _one million times_. And on each of these one million times it does a bunch of executions, rejects, cancelations, reduces, etc. Run this test with `-verbose:gc -Xms32m -Xmx64m` and you will always see **zero GC activity**. _No matter how many iterations you perform, the gc activity is always zero_. If you want to see some GC activity, you can turn on a flag that forces the creation of garbage by [producing some strings](https://github.com/coralblocks/CoralME/blob/bb9461313537987db43339e429b7314e58bbb784/src/main/java/com/coralblocks/coralme/example/NoGCTest.java#L103) in the middle of the loop.
  
 ##### Creating ZERO garbage
 ```
 $ ./bin/runGCTest.sh
-java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.example.NoGCTest false 1000000
+java -Xlog:gc -Xms32m -Xmx64m -cp target/coralme-all.jar com.coralblocks.coralme.example.NoGCTest false 1000000
 1000000 ... DONE!
 ```
 ##### Forcing the creation of garbage (pass true to runGCTest.sh)
 ```
 $ ./bin/runGCTest.sh true
 java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.example.NoGCTest true 1000000
-60870[GC (Allocation Failure)  33280K->1224K(125952K), 0.0005392 secs]
-146061[GC (Allocation Failure)  34504K->1200K(125952K), 0.0005032 secs]
-231254[GC (Allocation Failure)  34480K->1240K(125952K), 0.0003991 secs]
-316449[GC (Allocation Failure)  34520K->1208K(125952K), 0.0004686 secs]
-401642[GC (Allocation Failure)  34488K->1264K(125952K), 0.0004315 secs]
-486832[GC (Allocation Failure)  34544K->1200K(129536K), 0.0004712 secs]
-590373[GC (Allocation Failure)  41648K->1128K(129536K), 0.0005286 secs]
-693917[GC (Allocation Failure)  41576K->1128K(128512K), 0.0002270 secs]
-794836[GC (Allocation Failure)  40552K->1128K(129024K), 0.0002390 secs]
-895759[GC (Allocation Failure)  40552K->1128K(129024K), 0.0002202 secs]
-996679[GC (Allocation Failure)  40552K->1128K(129024K), 0.0002492 secs]
+[0.008s][info][gc] Using G1
+20000[0.114s][info][gc] GC(0) Pause Young (Normal) (G1 Evacuation Pause) 14M->1M(34M) 0.565ms
+50000[0.159s][info][gc] GC(1) Pause Young (Normal) (G1 Evacuation Pause) 19M->1M(34M) 0.236ms
+90000[0.201s][info][gc] GC(2) Pause Young (Normal) (G1 Evacuation Pause) 19M->1M(34M) 0.237ms
+120000[0.241s][info][gc] GC(3) Pause Young (Normal) (G1 Evacuation Pause) 19M->1M(34M) 0.224ms
+(...)
+890000[1.138s][info][gc] GC(26) Pause Young (Normal) (G1 Evacuation Pause) 19M->1M(34M) 0.108ms
+920000[1.177s][info][gc] GC(27) Pause Young (Normal) (G1 Evacuation Pause) 19M->1M(34M) 0.095ms
+960000[1.216s][info][gc] GC(28) Pause Young (Normal) (G1 Evacuation Pause) 19M->1M(34M) 0.102ms
+990000[1.256s][info][gc] GC(29) Pause Young (Normal) (G1 Evacuation Pause) 19M->1M(34M) 0.095ms
 1000000 ... DONE!
 ```
  
