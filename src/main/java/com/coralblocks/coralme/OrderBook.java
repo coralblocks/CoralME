@@ -610,11 +610,17 @@ public class OrderBook {
 		int index = order.getSide().invertedIndex(); // NOTE: Inverted because bid hits ask and vice-versa
 		
 		OUTER:
-		for(PriceLevel pl = head[index]; pl != null; pl = pl.next) {
+		for(PriceLevel pl = head[index], nextPriceLevel; pl != null; pl = nextPriceLevel) {
+
+			// Maker callbacks can release both objects, so save their links first.
+			// This book's pools must not be acquired from until the callbacks finish.
+			nextPriceLevel = pl.next;
 			
 			if (order.getType() != Type.MARKET && order.getSide().isOutside(order.getPrice(), pl.getPrice())) break;
 			
-			for(Order o = pl.head(); o != null; o = o.next) {
+			for(Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
+
+				nextOrder = o.next;
 				
 				if (!allowTradeToSelf && o.getClientId() == order.getClientId()) continue;
 				
@@ -1007,9 +1013,15 @@ public class OrderBook {
 		try {
 			if (hasBids()) {
 			
-				for(PriceLevel pl = head(Side.BUY); pl != null; pl = pl.next) {
+				for(PriceLevel pl = head(Side.BUY), nextPriceLevel; pl != null; pl = nextPriceLevel) {
+
+					// A successful roll releases the source order and possibly its level.
+					// This book's pools must not be acquired from until cancellation callbacks finish.
+					nextPriceLevel = pl.next;
 				
-					for(Order o = pl.head(); o != null; o = o.next) {
+					for(Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
+
+						nextOrder = o.next;
 					
 						if (o.getTimeInForce() != TimeInForce.GTC) continue;
 
@@ -1024,9 +1036,15 @@ public class OrderBook {
 
 			if (hasAsks()) {
 			
-				for(PriceLevel pl = head(Side.SELL); pl != null; pl = pl.next) {
+				for(PriceLevel pl = head(Side.SELL), nextPriceLevel; pl != null; pl = nextPriceLevel) {
+
+					// A successful roll releases the source order and possibly its level.
+					// This book's pools must not be acquired from until cancellation callbacks finish.
+					nextPriceLevel = pl.next;
 				
-					for(Order o = pl.head(); o != null; o = o.next) {
+					for(Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
+
+						nextOrder = o.next;
 					
 						if (o.getTimeInForce() != TimeInForce.GTC) continue;
 
