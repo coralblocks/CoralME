@@ -18,6 +18,7 @@ package com.coralblocks.coralme;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -206,6 +207,47 @@ public class OrderRejectionLifecycleTest {
 		assertEquals(1, acceptances[0]);
 		assertEquals(1, rejections[0]);
 		assertSame(reused, book.getOrder(2));
+	}
+
+	@Test
+	public void test_NonPositiveExchangeOrderIdsAreRejectedBeforeAcceptanceAndReturnedToPool() {
+		int[] acceptances = new int[1];
+		int[] rejections = new int[1];
+		OrderBook book = new OrderBook("AAPL", new OrderBookAdapter() {
+			@Override
+			public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
+				acceptances[0]++;
+			}
+
+			@Override
+			public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason reason) {
+				rejections[0]++;
+				assertSame(RejectReason.BAD_EXCHANGE_ORDER_ID, reason);
+			}
+		});
+		Order previousRejected = null;
+		long[] invalidExchangeOrderIds = { 0, -1 };
+
+		for(long exchangeOrderId : invalidExchangeOrderIds) {
+			Order rejected = book.createLimit(1, "invalid", exchangeOrderId, Side.BUY, 100, 100, TimeInForce.GTC);
+
+			if (previousRejected != null) assertSame(previousRejected, rejected);
+			assertTrue(rejected.isTerminal());
+			assertFalse(rejected.isAccepted());
+			assertNull(book.getOrder(exchangeOrderId));
+			assertTrue(book.isEmpty());
+			previousRejected = rejected;
+		}
+
+		assertEquals(0, acceptances[0]);
+		assertEquals(2, rejections[0]);
+
+		Order reused = book.createLimit(2, "valid", 1, Side.BUY, 100, 100, TimeInForce.GTC);
+
+		assertSame(previousRejected, reused);
+		assertEquals(1, acceptances[0]);
+		assertEquals(2, rejections[0]);
+		assertSame(reused, book.getOrder(1));
 	}
 
 	private static void assertRejectionProhibited(Order order) {

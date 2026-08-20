@@ -899,6 +899,8 @@ public class OrderBook implements OrderListener {
 
 			if (order.getSide() == null) {
 				order.reject(RejectReason.BAD_SIDE);
+			} else if (exchangeOrderId <= 0) {
+				order.reject(RejectReason.BAD_EXCHANGE_ORDER_ID);
 			} else if (tif == TimeInForce.IOC || type == Type.MARKET) {
 				order = fillOrCancel(order, exchangeOrderId);
 			} else {

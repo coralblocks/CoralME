@@ -838,6 +838,7 @@ public class Order {
 		BAD_TIF				('3'),
 		BAD_SIDE			('4'),
 		BAD_SYMBOL			('5'),
+		BAD_EXCHANGE_ORDER_ID ('6'),
 		
 		BAD_PRICE 			('P'), 
 		BAD_SIZE			('S'),
