@@ -658,11 +658,12 @@ public class Order {
 
 		orderBook.checkExternalListenerReentrancy("Order.cancel");
     	
-    	long canceledSize = getOpenSize();
-    	
-    	this.totalSize = this.executedSize;
-    	
-    	this.cancelTime = timestamper.nanoEpoch();
+		long canceledSize = getOpenSize();
+
+		this.totalSize = this.executedSize;
+		this.isResting = false;
+
+		this.cancelTime = timestamper.nanoEpoch();
     	
 		boolean callbacksCompleted = false;
 
@@ -729,9 +730,11 @@ public class Order {
     		sizeToExecute = getOpenSize();
     	}
     	
-    	this.executedSize += sizeToExecute;
-    	
-    	this.executeTime = time;
+		this.executedSize += sizeToExecute;
+
+		if (isTerminal()) this.isResting = false;
+
+		this.executeTime = time;
     	
 		boolean callbacksCompleted = false;
 
