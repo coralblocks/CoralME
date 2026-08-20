@@ -76,7 +76,7 @@ public class InternalListenerFailureIsolationTest {
 		// Internal callbacks execute in reverse registration order. The OrderBook runs first,
 		// collects the external failure, and the fatal internal listener then interrupts processing.
 		order.addInternalListener(new ThrowingInternalOrderListener(callback, internalFailure));
-		order.addInternalListener(book);
+		order.addInternalListener(book.internalOrderListener());
 		order.addListener(new OrderListenerAdapter() {
 			@Override
 			public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {

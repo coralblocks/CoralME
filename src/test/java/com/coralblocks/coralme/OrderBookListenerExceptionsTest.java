@@ -465,7 +465,7 @@ public class OrderBookListenerExceptionsTest {
 
 		Order order = new Order();
 		order.init(book, book.getTimestamper(), 7, "reject", 11, book.getSecurity(), Side.SELL, 100, 100, Type.LIMIT, TimeInForce.GTC);
-		order.addInternalListener(book);
+		order.addInternalListener(book.internalOrderListener());
 		order.reject(RejectReason.TRADING_HALTED);
 
 		assertTrue(order.isTerminal());

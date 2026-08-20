@@ -34,7 +34,7 @@ import com.coralblocks.coralpool.ArrayObjectPool;
 import com.coralblocks.coralpool.ObjectBuilder;
 import com.coralblocks.coralpool.ObjectPool;
 
-public class OrderBook implements OrderListener {
+public class OrderBook {
 	
 	/**
 	 * The default initial size of the {@link Order} object pool. Can be changed for tuning.
@@ -100,6 +100,8 @@ public class OrderBook implements OrderListener {
 	private final Timestamper timestamper;
 	
 	private final boolean allowTradeToSelf;
+
+	private final OrderListener internalOrderListener = new InternalOrderListener();
 	
 	
 	public OrderBook(String security, boolean allowTradeToSelf) {
@@ -1141,9 +1143,13 @@ public class OrderBook implements OrderListener {
 		
 		order.init(this, timestamper, clientId, clientOrderId, 0, security, side, size, price, type, tif);
 		
-		order.addInternalListener(this);
+		order.addInternalListener(internalOrderListener);
 		
 		return order;
+	}
+
+	final OrderListener internalOrderListener() {
+		return internalOrderListener;
 	}
 	
 	private void removeOrder(Order order) {
@@ -1192,6 +1198,8 @@ public class OrderBook implements OrderListener {
 		orderPool.release(order);
 	}
 	
+	private final class InternalOrderListener implements OrderListener {
+
 	@Override
     public void onOrderReduced(long time, Order order, long canceledSize, long newSize, CancelReason reason) {
 
@@ -1203,7 +1211,7 @@ public class OrderBook implements OrderListener {
 			OrderBookListener listener = listeners.get(i);
 			enterExternalListenerCallback();
 			try {
-				listener.onOrderReduced(this, time, order, canceledSize, newSize, reason);
+				listener.onOrderReduced(OrderBook.this, time, order, canceledSize, newSize, reason);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REDUCED, time, order, e);
 			} finally {
@@ -1227,7 +1235,7 @@ public class OrderBook implements OrderListener {
 			OrderBookListener listener = listeners.get(i);
 			enterExternalListenerCallback();
 			try {
-				listener.onOrderCanceled(this, time, order, canceledSize, reason);
+				listener.onOrderCanceled(OrderBook.this, time, order, canceledSize, reason);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_CANCELED, time, order, e);
 			} finally {
@@ -1254,7 +1262,7 @@ public class OrderBook implements OrderListener {
 			OrderBookListener listener = listeners.get(i);
 			enterExternalListenerCallback();
 			try {
-				listener.onOrderExecuted(this, time, order, execSide, sizeExecuted, priceExecuted, executionId, matchId);
+				listener.onOrderExecuted(OrderBook.this, time, order, execSide, sizeExecuted, priceExecuted, executionId, matchId);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_EXECUTED, time, order, executionId, matchId, e);
 			} finally {
@@ -1278,7 +1286,7 @@ public class OrderBook implements OrderListener {
 			OrderBookListener listener = listeners.get(i);
 			enterExternalListenerCallback();
 			try {
-				listener.onOrderAccepted(this, time, order);
+				listener.onOrderAccepted(OrderBook.this, time, order);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_ACCEPTED, time, order, e);
 			} finally {
@@ -1304,7 +1312,7 @@ public class OrderBook implements OrderListener {
 			OrderBookListener listener = listeners.get(i);
 			enterExternalListenerCallback();
 			try {
-				listener.onOrderRejected(this, time, order, reason);
+				listener.onOrderRejected(OrderBook.this, time, order, reason);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REJECTED, time, order, e);
 			} finally {
@@ -1326,7 +1334,7 @@ public class OrderBook implements OrderListener {
 			OrderBookListener listener = listeners.get(i);
 			enterExternalListenerCallback();
 			try {
-				listener.onOrderRested(this, time, order, restSize, restPrice);
+				listener.onOrderRested(OrderBook.this, time, order, restSize, restPrice);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_RESTED, time, order, e);
 			} finally {
@@ -1350,7 +1358,7 @@ public class OrderBook implements OrderListener {
 			OrderBookListener listener = listeners.get(i);
 			enterExternalListenerCallback();
 			try {
-				listener.onOrderTerminated(this, time, order);
+				listener.onOrderTerminated(OrderBook.this, time, order);
 			} catch(Exception e) {
 				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_TERMINATED, time, order, e);
 			} finally {
@@ -1365,6 +1373,7 @@ public class OrderBook implements OrderListener {
 	public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
 
 		// Internal OrderListeners do not receive external listener exception reports
+	}
 	}
 	
 	@Override

@@ -20,7 +20,7 @@ import com.coralblocks.coralme.Order.ExecuteSide;
 import com.coralblocks.coralme.Order.RejectReason;
 import com.coralblocks.coralme.Order.Side;
 
-public class PriceLevel implements OrderListener {
+public class PriceLevel {
     
     private long price;
     
@@ -35,6 +35,8 @@ public class PriceLevel implements OrderListener {
     private Order head = null;
     
     private Order tail = null;
+
+	private final OrderListener internalOrderListener = new InternalOrderListener();
     
     PriceLevel next = null;
     
@@ -117,7 +119,7 @@ public class PriceLevel implements OrderListener {
         
         orders++;
         
-		order.addInternalListener(this);
+		order.addInternalListener(internalOrderListener);
     }
     
     private void removeOrder(Order order) {
@@ -151,6 +153,8 @@ public class PriceLevel implements OrderListener {
 
     	return size;
     }
+
+	private final class InternalOrderListener implements OrderListener {
 
     @Override
     public void onOrderReduced(long time, Order order, long canceledSize, long newTotalSize, CancelReason cancelReason) {
@@ -206,5 +210,6 @@ public class PriceLevel implements OrderListener {
 	public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
 
 		// Internal OrderListeners do not receive external listener exception reports
+	}
 	}
 }

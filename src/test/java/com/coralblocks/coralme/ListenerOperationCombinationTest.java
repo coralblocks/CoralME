@@ -295,7 +295,7 @@ public class ListenerOperationCombinationTest {
 		Order order = new Order();
 		order.init(book, book.getTimestamper(), 1, "1", 0, book.getSecurity(), Side.BUY, 100, 100,
 				Type.LIMIT, TimeInForce.GTC);
-		order.addInternalListener(book);
+		order.addInternalListener(book.internalOrderListener());
 		order.addListener(new OrderListenerAdapter() {
 			@Override
 			public void onOrderRejected(long time, Order order, RejectReason rejectReason) {
