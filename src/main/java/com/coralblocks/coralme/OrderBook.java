@@ -613,7 +613,6 @@ public class OrderBook {
 		for(PriceLevel pl = head[index], nextPriceLevel; pl != null; pl = nextPriceLevel) {
 
 			// Maker callbacks can release both objects, so save their links first.
-			// This book's pools must not be acquired from until the callbacks finish.
 			nextPriceLevel = pl.next;
 			
 			if (order.getType() != Type.MARKET && order.getSide().isOutside(order.getPrice(), pl.getPrice())) break;
@@ -1016,7 +1015,6 @@ public class OrderBook {
 				for(PriceLevel pl = head(Side.BUY), nextPriceLevel; pl != null; pl = nextPriceLevel) {
 
 					// A successful roll releases the source order and possibly its level.
-					// This book's pools must not be acquired from until cancellation callbacks finish.
 					nextPriceLevel = pl.next;
 				
 					for(Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
@@ -1039,7 +1037,6 @@ public class OrderBook {
 				for(PriceLevel pl = head(Side.SELL), nextPriceLevel; pl != null; pl = nextPriceLevel) {
 
 					// A successful roll releases the source order and possibly its level.
-					// This book's pools must not be acquired from until cancellation callbacks finish.
 					nextPriceLevel = pl.next;
 				
 					for(Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
@@ -1171,6 +1168,12 @@ public class OrderBook {
 	}
 	
 	private void removeOrder(Order order) {
+
+		/*
+		 * Returning these objects to their pools does not modify them. External
+		 * callbacks that follow can inspect them because reentrant operations on
+		 * the same order book are blocked for the duration of callback dispatch.
+		 */
 		
 		PriceLevel priceLevel = order.getPriceLevel();
 
