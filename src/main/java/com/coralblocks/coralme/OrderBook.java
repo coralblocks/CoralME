@@ -812,8 +812,32 @@ public class OrderBook implements OrderListener {
 		}
 	}
 
+	/**
+	 * Performs additional validation before an order is accepted. Implementations
+	 * should inspect the order without mutating it and return a rejection reason, or
+	 * null to accept it. If validation throws, the original failure is propagated
+	 * after the unaccepted order has been returned to the object pool.
+	 *
+	 * @param order the unaccepted order to validate
+	 * @return the rejection reason, or null if the order is valid
+	 */
 	protected RejectReason validateOrder(Order order) {
 		return null;
+	}
+
+	private RejectReason validateOrderAndReleaseOnFailure(Order order) {
+		boolean validationCompleted = false;
+
+		try {
+			RejectReason rejectReason = validateOrder(order);
+			validationCompleted = true;
+			return rejectReason;
+		} finally {
+			if (!validationCompleted) {
+				order.discardBeforeAcceptance();
+				orderPool.release(order);
+			}
+		}
 	}
 	
 	private final Order fillOrCancel(Order order, long exchangeOrderId) {
@@ -827,7 +851,7 @@ public class OrderBook implements OrderListener {
 			return order;
 		}
 		
-		RejectReason rejectReason = validateOrder(order);
+		RejectReason rejectReason = validateOrderAndReleaseOnFailure(order);
 
 		if (rejectReason != null) {
 		
@@ -868,7 +892,7 @@ public class OrderBook implements OrderListener {
 	
 	private Order fillOrRest(Order order, long exchangeOrderId) {
 		
-		RejectReason rejectReason = validateOrder(order);
+		RejectReason rejectReason = validateOrderAndReleaseOnFailure(order);
 
 		if (rejectReason != null) {
 		

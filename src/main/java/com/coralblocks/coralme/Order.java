@@ -337,6 +337,12 @@ public class Order {
 		internalListeners.add(listener);
 	}
 
+	void discardBeforeAcceptance() {
+		listenerExceptions = null;
+		internalListeners.clear();
+		externalListeners.clear();
+	}
+
 	private void collectListenerException(OrderListener listener, OrderListenerException.Callback callback,
 			long time, Order order, Exception exception) {
 		collectListenerException(listener, callback, time, order, -1, -1, exception);
