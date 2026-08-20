@@ -529,6 +529,9 @@ public class Order {
      * <p><code>totalSize = openSize + executedSize</code></p>
      * 
      * <p><b>NOTE:</b> To work only with the open size you must use the method cancel instead.</p>
+     *
+     * <p>A value less than or equal to the executed size cancels all remaining open size.
+     * Consequently, a negative value performs a full cancel.</p>
      * 
      * <p><i>Why does this method exist?</i> Because it is much safer and better to reduce to a new total size than to
      * cancel open size. More details here: https://chatgpt.com/share/6808fbb1-d840-8013-82a8-9ae1854c7707
@@ -591,23 +594,44 @@ public class Order {
 		}
     }
     
+    /**
+     * Cancels the requested amount from the open size. A value greater than or equal
+     * to the open size cancels the entire remaining order.
+     *
+     * @param sizeToCancel the amount of open size to cancel
+     * @throws IllegalArgumentException if sizeToCancel is not positive
+     */
     public void cancel(long sizeToCancel) {
     	
     	cancel(sizeToCancel, CancelReason.USER);
     }
-    
+
+    /**
+     * Cancels the requested amount from the open size with the given reason. A value
+     * greater than or equal to the open size cancels the entire remaining order.
+     *
+     * @param sizeToCancel the amount of open size to cancel
+     * @param reason the cancellation reason
+     * @throws IllegalArgumentException if sizeToCancel is not positive
+     */
     public void cancel(long sizeToCancel, CancelReason reason) {
 
 		orderBook.checkExternalListenerReentrancy("Order.cancel");
+
+		if (sizeToCancel <= 0) {
+			throw new IllegalArgumentException("sizeToCancel must be positive: " + sizeToCancel);
+		}
     	
-    	if (sizeToCancel >= getOpenSize()) {
+		long openSize = getOpenSize();
+
+		if (sizeToCancel >= openSize) {
     		
     		cancel(reason);
     		
     		return;
     	}
     	
-    	long newSize = getOpenSize() - sizeToCancel + executedSize;
+		long newSize = openSize - sizeToCancel + executedSize;
     	
     	long canceledSize = this.totalSize - newSize;
     	
