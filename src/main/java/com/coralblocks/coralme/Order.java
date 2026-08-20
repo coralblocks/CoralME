@@ -30,6 +30,12 @@ public class Order {
 	
 	public static final int CLIENT_ORDER_ID_MAX_LENGTH = 64;
 	
+	/*
+	 * Internal listeners are registered as OrderBook first and PriceLevel second.
+	 * Every internal callback must run in reverse registration order so PriceLevel
+	 * updates or removes the order before OrderBook checks whether the level is empty.
+	 * Additional internal listeners follow the same last-registered-first contract.
+	 */
 	private final List<OrderListener> internalListeners = new ArrayList<OrderListener>(2);
 
 	private final List<OrderListener> externalListeners = new ArrayList<OrderListener>(64);
@@ -334,6 +340,7 @@ public class Order {
     }
 
 	void addInternalListener(OrderListener listener) {
+		// A newly registered listener has callback priority over existing listeners.
 		internalListeners.add(listener);
 	}
 
