@@ -948,9 +948,9 @@ public class OrderBook implements OrderListener {
 					
 						if (o.getTimeInForce() != TimeInForce.GTC) continue;
 					
-						newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
+						Order rolledOrder = newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
 					
-						o.cancel(CancelReason.ROLLED);
+						if (rolledOrder.isAccepted()) o.cancel(CancelReason.ROLLED);
 					}
 				}
 			}
@@ -963,9 +963,9 @@ public class OrderBook implements OrderListener {
 					
 						if (o.getTimeInForce() != TimeInForce.GTC) continue;
 					
-						newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
+						Order rolledOrder = newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
 					
-						o.cancel(CancelReason.ROLLED);
+						if (rolledOrder.isAccepted()) o.cancel(CancelReason.ROLLED);
 					}
 				}
 			}

@@ -553,6 +553,48 @@ public class OrderBookTest {
 	}
 
 	@Test
+	public void test_RollRetainsSourceOrderWhenDestinationRejectsIt() {
+
+		int[] sourceCancellations = new int[1];
+		int[] destinationRejections = new int[1];
+		int[] validations = new int[1];
+		OrderBook source = new OrderBook("AAPL", new OrderBookAdapter() {
+			@Override
+			public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize,
+					CancelReason cancelReason) {
+				sourceCancellations[0]++;
+			}
+		});
+		OrderBook destination = new OrderBook("AAPL", new OrderBookAdapter() {
+			@Override
+			public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason rejectReason) {
+				destinationRejections[0]++;
+			}
+		}) {
+			@Override
+			protected RejectReason validateOrder(Order order) {
+				return validations[0]++ == 1 ? RejectReason.DUPLICATE_EXCHANGE_ORDER_ID : null;
+			}
+		};
+		Order destinationOrder = destination.createLimit(CLIENT_ID, "destination", 10, Side.BUY, 50, 400.00, TimeInForce.GTC);
+		Order sourceBid = source.createLimit(CLIENT_ID, "1", 1, Side.BUY, 100, 432.12, TimeInForce.GTC);
+		Order sourceAsk = source.createLimit(CLIENT_ID, "2", 2, Side.SELL, 200, 435.23, TimeInForce.GTC);
+
+		long nextExchangeOrderId = source.rollTo(destination, 10);
+
+		Assert.assertEquals(12, nextExchangeOrderId);
+		Assert.assertSame(sourceBid, source.getOrder(1));
+		Assert.assertFalse(sourceBid.isTerminal());
+		Assert.assertTrue(sourceAsk.isTerminal());
+		Assert.assertEquals(1, source.getNumberOfOrders());
+		Assert.assertSame(destinationOrder, destination.getOrder(10));
+		Assert.assertNotNull(destination.getOrder(11));
+		Assert.assertEquals(2, destination.getNumberOfOrders());
+		Assert.assertEquals(1, sourceCancellations[0]);
+		Assert.assertEquals(1, destinationRejections[0]);
+	}
+
+	@Test
 	public void test_Roll_GTC() {
 		
 		OrderBookListener listener = Mockito.mock(OrderBookListener.class);
