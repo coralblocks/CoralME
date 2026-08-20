@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,23 +18,22 @@ package com.coralblocks.coralme.util;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class StringUtilsTest {
-	
+
 	@Test
 	public void test1() {
-		
+
 		String s = "house";
-		
+
 		CharSequence cs1 = new StringBuilder(s);
 		CharSequence cs2 = new StringBuilder(s);
-		
+
 		Assert.assertFalse(cs1.equals(cs2)); // yes, they are not equal, don't ask me why
 		Assert.assertFalse(cs1.equals(s)); // expected... (different types)
 		Assert.assertFalse(s.equals(cs1)); // expected... (different types)
-		
+
 		// now magic:
-		
+
 		Assert.assertTrue(StringUtils.equals(cs1, cs2));
 		Assert.assertTrue(StringUtils.equals(cs1, s));
 		Assert.assertTrue(StringUtils.equals(s, cs1));

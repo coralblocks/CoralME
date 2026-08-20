@@ -74,7 +74,8 @@ public class ListenerFailureCombinationTest {
 		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		OrderListener reentrantOrderListener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				book.purge();
 			}
 
@@ -86,7 +87,8 @@ public class ListenerFailureCombinationTest {
 		};
 		OrderListener ordinaryOrderListener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				throw orderFailure;
 			}
 
@@ -101,10 +103,7 @@ public class ListenerFailureCombinationTest {
 
 		order.reduceTo(60);
 
-		assertEquals(Arrays.asList(
-				"order-reentrant-report",
-				"order-ordinary-report",
-				"book-reentrant-report",
+		assertEquals(Arrays.asList("order-reentrant-report", "order-ordinary-report", "book-reentrant-report",
 				"book-ordinary-report"), reports);
 		assertEquals(2, orderReport[0].size());
 		assertSame(ordinaryOrderListener, orderReport[0].get(0).getListener());
@@ -161,7 +160,7 @@ public class ListenerFailureCombinationTest {
 		try {
 			order.cancel();
 			fail("Expected internal listener failure");
-		} catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			assertSame(internalFailure, e);
 		}
 
@@ -203,7 +202,8 @@ public class ListenerFailureCombinationTest {
 		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				throw callbackFailure;
 			}
 
@@ -222,10 +222,7 @@ public class ListenerFailureCombinationTest {
 
 		order.reduceTo(60);
 
-		assertEquals(Arrays.asList(
-				"order-throwing-report",
-				"order-observer-report",
-				"book-throwing-report",
+		assertEquals(Arrays.asList("order-throwing-report", "order-observer-report", "book-throwing-report",
 				"book-observer-report"), events);
 		assertEquals(60, order.getTotalSize());
 	}
@@ -252,7 +249,8 @@ public class ListenerFailureCombinationTest {
 		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				throw failure;
 			}
 

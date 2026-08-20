@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -164,7 +164,7 @@ public class OrderBookListenerExceptionsTest {
 		try {
 			book.createLimit(2, "taker", 3, Side.BUY, 100, 101, TimeInForce.GTC);
 			fail("Expected the internal listener exception");
-		} catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			assertSame(internalFailure, e);
 		}
 
@@ -277,7 +277,8 @@ public class OrderBookListenerExceptionsTest {
 
 		OrderBookAdapter throwingListener = new OrderBookAdapter() {
 			@Override
-			public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize, CancelReason cancelReason) {
+			public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize,
+					CancelReason cancelReason) {
 				throw cancelFailure;
 			}
 
@@ -324,14 +325,16 @@ public class OrderBookListenerExceptionsTest {
 
 		OrderBookAdapter throwingListener = new OrderBookAdapter() {
 			@Override
-			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				throw failure;
 			}
 		};
 
 		OrderBookAdapter observer = new OrderBookAdapter() {
 			@Override
-			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				reductionCallbacks[0]++;
 			}
 
@@ -378,7 +381,8 @@ public class OrderBookListenerExceptionsTest {
 
 		OrderBookAdapter throwingListener = new OrderBookAdapter() {
 			@Override
-			public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize, CancelReason cancelReason) {
+			public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize,
+					CancelReason cancelReason) {
 				throw cancelFailure;
 			}
 
@@ -390,12 +394,14 @@ public class OrderBookListenerExceptionsTest {
 
 		OrderBookAdapter observer = new OrderBookAdapter() {
 			@Override
-			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize,
+					long reduceNewTotalSize, CancelReason cancelReason) {
 				reductions[0]++;
 			}
 
 			@Override
-			public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize, CancelReason cancelReason) {
+			public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize,
+					CancelReason cancelReason) {
 				cancellations[0]++;
 			}
 
@@ -427,7 +433,8 @@ public class OrderBookListenerExceptionsTest {
 		assertEquals(1, reports[0]);
 		assertEquals(2, reported[0].size());
 		assertFailure(reported[0].get(0), throwingListener, cancelFailure, Callback.ON_ORDER_CANCELED, maker.getId());
-		assertFailure(reported[0].get(1), throwingListener, terminationFailure, Callback.ON_ORDER_TERMINATED, maker.getId());
+		assertFailure(reported[0].get(1), throwingListener, terminationFailure, Callback.ON_ORDER_TERMINATED,
+				maker.getId());
 	}
 
 	@Test
@@ -464,7 +471,8 @@ public class OrderBookListenerExceptionsTest {
 		book.addListener(observer);
 
 		Order order = new Order();
-		order.init(book, book.getTimestamper(), 7, "reject", 11, book.getSecurity(), Side.SELL, 100, 100, Type.LIMIT, TimeInForce.GTC);
+		order.init(book, book.getTimestamper(), 7, "reject", 11, book.getSecurity(), Side.SELL, 100, 100, Type.LIMIT,
+				TimeInForce.GTC);
 		order.addInternalListener(book.internalOrderListener());
 		order.reject(RejectReason.TRADING_HALTED);
 
@@ -489,7 +497,8 @@ public class OrderBookListenerExceptionsTest {
 				reports[0]++;
 				reported[0] = exceptions;
 				assertTrue(orderBook.isEmpty());
-				for(Order order : orders) assertTrue(order.isTerminal());
+				for (Order order : orders)
+					assertTrue(order.isTerminal());
 			}
 		};
 
@@ -526,7 +535,8 @@ public class OrderBookListenerExceptionsTest {
 				assertEquals(1, orderBook.getNumberOfOrders());
 				assertSame(gtcOrder[0], orderBook.getOrder(gtcOrder[0].getId()));
 				assertFalse(gtcOrder[0].isTerminal());
-				for(Order order : dayOrders) assertTrue(order.isTerminal());
+				for (Order order : dayOrders)
+					assertTrue(order.isTerminal());
 			}
 		};
 
@@ -549,7 +559,8 @@ public class OrderBookListenerExceptionsTest {
 			final RuntimeException terminationFailure) {
 		return new OrderBookAdapter() {
 			@Override
-			public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize, CancelReason cancelReason) {
+			public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize,
+					CancelReason cancelReason) {
 				throw cancelFailure;
 			}
 
@@ -562,32 +573,36 @@ public class OrderBookListenerExceptionsTest {
 
 	private void assertCancellationFailures(OrderBookListenerExceptions exceptions, OrderBookListener listener,
 			RuntimeException cancelFailure, RuntimeException terminationFailure, Order[] orders) {
-		for(Order order : orders) {
-			assertEquals(1, countFailures(exceptions, listener, cancelFailure, Callback.ON_ORDER_CANCELED, order.getId()));
-			assertEquals(1, countFailures(exceptions, listener, terminationFailure, Callback.ON_ORDER_TERMINATED, order.getId()));
+		for (Order order : orders) {
+			assertEquals(1,
+					countFailures(exceptions, listener, cancelFailure, Callback.ON_ORDER_CANCELED, order.getId()));
+			assertEquals(1, countFailures(exceptions, listener, terminationFailure, Callback.ON_ORDER_TERMINATED,
+					order.getId()));
 		}
 	}
 
 	private int countFailures(OrderBookListenerExceptions exceptions, OrderBookListener listener,
 			RuntimeException cause, Callback callback, long orderId) {
 		int count = 0;
-		for(OrderBookListenerException exception : exceptions) {
+		for (OrderBookListenerException exception : exceptions) {
 			if (exception.getListener() == listener && exception.getListenerException() == cause
-					&& exception.getCallback() == callback && exception.getOrderId() == orderId) count++;
+					&& exception.getCallback() == callback && exception.getOrderId() == orderId) {
+				count++;
+			}
 		}
 		return count;
 	}
 
-	private void assertFailure(OrderBookListenerException exception, OrderBookListener listener,
-			RuntimeException cause, Callback callback, long orderId) {
+	private void assertFailure(OrderBookListenerException exception, OrderBookListener listener, RuntimeException cause,
+			Callback callback, long orderId) {
 		assertSame(listener, exception.getListener());
 		assertSame(cause, exception.getListenerException());
 		assertEquals(callback, exception.getCallback());
 		assertEquals(orderId, exception.getOrderId());
 	}
 
-	private void assertFailure(OrderBookListenerException exception, OrderBookListener listener,
-			RuntimeException cause, long orderId, long matchId) {
+	private void assertFailure(OrderBookListenerException exception, OrderBookListener listener, RuntimeException cause,
+			long orderId, long matchId) {
 		assertSame(listener, exception.getListener());
 		assertSame(cause, exception.getListenerException());
 		assertEquals(OrderBookListenerException.Callback.ON_ORDER_EXECUTED, exception.getCallback());
@@ -599,7 +614,8 @@ public class OrderBookListenerExceptionsTest {
 	private static class InternalOrderListenerAdapter implements OrderListener {
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+				CancelReason cancelReason) {
 		}
 
 		@Override

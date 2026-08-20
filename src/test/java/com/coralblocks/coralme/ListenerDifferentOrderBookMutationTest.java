@@ -37,20 +37,13 @@ import com.coralblocks.coralme.Order.Type;
 public class ListenerDifferentOrderBookMutationTest {
 
 	private static enum Callback {
-		ACCEPTED,
-		RESTED,
-		REDUCED,
-		EXECUTED,
-		CANCELED,
-		REJECTED,
-		TERMINATED
+		ACCEPTED, RESTED, REDUCED, EXECUTED, CANCELED, REJECTED, TERMINATED
 	}
 
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> parameters() {
-		return Arrays.asList(Arrays.stream(Callback.values())
-				.map(callback -> new Object[] { callback })
-				.toArray(Object[][]::new));
+		return Arrays.asList(
+				Arrays.stream(Callback.values()).map(callback -> new Object[] { callback }).toArray(Object[][]::new));
 	}
 
 	private final Callback callback;
@@ -135,8 +128,7 @@ public class ListenerDifferentOrderBookMutationTest {
 		final int[] reports = new int[1];
 		OrderBook book = new OrderBook("AAPL");
 		Order order = new Order();
-		order.init(book, book.getTimestamper(), 1, "1", 1, "AAPL", Side.BUY, 100, 100,
-				Type.LIMIT, TimeInForce.GTC);
+		order.init(book, book.getTimestamper(), 1, "1", 1, "AAPL", Side.BUY, 100, 100, Type.LIMIT, TimeInForce.GTC);
 		order.addListener(new OrderListenerAdapter() {
 			private void mutate(Callback currentCallback) {
 				if (mutations[0] != 0 || callback != currentCallback) return;
@@ -146,7 +138,8 @@ public class ListenerDifferentOrderBookMutationTest {
 			}
 
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				mutate(Callback.REDUCED);
 			}
 
@@ -196,7 +189,7 @@ public class ListenerDifferentOrderBookMutationTest {
 	}
 
 	private void triggerOrderBookCallback(OrderBook book) {
-		switch(callback) {
+		switch (callback) {
 		case ACCEPTED:
 		case RESTED:
 			book.createLimit(1, "resting", 1, Side.BUY, 100, 100, TimeInForce.GTC);
@@ -219,7 +212,7 @@ public class ListenerDifferentOrderBookMutationTest {
 	}
 
 	private void triggerOrderCallback(Order order) {
-		switch(callback) {
+		switch (callback) {
 		case ACCEPTED:
 			order.accept(1);
 			break;

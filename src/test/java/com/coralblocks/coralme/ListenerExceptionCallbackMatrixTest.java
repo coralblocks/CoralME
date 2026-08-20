@@ -44,10 +44,8 @@ public class ListenerExceptionCallbackMatrixTest {
 	private static enum Callback {
 		ACCEPTED(OrderBookListenerException.Callback.ON_ORDER_ACCEPTED,
 				OrderListenerException.Callback.ON_ORDER_ACCEPTED),
-		RESTED(OrderBookListenerException.Callback.ON_ORDER_RESTED,
-				OrderListenerException.Callback.ON_ORDER_RESTED),
-		REDUCED(OrderBookListenerException.Callback.ON_ORDER_REDUCED,
-				OrderListenerException.Callback.ON_ORDER_REDUCED),
+		RESTED(OrderBookListenerException.Callback.ON_ORDER_RESTED, OrderListenerException.Callback.ON_ORDER_RESTED),
+		REDUCED(OrderBookListenerException.Callback.ON_ORDER_REDUCED, OrderListenerException.Callback.ON_ORDER_REDUCED),
 		EXECUTED(OrderBookListenerException.Callback.ON_ORDER_EXECUTED,
 				OrderListenerException.Callback.ON_ORDER_EXECUTED),
 		CANCELED(OrderBookListenerException.Callback.ON_ORDER_CANCELED,
@@ -69,9 +67,8 @@ public class ListenerExceptionCallbackMatrixTest {
 
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> parameters() {
-		return Arrays.asList(Arrays.stream(Callback.values())
-				.map(callback -> new Object[] { callback })
-				.toArray(Object[][]::new));
+		return Arrays.asList(
+				Arrays.stream(Callback.values()).map(callback -> new Object[] { callback }).toArray(Object[][]::new));
 	}
 
 	private final Callback callback;
@@ -110,8 +107,7 @@ public class ListenerExceptionCallbackMatrixTest {
 		RuntimeException failure2 = new RuntimeException("order listener 2");
 		OrderBook book = new OrderBook("AAPL");
 		Order order = new Order();
-		order.init(book, book.getTimestamper(), 1, "1", 1, "AAPL", Side.BUY, 100, 100,
-				Type.LIMIT, TimeInForce.GTC);
+		order.init(book, book.getTimestamper(), 1, "1", 1, "AAPL", Side.BUY, 100, 100, Type.LIMIT, TimeInForce.GTC);
 		ThrowingOrderListener listener1 = new ThrowingOrderListener("order-1", callback, failure1, events);
 		ThrowingOrderListener listener2 = new ThrowingOrderListener("order-2", callback, failure2, events);
 		order.addListener(listener1);
@@ -132,7 +128,7 @@ public class ListenerExceptionCallbackMatrixTest {
 	}
 
 	private Order triggerOrderBookCallback(OrderBook book) {
-		switch(callback) {
+		switch (callback) {
 		case ACCEPTED:
 		case RESTED:
 			return book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
@@ -157,7 +153,7 @@ public class ListenerExceptionCallbackMatrixTest {
 	}
 
 	private void triggerOrderCallback(Order order) {
-		switch(callback) {
+		switch (callback) {
 		case ACCEPTED:
 			order.accept(1);
 			break;
@@ -197,8 +193,8 @@ public class ListenerExceptionCallbackMatrixTest {
 		}
 	}
 
-	private void assertOrderFailure(OrderListenerException exception, OrderListener listener,
-			RuntimeException failure, Order order) {
+	private void assertOrderFailure(OrderListenerException exception, OrderListener listener, RuntimeException failure,
+			Order order) {
 		assertSame(listener, exception.getListener());
 		assertSame(failure, exception.getListenerException());
 		assertEquals(callback.orderCallback, exception.getCallback());
@@ -209,8 +205,8 @@ public class ListenerExceptionCallbackMatrixTest {
 		assertEquals(-1, exception.getMatchId());
 	}
 
-	private void assertSnapshot(long orderId, long clientId, String clientOrderId, String security,
-			Side side, Order order) {
+	private void assertSnapshot(long orderId, long clientId, String clientOrderId, String security, Side side,
+			Order order) {
 		assertEquals(order.getId(), orderId);
 		assertEquals(order.getClientId(), clientId);
 		assertEquals(order.getClientOrderId().toString(), clientOrderId);
@@ -219,7 +215,7 @@ public class ListenerExceptionCallbackMatrixTest {
 	}
 
 	private void assertOrderBookStateAfterCallback(OrderBook book, Order order) {
-		switch(callback) {
+		switch (callback) {
 		case ACCEPTED:
 		case RESTED:
 		case REDUCED:
@@ -236,7 +232,7 @@ public class ListenerExceptionCallbackMatrixTest {
 	}
 
 	private void assertOrderStateAfterCallback(Order order) {
-		switch(callback) {
+		switch (callback) {
 		case ACCEPTED:
 			assertTrue(order.isAccepted());
 			assertFalse(order.isTerminal());
@@ -344,8 +340,7 @@ public class ListenerExceptionCallbackMatrixTest {
 		private long failureTime;
 		private OrderListenerExceptions reported;
 
-		private ThrowingOrderListener(String name, Callback callback, RuntimeException failure,
-				List<String> events) {
+		private ThrowingOrderListener(String name, Callback callback, RuntimeException failure, List<String> events) {
 			this.name = name;
 			this.callback = callback;
 			this.failure = failure;
@@ -360,7 +355,8 @@ public class ListenerExceptionCallbackMatrixTest {
 		}
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+				CancelReason cancelReason) {
 			fail(Callback.REDUCED, time);
 		}
 

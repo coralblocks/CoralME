@@ -128,14 +128,16 @@ public class OrderListenerExceptionsTest {
 
 		OrderListener throwingListener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				throw failure;
 			}
 		};
 
 		OrderListener observer = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order reducedOrder, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order reducedOrder, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				reductions[0]++;
 				assertSame(order, book.getOrder(order.getId()));
 				assertEquals(60, order.getPriceLevel().getSize());
@@ -309,7 +311,7 @@ public class OrderListenerExceptionsTest {
 		try {
 			book.createLimit(2, "taker", 3, Side.BUY, 100, 101, TimeInForce.GTC);
 			fail("Expected the internal listener exception");
-		} catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			assertSame(internalFailure, e);
 		}
 
@@ -319,8 +321,8 @@ public class OrderListenerExceptionsTest {
 		assertEquals(0, reports[0]);
 	}
 
-	private void assertFailure(OrderListenerException exception, OrderListener listener,
-			Exception cause, Callback callback, long orderId) {
+	private void assertFailure(OrderListenerException exception, OrderListener listener, Exception cause,
+			Callback callback, long orderId) {
 		assertSame(listener, exception.getListener());
 		assertSame(cause, exception.getListenerException());
 		assertEquals(callback, exception.getCallback());
@@ -330,7 +332,8 @@ public class OrderListenerExceptionsTest {
 	private static class OrderListenerAdapter implements OrderListener {
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+				CancelReason cancelReason) {
 		}
 
 		@Override

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,8 @@ import java.util.List;
  * Collects all exceptions thrown by external {@link OrderBookListener}s during
  * one complete {@link OrderBook} operation.
  */
-public final class OrderBookListenerExceptions extends RuntimeException implements Iterable<OrderBookListenerException> {
+public final class OrderBookListenerExceptions extends RuntimeException
+		implements Iterable<OrderBookListenerException> {
 
 	private final List<OrderBookListenerException> exceptions = new ArrayList<OrderBookListenerException>(4);
 	private final List<OrderBookListenerException> readOnlyExceptions = Collections.unmodifiableList(exceptions);

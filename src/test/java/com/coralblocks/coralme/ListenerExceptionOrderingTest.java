@@ -79,7 +79,8 @@ public class ListenerExceptionOrderingTest {
 
 		OrderListener throwingOrderListener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				events.add("order-throwing-reduced");
 				throw orderFailure;
 			}
@@ -93,7 +94,8 @@ public class ListenerExceptionOrderingTest {
 
 		OrderListener observingOrderListener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				events.add("order-observer-reduced");
 			}
 
@@ -110,14 +112,8 @@ public class ListenerExceptionOrderingTest {
 
 		order.reduceTo(60);
 
-		assertEquals(Arrays.asList(
-				"book-throwing-reduced",
-				"book-observer-reduced",
-				"order-observer-reduced",
-				"order-throwing-reduced",
-				"order-throwing-report",
-				"order-observer-report",
-				"book-throwing-report",
+		assertEquals(Arrays.asList("book-throwing-reduced", "book-observer-reduced", "order-observer-reduced",
+				"order-throwing-reduced", "order-throwing-report", "order-observer-report", "book-throwing-report",
 				"book-observer-report"), events);
 		assertNotNull(orderReport[0]);
 		assertNotNull(orderBookReport[0]);
@@ -183,13 +179,8 @@ public class ListenerExceptionOrderingTest {
 
 		order.cancel();
 
-		assertEquals(Arrays.asList(
-				"book-canceled",
-				"order-canceled",
-				"book-terminated",
-				"order-terminated",
-				"order-report",
-				"book-report"), events);
+		assertEquals(Arrays.asList("book-canceled", "order-canceled", "book-terminated", "order-terminated",
+				"order-report", "book-report"), events);
 		assertEquals(2, orderReport[0].size());
 		assertEquals(2, bookReport[0].size());
 		assertSame(orderCancelFailure, orderReport[0].get(0).getListenerException());
@@ -258,16 +249,10 @@ public class ListenerExceptionOrderingTest {
 
 		Order taker = book.createLimit(2, "taker", 2, Side.BUY, 100, 100, TimeInForce.GTC);
 
-		assertEquals(Arrays.asList(
-				"book-accepted-2",
-				"book-executed-1",
-				"order-executed-1",
-				"book-terminated-1",
-				"order-terminated-1",
-				"book-executed-2",
-				"book-terminated-2",
-				"order-report-1",
-				"book-report"), events);
+		assertEquals(
+				Arrays.asList("book-accepted-2", "book-executed-1", "order-executed-1", "book-terminated-1",
+						"order-terminated-1", "book-executed-2", "book-terminated-2", "order-report-1", "book-report"),
+				events);
 		assertTrue(maker.isTerminal());
 		assertTrue(taker.isTerminal());
 		assertTrue(book.isEmpty());
@@ -390,7 +375,8 @@ public class ListenerExceptionOrderingTest {
 	private static class OrderListenerAdapter implements OrderListener {
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+				CancelReason cancelReason) {
 		}
 
 		@Override

@@ -59,8 +59,8 @@ public class OrderBookListenerReentrancyMatrixTest {
 	@Parameters(name = "{0} -> {1}")
 	public static Collection<Object[]> parameters() {
 		List<Object[]> parameters = new ArrayList<Object[]>();
-		for(Callback callback : Callback.values()) {
-			for(GuardedOperation operation : GuardedOperation.values()) {
+		for (Callback callback : Callback.values()) {
+			for (GuardedOperation operation : GuardedOperation.values()) {
 				parameters.add(new Object[] { callback, operation });
 			}
 		}
@@ -88,13 +88,13 @@ public class OrderBookListenerReentrancyMatrixTest {
 		assertSame(harness.listener, listenerException.getListener());
 		assertEquals(callback.exceptionCallback, listenerException.getCallback());
 		assertTrue(listenerException.getListenerException() instanceof ReentrantOrderBookOperationException);
-		ReentrantOrderBookOperationException reentrantException =
-				(ReentrantOrderBookOperationException) listenerException.getListenerException();
+		ReentrantOrderBookOperationException reentrantException = (ReentrantOrderBookOperationException) listenerException.getListenerException();
 		assertSame(harness.book, reentrantException.getOrderBook());
 		assertEquals(operation.expectedOperation(), reentrantException.getOperation());
 		harness.assertConsistentState();
 
-		// The guard must always be cleared after the callback and after exception reporting.
+		// The guard must always be cleared after the callback and after exception
+		// reporting.
 		harness.book.addListener(new OrderBookAdapter());
 	}
 
@@ -120,7 +120,7 @@ public class OrderBookListenerReentrancyMatrixTest {
 		}
 
 		private void trigger() {
-			switch(callback) {
+			switch (callback) {
 			case ACCEPTED:
 			case RESTED:
 				primaryOrder = book.createLimit(1, "resting", 1, Side.BUY, 100, 100, TimeInForce.GTC);
@@ -145,7 +145,7 @@ public class OrderBookListenerReentrancyMatrixTest {
 		}
 
 		private void assertConsistentState() {
-			switch(callback) {
+			switch (callback) {
 			case ACCEPTED:
 			case RESTED:
 				assertFalse(primaryOrder.isTerminal());

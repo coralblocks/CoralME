@@ -40,9 +40,9 @@ public class ListenerExceptionReportReentrancyTest {
 
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> parameters() {
-		return Arrays.asList(Arrays.stream(GuardedOperation.values())
-				.map(operation -> new Object[] { operation })
-				.toArray(Object[][]::new));
+		return Arrays.asList(
+				Arrays.stream(GuardedOperation.values()).map(operation -> new Object[] { operation }).toArray(
+						Object[][]::new));
 	}
 
 	private final GuardedOperation operation;
@@ -76,7 +76,7 @@ public class ListenerExceptionReportReentrancyTest {
 				try {
 					operation.execute(orderBook, orderBook.getOrder(1), listener[0], iterator);
 					operationReturned[0] = true;
-				} catch(Exception e) {
+				} catch (Exception e) {
 					reportFailure[0] = e;
 					throw e;
 				}
@@ -112,7 +112,8 @@ public class ListenerExceptionReportReentrancyTest {
 
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				throw originalFailure;
 			}
 
@@ -123,7 +124,7 @@ public class ListenerExceptionReportReentrancyTest {
 				try {
 					operation.execute(book, order, registeredBookListener, iterator);
 					operationReturned[0] = true;
-				} catch(Exception e) {
+				} catch (Exception e) {
 					reportFailure[0] = e;
 					throw e;
 				}

@@ -20,18 +20,15 @@ import com.coralblocks.coralme.Order.Side;
 /**
  * Describes an exception thrown by an external {@link OrderListener}.
  *
- * <p>The order information is copied when the exception is captured because
- * {@link Order} instances are pooled and may later be reused.</p>
+ * <p>
+ * The order information is copied when the exception is captured because
+ * {@link Order} instances are pooled and may later be reused.
+ * </p>
  */
 public final class OrderListenerException extends RuntimeException {
 
 	public static enum Callback {
-		ON_ORDER_REDUCED,
-		ON_ORDER_CANCELED,
-		ON_ORDER_EXECUTED,
-		ON_ORDER_ACCEPTED,
-		ON_ORDER_REJECTED,
-		ON_ORDER_RESTED,
+		ON_ORDER_REDUCED, ON_ORDER_CANCELED, ON_ORDER_EXECUTED, ON_ORDER_ACCEPTED, ON_ORDER_REJECTED, ON_ORDER_RESTED,
 		ON_ORDER_TERMINATED
 	}
 
@@ -51,8 +48,8 @@ public final class OrderListenerException extends RuntimeException {
 		this(listener, callback, time, order, -1, -1, cause);
 	}
 
-	OrderListenerException(OrderListener listener, Callback callback, long time, Order order,
-			long executionId, long matchId, Exception cause) {
+	OrderListenerException(OrderListener listener, Callback callback, long time, Order order, long executionId,
+			long matchId, Exception cause) {
 		super(message(listener, callback, order), cause);
 		this.listener = listener;
 		this.callback = callback;
@@ -68,7 +65,8 @@ public final class OrderListenerException extends RuntimeException {
 	}
 
 	private static String message(OrderListener listener, Callback callback, Order order) {
-		String listenerIdentity = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener));
+		String listenerIdentity = listener.getClass().getName() + "@"
+				+ Integer.toHexString(System.identityHashCode(listener));
 		return "OrderListener " + listenerIdentity + " threw from " + callback + " for orderId=" + order.getId();
 	}
 
@@ -105,16 +103,16 @@ public final class OrderListenerException extends RuntimeException {
 	}
 
 	/**
-	 * Returns the execution identifier, or {@code -1} when the failing callback
-	 * was not {@link Callback#ON_ORDER_EXECUTED}.
+	 * Returns the execution identifier, or {@code -1} when the failing callback was
+	 * not {@link Callback#ON_ORDER_EXECUTED}.
 	 */
 	public long getExecutionId() {
 		return executionId;
 	}
 
 	/**
-	 * Returns the match identifier, or {@code -1} when the failing callback
-	 * was not {@link Callback#ON_ORDER_EXECUTED}.
+	 * Returns the match identifier, or {@code -1} when the failing callback was not
+	 * {@link Callback#ON_ORDER_EXECUTED}.
 	 */
 	public long getMatchId() {
 		return matchId;

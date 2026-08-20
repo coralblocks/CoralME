@@ -52,33 +52,33 @@ public class OrderBookIteratorMutationStressTest {
 
 	@Test
 	public void test_ExhaustiveRemovalSubsetsAtEveryCursorPosition() {
-		for(Side side : Side.values()) {
-			for(TraversalOrder traversalOrder : TraversalOrder.values()) {
-				for(Removal removal : Removal.values()) {
+		for (Side side : Side.values()) {
+			for (TraversalOrder traversalOrder : TraversalOrder.values()) {
+				for (Removal removal : Removal.values()) {
 					OrderBook book = new OrderBook("AAPL");
 					int[] traversalIds = traversalIds(traversalOrder);
 
-					for(int consumed = 0; consumed <= traversalIds.length; consumed++) {
-						for(int removalMask = 0; removalMask < 1 << traversalIds.length; removalMask++) {
-							for(int removalDirection = 0; removalDirection < 2; removalDirection++) {
+					for (int consumed = 0; consumed <= traversalIds.length; consumed++) {
+						for (int removalMask = 0; removalMask < 1 << traversalIds.length; removalMask++) {
+							for (int removalDirection = 0; removalDirection < 2; removalDirection++) {
 								populateEightOrders(book, side, TimeInForce.GTC);
 								Iterator<Order> iterator = book.iterator(side, traversalOrder);
-								String scenario = "side=" + side + ", traversal=" + traversalOrder
-										+ ", removal=" + removal + ", consumed=" + consumed
-										+ ", mask=" + removalMask + ", removalDirection=" + removalDirection;
+								String scenario = "side=" + side + ", traversal=" + traversalOrder + ", removal="
+										+ removal + ", consumed=" + consumed + ", mask=" + removalMask
+										+ ", removalDirection=" + removalDirection;
 
-								for(int i = 0; i < consumed; i++) {
+								for (int i = 0; i < consumed; i++) {
 									assertTrue(scenario, iterator.hasNext());
 									assertEquals(scenario, traversalIds[i], iterator.next().getId());
 								}
 
-								for(int i = 0; i < traversalIds.length; i++) {
+								for (int i = 0; i < traversalIds.length; i++) {
 									int id = removalDirection == 0 ? i + 1 : traversalIds.length - i;
 									if ((removalMask & 1 << (id - 1)) == 0) continue;
 									removal.remove(book.getOrder(id));
 								}
 
-								for(int i = consumed; i < traversalIds.length; i++) {
+								for (int i = consumed; i < traversalIds.length; i++) {
 									int expectedId = traversalIds[i];
 									if ((removalMask & 1 << (expectedId - 1)) != 0) continue;
 									assertTrue(scenario, iterator.hasNext());
@@ -134,14 +134,14 @@ public class OrderBookIteratorMutationStressTest {
 
 	@Test
 	public void test_RepeatedNextOrderRemovalAndImmediatePoolReuseInBothDirections() {
-		for(TraversalOrder traversalOrder : TraversalOrder.values()) {
+		for (TraversalOrder traversalOrder : TraversalOrder.values()) {
 			OrderBook book = new OrderBook("AAPL");
 			populateEightOrders(book, Side.BUY, TimeInForce.GTC);
 			Iterator<Order> iterator = book.iterator(Side.BUY, traversalOrder);
 			int[] ids = traversalIds(traversalOrder);
 			assertEquals(ids[0], iterator.next().getId());
 
-			for(int i = 1; i < ids.length - 1; i++) {
+			for (int i = 1; i < ids.length - 1; i++) {
 				Order removedOrder = book.getOrder(ids[i]);
 				removedOrder.cancel();
 				Order reusedOrder = book.createMarket(100 + ids[i], "transient", 100 + ids[i], Side.BUY, 1);
@@ -172,7 +172,7 @@ public class OrderBookIteratorMutationStressTest {
 
 	@Test
 	public void test_ExpireSkipsEveryRemovedDayOrderInBothDirections() {
-		for(TraversalOrder traversalOrder : TraversalOrder.values()) {
+		for (TraversalOrder traversalOrder : TraversalOrder.values()) {
 			OrderBook book = createMixedTimeInForceBook();
 			Iterator<Order> iterator = book.iterator(Side.BUY, traversalOrder);
 			int[] ids = traversalIds(traversalOrder);
@@ -191,7 +191,7 @@ public class OrderBookIteratorMutationStressTest {
 
 	@Test
 	public void test_RollSkipsEveryRemovedGtcOrderInBothDirections() {
-		for(TraversalOrder traversalOrder : TraversalOrder.values()) {
+		for (TraversalOrder traversalOrder : TraversalOrder.values()) {
 			OrderBook source = createMixedTimeInForceBook();
 			OrderBook destination = new OrderBook("AAPL");
 			Iterator<Order> iterator = source.iterator(Side.BUY, traversalOrder);
@@ -212,7 +212,7 @@ public class OrderBookIteratorMutationStressTest {
 
 	@Test
 	public void test_MatchingAcrossPriceLevelsRepairsBothTraversalDirections() {
-		for(TraversalOrder traversalOrder : TraversalOrder.values()) {
+		for (TraversalOrder traversalOrder : TraversalOrder.values()) {
 			OrderBook book = new OrderBook("AAPL");
 			book.createLimit(1, "best-old", 1, Side.SELL, 100, 100, TimeInForce.GTC);
 			book.createLimit(2, "best-new", 2, Side.SELL, 100, 100, TimeInForce.GTC);
@@ -269,9 +269,9 @@ public class OrderBookIteratorMutationStressTest {
 
 	@Test
 	public void test_DeterministicRandomMutationStressNeverReturnsStaleOrDuplicateOrders() {
-		for(Side side : Side.values()) {
-			for(TraversalOrder traversalOrder : TraversalOrder.values()) {
-				for(int seed = 0; seed < 100; seed++) {
+		for (Side side : Side.values()) {
+			for (TraversalOrder traversalOrder : TraversalOrder.values()) {
+				for (int seed = 0; seed < 100; seed++) {
 					runRandomMutationScenario(side, traversalOrder, seed);
 				}
 			}
@@ -282,11 +282,10 @@ public class OrderBookIteratorMutationStressTest {
 		OrderBook book = new OrderBook("AAPL");
 		Random random = new Random(seed * 31L + side.index() * 7L + traversalOrder.ordinal());
 		long nextId = 1;
-		for(int i = 0; i < 32; i++) {
+		for (int i = 0; i < 32; i++) {
 			long price = 90 + random.nextInt(21);
 			TimeInForce timeInForce = random.nextBoolean() ? TimeInForce.GTC : TimeInForce.DAY;
-			book.createLimit(nextId, "random-resting", nextId, side, 25 + random.nextInt(176), price,
-					timeInForce);
+			book.createLimit(nextId, "random-resting", nextId, side, 25 + random.nextInt(176), price, timeInForce);
 			nextId++;
 		}
 
@@ -296,8 +295,8 @@ public class OrderBookIteratorMutationStressTest {
 		long lastId = 0;
 		boolean returnedAny = false;
 
-		for(int step = 0; step < 300; step++) {
-			switch(random.nextInt(7)) {
+		for (int step = 0; step < 300; step++) {
+			switch (random.nextInt(7)) {
 			case 0:
 				removeRandomOrder(book, nextId, random, false);
 				break;
@@ -310,8 +309,7 @@ public class OrderBookIteratorMutationStressTest {
 			case 3:
 				long price = 90 + random.nextInt(21);
 				TimeInForce timeInForce = random.nextBoolean() ? TimeInForce.GTC : TimeInForce.DAY;
-				book.createLimit(nextId, "random-added", nextId, side, 25 + random.nextInt(176), price,
-						timeInForce);
+				book.createLimit(nextId, "random-added", nextId, side, 25 + random.nextInt(176), price, timeInForce);
 				nextId++;
 				break;
 			case 4:
@@ -328,27 +326,31 @@ public class OrderBookIteratorMutationStressTest {
 
 			if (step % 2 != 0 || !iterator.hasNext()) continue;
 			Order returned = iterator.next();
-			String scenario = "side=" + side + ", traversal=" + traversalOrder + ", seed=" + seed
-					+ ", step=" + step + ", returnedId=" + returned.getId();
+			String scenario = "side=" + side + ", traversal=" + traversalOrder + ", seed=" + seed + ", step=" + step
+					+ ", returnedId=" + returned.getId();
 			assertSame(scenario, returned, book.getOrder(returned.getId()));
 			assertTrue(scenario, returned.isResting());
 			assertTrue(scenario, returnedIds.add(returned.getId()));
-			if (returnedAny) assertFollowsTraversalOrder(scenario, side, traversalOrder,
-					lastPrice, lastId, returned.getPrice(), returned.getId());
+			if (returnedAny) {
+				assertFollowsTraversalOrder(scenario, side, traversalOrder, lastPrice, lastId, returned.getPrice(),
+						returned.getId());
+			}
 			lastPrice = returned.getPrice();
 			lastId = returned.getId();
 			returnedAny = true;
 		}
 
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			Order returned = iterator.next();
-			String scenario = "side=" + side + ", traversal=" + traversalOrder + ", seed=" + seed
-					+ ", drainId=" + returned.getId();
+			String scenario = "side=" + side + ", traversal=" + traversalOrder + ", seed=" + seed + ", drainId="
+					+ returned.getId();
 			assertSame(scenario, returned, book.getOrder(returned.getId()));
 			assertTrue(scenario, returned.isResting());
 			assertTrue(scenario, returnedIds.add(returned.getId()));
-			if (returnedAny) assertFollowsTraversalOrder(scenario, side, traversalOrder,
-					lastPrice, lastId, returned.getPrice(), returned.getId());
+			if (returnedAny) {
+				assertFollowsTraversalOrder(scenario, side, traversalOrder, lastPrice, lastId, returned.getPrice(),
+						returned.getId());
+			}
 			lastPrice = returned.getPrice();
 			lastId = returned.getId();
 			returnedAny = true;
@@ -375,7 +377,7 @@ public class OrderBookIteratorMutationStressTest {
 	}
 
 	private static Order findRandomOrder(OrderBook book, long nextId, Random random) {
-		for(int attempt = 0; attempt < 16; attempt++) {
+		for (int attempt = 0; attempt < 16; attempt++) {
 			Order order = book.getOrder(1 + random.nextInt((int) nextId - 1));
 			if (order != null) return order;
 		}
@@ -400,7 +402,7 @@ public class OrderBookIteratorMutationStressTest {
 
 	private static OrderBook createMixedTimeInForceBook() {
 		OrderBook book = new OrderBook("AAPL");
-		for(int id = 1; id <= 8; id++) {
+		for (int id = 1; id <= 8; id++) {
 			TimeInForce timeInForce = id % 2 == 0 ? TimeInForce.GTC : TimeInForce.DAY;
 			long price = 105 - (id + 1) / 2;
 			book.createLimit(id, "mixed", id, Side.BUY, 100, price, timeInForce);
@@ -409,23 +411,21 @@ public class OrderBookIteratorMutationStressTest {
 	}
 
 	private static void populateEightOrders(OrderBook book, Side side, TimeInForce timeInForce) {
-		long[] prices = side == Side.BUY
-				? new long[] { 103, 103, 103, 102, 101, 101, 100, 100 }
+		long[] prices = side == Side.BUY ? new long[] { 103, 103, 103, 102, 101, 101, 100, 100 }
 				: new long[] { 100, 100, 100, 101, 102, 102, 103, 103 };
-		for(int i = 0; i < prices.length; i++) {
+		for (int i = 0; i < prices.length; i++) {
 			long id = i + 1;
 			book.createLimit(id, "stress", id, side, 100, prices[i], timeInForce);
 		}
 	}
 
 	private static int[] traversalIds(TraversalOrder traversalOrder) {
-		return traversalOrder == TraversalOrder.PRICE_TIME_PRIORITY
-				? new int[] { 1, 2, 3, 4, 5, 6, 7, 8 }
+		return traversalOrder == TraversalOrder.PRICE_TIME_PRIORITY ? new int[] { 1, 2, 3, 4, 5, 6, 7, 8 }
 				: new int[] { 8, 7, 6, 5, 4, 3, 2, 1 };
 	}
 
 	private static void assertRemainingIds(Iterator<Order> iterator, long... expectedIds) {
-		for(long expectedId : expectedIds) {
+		for (long expectedId : expectedIds) {
 			assertTrue("Missing order " + expectedId, iterator.hasNext());
 			assertEquals(expectedId, iterator.next().getId());
 		}

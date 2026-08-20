@@ -201,7 +201,8 @@ public class OrderBookReentrancyTest {
 
 		OrderListener listener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				book.createLimit(2, "reentrant", 2, Side.BUY, 100, 99, TimeInForce.GTC);
 			}
 
@@ -233,7 +234,8 @@ public class OrderBookReentrancyTest {
 
 		OrderListener listener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				order.cancel();
 			}
 
@@ -263,7 +265,8 @@ public class OrderBookReentrancyTest {
 
 		OrderListener listener = new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				order.addListener(marker);
 			}
 
@@ -289,7 +292,8 @@ public class OrderBookReentrancyTest {
 
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				otherBook.createLimit(2, "other", 2, Side.SELL, 200, 200, TimeInForce.GTC);
 			}
 
@@ -316,7 +320,8 @@ public class OrderBookReentrancyTest {
 
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				throw listenerFailure;
 			}
 
@@ -338,18 +343,17 @@ public class OrderBookReentrancyTest {
 		assertEquals(2, book.getNumberOfOrders());
 	}
 
-	private void assertReentrantFailure(OrderBookListenerException listenerException, OrderBook book, String operation) {
+	private void assertReentrantFailure(OrderBookListenerException listenerException, OrderBook book,
+			String operation) {
 		assertTrue(listenerException.getListenerException() instanceof ReentrantOrderBookOperationException);
-		ReentrantOrderBookOperationException reentrantException =
-				(ReentrantOrderBookOperationException) listenerException.getListenerException();
+		ReentrantOrderBookOperationException reentrantException = (ReentrantOrderBookOperationException) listenerException.getListenerException();
 		assertSame(book, reentrantException.getOrderBook());
 		assertEquals(operation, reentrantException.getOperation());
 	}
 
 	private void assertReentrantFailure(OrderListenerException listenerException, OrderBook book, String operation) {
 		assertTrue(listenerException.getListenerException() instanceof ReentrantOrderBookOperationException);
-		ReentrantOrderBookOperationException reentrantException =
-				(ReentrantOrderBookOperationException) listenerException.getListenerException();
+		ReentrantOrderBookOperationException reentrantException = (ReentrantOrderBookOperationException) listenerException.getListenerException();
 		assertSame(book, reentrantException.getOrderBook());
 		assertEquals(operation, reentrantException.getOperation());
 	}
@@ -357,7 +361,8 @@ public class OrderBookReentrancyTest {
 	private static class OrderListenerAdapter implements OrderListener {
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+				CancelReason cancelReason) {
 		}
 
 		@Override

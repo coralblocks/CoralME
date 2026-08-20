@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,40 +20,43 @@ import com.coralblocks.coralme.Order.ExecuteSide;
 import com.coralblocks.coralme.Order.RejectReason;
 
 public class OrderBookAdapter implements OrderBookListener {
-    
+
 	@Override
-    public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
-    	
-    }
-    
+	public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize,
+			CancelReason cancelReason) {
+
+	}
+
 	@Override
-    public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize, CancelReason cancelReason) {
-    	
-    }
-    
+	public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize,
+			CancelReason cancelReason) {
+
+	}
+
 	@Override
-    public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide, long executeSize, long executePrice, long executeId, long executeMatchId) {
-    	
-    }
-    
+	public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide, long executeSize,
+			long executePrice, long executeId, long executeMatchId) {
+
+	}
+
 	@Override
-    public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
-    	
-    }
-    
+	public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
+
+	}
+
 	@Override
-    public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason rejectReason) {
-    	
-    }
-    
+	public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason rejectReason) {
+
+	}
+
 	@Override
-    public void onOrderRested(OrderBook orderBook, long time, Order order, long restSize, long restPrice) {
-    	
-    }
+	public void onOrderRested(OrderBook orderBook, long time, Order order, long restSize, long restPrice) {
+
+	}
 
 	@Override
 	public void onOrderTerminated(OrderBook orderBook, long time, Order order) {
-		
+
 	}
 
 	@Override

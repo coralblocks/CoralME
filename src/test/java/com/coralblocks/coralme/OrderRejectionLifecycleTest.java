@@ -106,8 +106,8 @@ public class OrderRejectionLifecycleTest {
 	public void test_AcceptedNonRestingOrderCannotBeRejected() {
 		OrderBook book = new OrderBook("AAPL");
 		Order order = new Order();
-		order.init(book, book.getTimestamper(), 1, "accepted", 0, book.getSecurity(), Side.BUY, 100, 100,
-				Type.LIMIT, TimeInForce.GTC);
+		order.init(book, book.getTimestamper(), 1, "accepted", 0, book.getSecurity(), Side.BUY, 100, 100, Type.LIMIT,
+				TimeInForce.GTC);
 		order.accept(1);
 
 		assertRejectionProhibited(order);
@@ -123,8 +123,8 @@ public class OrderRejectionLifecycleTest {
 	public void test_OrderCannotBeRejectedTwice() {
 		OrderBook book = new OrderBook("AAPL");
 		Order order = new Order();
-		order.init(book, book.getTimestamper(), 1, "rejected", 0, book.getSecurity(), Side.BUY, 100, 100,
-				Type.LIMIT, TimeInForce.GTC);
+		order.init(book, book.getTimestamper(), 1, "rejected", 0, book.getSecurity(), Side.BUY, 100, 100, Type.LIMIT,
+				TimeInForce.GTC);
 		order.reject(RejectReason.BAD_TYPE);
 		long firstRejectTime = order.getRejectTime();
 
@@ -228,7 +228,7 @@ public class OrderRejectionLifecycleTest {
 		Order previousRejected = null;
 		long[] invalidExchangeOrderIds = { 0, -1 };
 
-		for(long exchangeOrderId : invalidExchangeOrderIds) {
+		for (long exchangeOrderId : invalidExchangeOrderIds) {
 			Order rejected = book.createLimit(1, "invalid", exchangeOrderId, Side.BUY, 100, 100, TimeInForce.GTC);
 
 			if (previousRejected != null) assertSame(previousRejected, rejected);
@@ -375,7 +375,7 @@ public class OrderRejectionLifecycleTest {
 		try {
 			order.reject(RejectReason.BAD_TYPE);
 			fail("Expected IllegalStateException");
-		} catch(IllegalStateException expected) {
+		} catch (IllegalStateException expected) {
 		}
 	}
 }

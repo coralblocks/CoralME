@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,22 +19,22 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class SystemTimestamperTest {
-	
+
 	@Test
 	public void test1() {
-		
+
 		Timestamper t = new SystemTimestamper();
-		
+
 		long start = t.nanoEpoch();
-		
+
 		try {
 			Thread.sleep(5);
-		} catch(InterruptedException e) {
+		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		long end = t.nanoEpoch();
-		
+
 		Assert.assertTrue(end > start);
 		Assert.assertTrue(end - start > 1000000L);
 	}

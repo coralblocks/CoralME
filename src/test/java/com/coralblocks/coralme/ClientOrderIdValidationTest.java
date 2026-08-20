@@ -78,7 +78,8 @@ public class ClientOrderIdValidationTest {
 
 	private StringBuilder clientOrderId(int length) {
 		StringBuilder clientOrderId = new StringBuilder(length);
-		for(int i = 0; i < length; i++) clientOrderId.append('x');
+		for (int i = 0; i < length; i++)
+			clientOrderId.append('x');
 		return clientOrderId;
 	}
 }

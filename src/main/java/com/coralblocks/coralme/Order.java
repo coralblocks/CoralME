@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,345 +27,352 @@ import com.coralblocks.coralme.util.Timestamper;
 /**
  * A mutable order instance owned and reused by an {@link OrderBook}.
  *
- * <p>After an order becomes terminal, a later {@link OrderBook} operation may
- * reuse the same instance for a different order. Do not retain an order reference
- * after it becomes terminal; copy any values that must outlive it.</p>
+ * <p>
+ * After an order becomes terminal, a later {@link OrderBook} operation may
+ * reuse the same instance for a different order. Do not retain an order
+ * reference after it becomes terminal; copy any values that must outlive it.
+ * </p>
  */
 public class Order {
 
 	static final String EMPTY_CLIENT_ORDER_ID = "NULL";
-	
+
 	/** Maximum number of characters accepted in a client order ID. */
 	public static final int CLIENT_ORDER_ID_MAX_LENGTH = 64;
-	
+
 	/*
 	 * Internal listeners are registered as OrderBook first and PriceLevel second.
 	 * Every internal callback must run in reverse registration order so PriceLevel
-	 * updates or removes the order before OrderBook checks whether the level is empty.
-	 * Additional internal listeners follow the same last-registered-first contract.
+	 * updates or removes the order before OrderBook checks whether the level is
+	 * empty. Additional internal listeners follow the same last-registered-first
+	 * contract.
 	 */
 	private final List<OrderListener> internalListeners = new ArrayList<OrderListener>(2);
 
 	private final List<OrderListener> externalListeners = new ArrayList<OrderListener>(64);
 
 	private OrderListenerExceptions listenerExceptions;
-    
-    private Side side;
-    
-    private long originalSize;
-    
-    private long totalSize;
-    
-    private long executedSize;
-    
-    private PriceLevel priceLevel;
-    
-    private long clientId;
-    
-    private final StringBuilder clientOrderId = new StringBuilder(CLIENT_ORDER_ID_MAX_LENGTH);
-    
-    private long price;
-    
-    private long acceptTime;
-    
-    private long restTime;
-    
-    private long cancelTime;
-    
-    private long rejectTime;
-    
-    private long reduceTime;
-    
-    private long executeTime;
-    
-    private long id;
-    
-    private String security;
-    
-    private TimeInForce tif;
-    
-    private Type type;
-    
-    Order next = null;
-    
-    Order prev = null;
-    
-    private boolean isResting;
-    
-    private boolean isPendingCancel;
-    
-    private long pendingSize;
-    
-    private Timestamper timestamper;
+
+	private Side side;
+
+	private long originalSize;
+
+	private long totalSize;
+
+	private long executedSize;
+
+	private PriceLevel priceLevel;
+
+	private long clientId;
+
+	private final StringBuilder clientOrderId = new StringBuilder(CLIENT_ORDER_ID_MAX_LENGTH);
+
+	private long price;
+
+	private long acceptTime;
+
+	private long restTime;
+
+	private long cancelTime;
+
+	private long rejectTime;
+
+	private long reduceTime;
+
+	private long executeTime;
+
+	private long id;
+
+	private String security;
+
+	private TimeInForce tif;
+
+	private Type type;
+
+	Order next = null;
+
+	Order prev = null;
+
+	private boolean isResting;
+
+	private boolean isPendingCancel;
+
+	private long pendingSize;
+
+	private Timestamper timestamper;
 
 	private OrderBook orderBook;
-    
-    public Order() {
-    	
-    }
-    
-	void init(OrderBook orderBook, Timestamper timestamper, long clientId, CharSequence clientOrderId, long exchangeOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
+
+	public Order() {
+
+	}
+
+	void init(OrderBook orderBook, Timestamper timestamper, long clientId, CharSequence clientOrderId,
+			long exchangeOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
 
 		this.orderBook = orderBook;
-    	
+
 		this.timestamper = timestamper;
-		
+
 		this.clientId = clientId;
-		
+
 		// Cap the pooled buffer before OrderBook rejects an overlong ID.
 		int clientOrderIdLength = Math.min(clientOrderId.length(), CLIENT_ORDER_ID_MAX_LENGTH);
 		this.clientOrderId.setLength(0);
 		this.clientOrderId.append(clientOrderId, 0, clientOrderIdLength);
-    	
-    	this.side = side;
-    	
-    	this.type = type;
-    	
-    	this.originalSize = this.totalSize = size;
-    	
-    	this.price = price;
-    	
-    	this.executedSize = 0;
-    	
-    	this.security = security;
-    	
-    	this.id = exchangeOrderId;
-    	
-    	this.acceptTime = -1;
-    	
-    	this.restTime = -1;
-    	
-    	this.reduceTime = -1;
-    	
-    	this.executeTime = -1;
-    	
-    	this.cancelTime = -1;
-    	
-    	this.rejectTime = -1;
-    	
-    	this.priceLevel = null;
-    	
-    	this.tif = tif;
-    	
-    	this.isResting = false;
-    	
-    	this.isPendingCancel = false;
-    	
-    	this.pendingSize = -1;
-    	
-    	this.next = this.prev = null; // sanity!
-    }
-	
+
+		this.side = side;
+
+		this.type = type;
+
+		this.originalSize = this.totalSize = size;
+
+		this.price = price;
+
+		this.executedSize = 0;
+
+		this.security = security;
+
+		this.id = exchangeOrderId;
+
+		this.acceptTime = -1;
+
+		this.restTime = -1;
+
+		this.reduceTime = -1;
+
+		this.executeTime = -1;
+
+		this.cancelTime = -1;
+
+		this.rejectTime = -1;
+
+		this.priceLevel = null;
+
+		this.tif = tif;
+
+		this.isResting = false;
+
+		this.isPendingCancel = false;
+
+		this.pendingSize = -1;
+
+		this.next = this.prev = null; // sanity!
+	}
+
 	final void setPendingCancel() {
 		this.isPendingCancel = true;
 	}
-	
+
 	final void setPendingSize(long size) {
 		this.pendingSize = size;
 	}
-	
+
 	public final long getPendingSize() {
 		return pendingSize;
 	}
-	
+
 	public final boolean isPendingCancel() {
 		return isPendingCancel;
 	}
-	
+
 	public final boolean isResting() {
-		
+
 		return isResting;
 	}
-	
+
 	public final double getPriceAsDouble() {
-		
+
 		return DoubleUtils.toDouble(price);
 	}
-	
-    final void setPriceLevel(PriceLevel priceLevel) {
-    	
-    	this.priceLevel = priceLevel;
-    }
-    
-    public final PriceLevel getPriceLevel() {
-    	
-    	return priceLevel;
-    }
-    
-    public final Type getType() {
-    	
-    	return type;
-    }
-    
-    public final boolean isLimit() {
-    	
-    	return type == Type.LIMIT;
-    }
-    
-    public final boolean isMarket() {
-    	
-    	return type == Type.MARKET;
-    }
-    
-    public final long getOriginalSize() {
-    	
-    	return originalSize;
-    }
-    
-    /**
-     * Returns the size executed for this order.
-     *
-     * @return the executed size
-     */
-    public final long getExecutedSize() {
 
-        return executedSize;
-    }
+	final void setPriceLevel(PriceLevel priceLevel) {
 
-    /**
-     * Returns the size executed for this order. This is an alias for
-     * {@link #getExecutedSize()}.
-     *
-     * @return the executed size
-     */
-    public final long getFilledSize() {
-    	
-    	return executedSize;
-    }
-    
-    public final long getOpenSize() {
-    	
-    	return totalSize - executedSize;
-    }
-    
-    public final long getTotalSize() {
-    	
-    	return totalSize;
-    }
-    
-    public final long getAcceptTime() {
-    	
-    	return acceptTime;
-    }
-    
-    public final long getRestTime() {
-    	
-    	return restTime;
-    }
-    
-    public final long getReduceTime() {
-    	
-    	return reduceTime;
-    }
-    
-    public final long getExecuteTime() {
-    	
-    	return executeTime;
-    }
-    
-    public final long getCancelTime() {
-    	
-    	return cancelTime;
-    }
-    
-    public final long getRejectTime() {
-    	
-    	return rejectTime;
-    }
-    
-    public final long getCanceledSize() {
-    	
-    	// originalSize = openSize + canceledSize + executedSize
-    	return originalSize - getOpenSize() - executedSize;
-    }
-    
-    public final boolean isTerminal() {
-    	
-    	return getOpenSize() == 0;
-    }
-    
-    public final TimeInForce getTimeInForce() {
-    	
-    	return tif;
-    }
-    
-    public final boolean isAccepted() {
-    	
-    	return id > 0;
-    }
-    
-    public final boolean isIoC() {
-    	
-    	return tif == TimeInForce.IOC;
-    }
-    
-    public final boolean isDay() {
-    	
-    	return tif == TimeInForce.DAY;
-    }
-    
-    public final boolean isGTC() {
-    	
-    	return tif == TimeInForce.GTC;
-    }
-    
-    public final long getPrice() {
-    	
-    	return price;
-    }
-    
-    public final Side getSide() {
-    	
-    	return side;
-    }
-    
-    public final Side getOtherSide() {
-    	
-    	return side == Side.BUY ? Side.SELL : Side.BUY;
-    }
-    
-    public final long getId() {
-    	
-    	return id;
-    }
-    
-    public final long getExchangeOrderId() {
-    	
-    	return id;
-    }
-    
-    public final long getClientId() {
-    	
-    	return clientId;
-    }
-    
-    public final CharSequence getClientOrderId() {
-    	
-    	return clientOrderId;
-    }
-    
-    public final String getSecurity() {
-    	
-    	return security;
-    }
-    
+		this.priceLevel = priceLevel;
+	}
+
+	public final PriceLevel getPriceLevel() {
+
+		return priceLevel;
+	}
+
+	public final Type getType() {
+
+		return type;
+	}
+
+	public final boolean isLimit() {
+
+		return type == Type.LIMIT;
+	}
+
+	public final boolean isMarket() {
+
+		return type == Type.MARKET;
+	}
+
+	public final long getOriginalSize() {
+
+		return originalSize;
+	}
+
+	/**
+	 * Returns the size executed for this order.
+	 *
+	 * @return the executed size
+	 */
+	public final long getExecutedSize() {
+
+		return executedSize;
+	}
+
+	/**
+	 * Returns the size executed for this order. This is an alias for
+	 * {@link #getExecutedSize()}.
+	 *
+	 * @return the executed size
+	 */
+	public final long getFilledSize() {
+
+		return executedSize;
+	}
+
+	public final long getOpenSize() {
+
+		return totalSize - executedSize;
+	}
+
+	public final long getTotalSize() {
+
+		return totalSize;
+	}
+
+	public final long getAcceptTime() {
+
+		return acceptTime;
+	}
+
+	public final long getRestTime() {
+
+		return restTime;
+	}
+
+	public final long getReduceTime() {
+
+		return reduceTime;
+	}
+
+	public final long getExecuteTime() {
+
+		return executeTime;
+	}
+
+	public final long getCancelTime() {
+
+		return cancelTime;
+	}
+
+	public final long getRejectTime() {
+
+		return rejectTime;
+	}
+
+	public final long getCanceledSize() {
+
+		// originalSize = openSize + canceledSize + executedSize
+		return originalSize - getOpenSize() - executedSize;
+	}
+
+	public final boolean isTerminal() {
+
+		return getOpenSize() == 0;
+	}
+
+	public final TimeInForce getTimeInForce() {
+
+		return tif;
+	}
+
+	public final boolean isAccepted() {
+
+		return id > 0;
+	}
+
+	public final boolean isIoC() {
+
+		return tif == TimeInForce.IOC;
+	}
+
+	public final boolean isDay() {
+
+		return tif == TimeInForce.DAY;
+	}
+
+	public final boolean isGTC() {
+
+		return tif == TimeInForce.GTC;
+	}
+
+	public final long getPrice() {
+
+		return price;
+	}
+
+	public final Side getSide() {
+
+		return side;
+	}
+
+	public final Side getOtherSide() {
+
+		return side == Side.BUY ? Side.SELL : Side.BUY;
+	}
+
+	public final long getId() {
+
+		return id;
+	}
+
+	public final long getExchangeOrderId() {
+
+		return id;
+	}
+
+	public final long getClientId() {
+
+		return clientId;
+	}
+
+	public final CharSequence getClientOrderId() {
+
+		return clientOrderId;
+	}
+
+	public final String getSecurity() {
+
+		return security;
+	}
+
 	/**
 	 * Adds an external listener. Exceptions thrown by this listener are collected
-	 * and reported through {@link OrderListener#onExceptionsThrown(Order, OrderListenerExceptions)}.
+	 * and reported through
+	 * {@link OrderListener#onExceptionsThrown(Order, OrderListenerExceptions)}.
 	 * External listeners are notified in reverse registration order.
 	 *
-	 * <p>A listener added after an {@link OrderBook} creation method returns does
-	 * not receive that order's accepted, rejected, or rested callbacks because
-	 * those creation-time events have already been dispatched.</p>
+	 * <p>
+	 * A listener added after an {@link OrderBook} creation method returns does not
+	 * receive that order's accepted, rejected, or rested callbacks because those
+	 * creation-time events have already been dispatched.
+	 * </p>
 	 *
 	 * @param listener the listener to add
 	 */
-    public void addListener(OrderListener listener) {
+	public void addListener(OrderListener listener) {
 
 		orderBook.checkExternalListenerReentrancy("Order.addListener");
 
-        externalListeners.add(listener);
-    }
+		externalListeners.add(listener);
+	}
 
 	void addInternalListener(OrderListener listener) {
 		// A newly registered listener has callback priority over existing listeners.
@@ -378,16 +385,16 @@ public class Order {
 		externalListeners.clear();
 	}
 
-	private void collectListenerException(OrderListener listener, OrderListenerException.Callback callback,
-			long time, Order order, Exception exception) {
+	private void collectListenerException(OrderListener listener, OrderListenerException.Callback callback, long time,
+			Order order, Exception exception) {
 		collectListenerException(listener, callback, time, order, -1, -1, exception);
 	}
 
-	private void collectListenerException(OrderListener listener, OrderListenerException.Callback callback,
-			long time, Order order, long executionId, long matchId, Exception exception) {
+	private void collectListenerException(OrderListener listener, OrderListenerException.Callback callback, long time,
+			Order order, long executionId, long matchId, Exception exception) {
 		if (listenerExceptions == null) listenerExceptions = new OrderListenerExceptions();
-		listenerExceptions.add(new OrderListenerException(listener, callback, time, order,
-				executionId, matchId, exception));
+		listenerExceptions.add(
+				new OrderListenerException(listener, callback, time, order, executionId, matchId, exception));
 	}
 
 	final void discardListenerExceptions() {
@@ -413,13 +420,14 @@ public class Order {
 		listenerExceptions = null;
 		int size = externalListeners.size();
 
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			OrderListener listener = externalListeners.get(i);
 			orderBook.enterExternalListenerCallback();
 			try {
 				listener.onExceptionsThrown(this, exceptions);
-			} catch(Exception ignored) {
-				// Exceptions thrown while reporting listener exceptions are intentionally swallowed...
+			} catch (Exception ignored) {
+				// Exceptions thrown while reporting listener exceptions are intentionally
+				// swallowed...
 				// For someone to throw an exception here would be very silly
 			} finally {
 				orderBook.exitExternalListenerCallback();
@@ -428,26 +436,26 @@ public class Order {
 
 		if (isTerminal()) externalListeners.clear();
 	}
-    
-    void accept(long id) {
-    	
-    	this.id = id;
-    	
-    	this.acceptTime = timestamper.nanoEpoch();
-        
+
+	void accept(long id) {
+
+		this.id = id;
+
+		this.acceptTime = timestamper.nanoEpoch();
+
 		boolean callbacksCompleted = false;
 
 		try {
-			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+			for (int i = internalListeners.size() - 1; i >= 0; i--) {
 				internalListeners.get(i).onOrderAccepted(this.acceptTime, this);
 			}
 
-			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+			for (int i = externalListeners.size() - 1; i >= 0; i--) {
 				OrderListener listener = externalListeners.get(i);
 				orderBook.enterExternalListenerCallback();
 				try {
 					listener.onOrderAccepted(this.acceptTime, this);
-				} catch(Exception e) {
+				} catch (Exception e) {
 					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_ACCEPTED,
 							this.acceptTime, this, e);
 				} finally {
@@ -467,29 +475,29 @@ public class Order {
 
 			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
-    }
-    
-    void rest() {
-    	
-    	this.isResting = true;
-    	
-    	this.restTime = timestamper.nanoEpoch();
-        
+	}
+
+	void rest() {
+
+		this.isResting = true;
+
+		this.restTime = timestamper.nanoEpoch();
+
 		boolean callbacksCompleted = false;
 
 		try {
-			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+			for (int i = internalListeners.size() - 1; i >= 0; i--) {
 				internalListeners.get(i).onOrderRested(this.restTime, this, getOpenSize(), getPrice());
 			}
 
-			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+			for (int i = externalListeners.size() - 1; i >= 0; i--) {
 				OrderListener listener = externalListeners.get(i);
 				orderBook.enterExternalListenerCallback();
 				try {
 					listener.onOrderRested(this.restTime, this, getOpenSize(), getPrice());
-				} catch(Exception e) {
-					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_RESTED,
-							this.restTime, this, e);
+				} catch (Exception e) {
+					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_RESTED, this.restTime,
+							this, e);
 				} finally {
 					orderBook.exitExternalListenerCallback();
 				}
@@ -507,13 +515,14 @@ public class Order {
 
 			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
-    }
-    
+	}
+
 	/**
 	 * Rejects this Order before it has been accepted.
 	 *
 	 * @param reason the rejection reason
-	 * @throws IllegalStateException if this Order is resting, accepted, or was already rejected
+	 * @throws IllegalStateException if this Order is resting, accepted, or was
+	 *                               already rejected
 	 */
 	public void reject(RejectReason reason) {
 
@@ -522,24 +531,24 @@ public class Order {
 		if (isResting || acceptTime != -1 || rejectTime != -1) {
 			throw new IllegalStateException("Order can only be rejected once and before acceptance");
 		}
-    	
-    	this.totalSize = this.executedSize = 0;
-    	
-    	this.rejectTime = timestamper.nanoEpoch();
-    	
+
+		this.totalSize = this.executedSize = 0;
+
+		this.rejectTime = timestamper.nanoEpoch();
+
 		boolean callbacksCompleted = false;
 
 		try {
-			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+			for (int i = internalListeners.size() - 1; i >= 0; i--) {
 				internalListeners.get(i).onOrderRejected(this.rejectTime, this, reason);
 			}
 
-			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+			for (int i = externalListeners.size() - 1; i >= 0; i--) {
 				OrderListener listener = externalListeners.get(i);
 				orderBook.enterExternalListenerCallback();
 				try {
 					listener.onOrderRejected(this.rejectTime, this, reason);
-				} catch(Exception e) {
+				} catch (Exception e) {
 					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_REJECTED,
 							this.rejectTime, this, e);
 				} finally {
@@ -562,59 +571,70 @@ public class Order {
 
 			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
-    }
-    
-    /**
-     * Note that this method takes the <code>newTotalSize</code> and <i>NOT</i> the <code>newOpenSize</code>, in other words,
-     * you must include the current executed size on your desired <code>newTotalSize</code>.
-     * 
-     * <p><code>totalSize = openSize + executedSize</code></p>
-     * 
-     * <p><b>NOTE:</b> To work only with the open size you must use the method cancel instead.</p>
-     *
-     * <p>A value less than or equal to the executed size cancels all remaining open size.
-     * Consequently, a negative value performs a full cancel.</p>
-     * 
-     * <p><i>Why does this method exist?</i> Because it is much safer and better to reduce to a new total size than to
-     * cancel open size. More details here: https://chatgpt.com/share/6808fbb1-d840-8013-82a8-9ae1854c7707
-     * 
-     * @param newTotalSize the desired new total size (open size + executed size)
-     */
-    public void reduceTo(long newTotalSize) {
+	}
+
+	/**
+	 * Note that this method takes the <code>newTotalSize</code> and <i>NOT</i> the
+	 * <code>newOpenSize</code>, in other words, you must include the current
+	 * executed size on your desired <code>newTotalSize</code>.
+	 *
+	 * <p>
+	 * <code>totalSize = openSize + executedSize</code>
+	 * </p>
+	 *
+	 * <p>
+	 * <b>NOTE:</b> To work only with the open size you must use the method cancel
+	 * instead.
+	 * </p>
+	 *
+	 * <p>
+	 * A value less than or equal to the executed size cancels all remaining open
+	 * size. Consequently, a negative value performs a full cancel.
+	 * </p>
+	 *
+	 * <p>
+	 * <i>Why does this method exist?</i> Because it is much safer and better to
+	 * reduce to a new total size than to cancel open size. More details here:
+	 * https://chatgpt.com/share/6808fbb1-d840-8013-82a8-9ae1854c7707
+	 *
+	 * @param newTotalSize the desired new total size (open size + executed size)
+	 */
+	public void reduceTo(long newTotalSize) {
 
 		orderBook.checkExternalListenerReentrancy("Order.reduceTo");
-    	
-    	if (newTotalSize <= executedSize) {
-    		
-    		cancel(CancelReason.USER);
-    		
-    		return;
-    	}
-    	
-    	if (newTotalSize > totalSize) {
-    		
-    		newTotalSize = totalSize;
-    	}
-    	
-    	long canceledSize = this.totalSize - newTotalSize;
-    	
-    	this.totalSize = newTotalSize;
-    	
-    	this.reduceTime = timestamper.nanoEpoch();
-    	
+
+		if (newTotalSize <= executedSize) {
+
+			cancel(CancelReason.USER);
+
+			return;
+		}
+
+		if (newTotalSize > totalSize) {
+
+			newTotalSize = totalSize;
+		}
+
+		long canceledSize = this.totalSize - newTotalSize;
+
+		this.totalSize = newTotalSize;
+
+		this.reduceTime = timestamper.nanoEpoch();
+
 		boolean callbacksCompleted = false;
 
 		try {
-			for(int i = internalListeners.size() - 1; i >= 0; i--) {
-				internalListeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize, CancelReason.USER);
+			for (int i = internalListeners.size() - 1; i >= 0; i--) {
+				internalListeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize,
+						CancelReason.USER);
 			}
 
-			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+			for (int i = externalListeners.size() - 1; i >= 0; i--) {
 				OrderListener listener = externalListeners.get(i);
 				orderBook.enterExternalListenerCallback();
 				try {
 					listener.onOrderReduced(this.reduceTime, this, canceledSize, this.totalSize, CancelReason.USER);
-				} catch(Exception e) {
+				} catch (Exception e) {
 					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_REDUCED,
 							this.reduceTime, this, e);
 				} finally {
@@ -634,66 +654,67 @@ public class Order {
 
 			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
-    }
-    
-    /**
-     * Cancels the requested amount from the open size. A value greater than or equal
-     * to the open size cancels the entire remaining order.
-     *
-     * @param sizeToCancel the amount of open size to cancel
-     * @throws IllegalArgumentException if sizeToCancel is not positive
-     */
-    public void cancel(long sizeToCancel) {
-    	
-    	cancel(sizeToCancel, CancelReason.USER);
-    }
+	}
 
-    /**
-     * Cancels the requested amount from the open size with the given reason. A value
-     * greater than or equal to the open size cancels the entire remaining order.
-     *
-     * @param sizeToCancel the amount of open size to cancel
-     * @param reason the cancellation reason
-     * @throws IllegalArgumentException if sizeToCancel is not positive
-     */
-    public void cancel(long sizeToCancel, CancelReason reason) {
+	/**
+	 * Cancels the requested amount from the open size. A value greater than or
+	 * equal to the open size cancels the entire remaining order.
+	 *
+	 * @param sizeToCancel the amount of open size to cancel
+	 * @throws IllegalArgumentException if sizeToCancel is not positive
+	 */
+	public void cancel(long sizeToCancel) {
+
+		cancel(sizeToCancel, CancelReason.USER);
+	}
+
+	/**
+	 * Cancels the requested amount from the open size with the given reason. A
+	 * value greater than or equal to the open size cancels the entire remaining
+	 * order.
+	 *
+	 * @param sizeToCancel the amount of open size to cancel
+	 * @param reason       the cancellation reason
+	 * @throws IllegalArgumentException if sizeToCancel is not positive
+	 */
+	public void cancel(long sizeToCancel, CancelReason reason) {
 
 		orderBook.checkExternalListenerReentrancy("Order.cancel");
 
 		if (sizeToCancel <= 0) {
 			throw new IllegalArgumentException("sizeToCancel must be positive: " + sizeToCancel);
 		}
-    	
+
 		long openSize = getOpenSize();
 
 		if (sizeToCancel >= openSize) {
-    		
-    		cancel(reason);
-    		
-    		return;
-    	}
-    	
+
+			cancel(reason);
+
+			return;
+		}
+
 		long newSize = openSize - sizeToCancel + executedSize;
-    	
-    	long canceledSize = this.totalSize - newSize;
-    	
-    	this.totalSize = newSize;
-    	
-    	this.reduceTime = timestamper.nanoEpoch();
-    	
+
+		long canceledSize = this.totalSize - newSize;
+
+		this.totalSize = newSize;
+
+		this.reduceTime = timestamper.nanoEpoch();
+
 		boolean callbacksCompleted = false;
 
 		try {
-			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+			for (int i = internalListeners.size() - 1; i >= 0; i--) {
 				internalListeners.get(i).onOrderReduced(this.reduceTime, this, canceledSize, newSize, reason);
 			}
 
-			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+			for (int i = externalListeners.size() - 1; i >= 0; i--) {
 				OrderListener listener = externalListeners.get(i);
 				orderBook.enterExternalListenerCallback();
 				try {
 					listener.onOrderReduced(this.reduceTime, this, canceledSize, newSize, reason);
-				} catch(Exception e) {
+				} catch (Exception e) {
 					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_REDUCED,
 							this.reduceTime, this, e);
 				} finally {
@@ -713,37 +734,37 @@ public class Order {
 
 			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
-    }
-    
-    public void cancel() {
-    	
-    	cancel(CancelReason.USER);
-    }
-    
-    public void cancel(CancelReason reason) {
+	}
+
+	public void cancel() {
+
+		cancel(CancelReason.USER);
+	}
+
+	public void cancel(CancelReason reason) {
 
 		orderBook.checkExternalListenerReentrancy("Order.cancel");
-    	
+
 		long canceledSize = getOpenSize();
 
 		this.totalSize = this.executedSize;
 		this.isResting = false;
 
 		this.cancelTime = timestamper.nanoEpoch();
-    	
+
 		boolean callbacksCompleted = false;
 
 		try {
-			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+			for (int i = internalListeners.size() - 1; i >= 0; i--) {
 				internalListeners.get(i).onOrderCanceled(this.cancelTime, this, canceledSize, reason);
 			}
 
-			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+			for (int i = externalListeners.size() - 1; i >= 0; i--) {
 				OrderListener listener = externalListeners.get(i);
 				orderBook.enterExternalListenerCallback();
 				try {
 					listener.onOrderCanceled(this.cancelTime, this, canceledSize, reason);
-				} catch(Exception e) {
+				} catch (Exception e) {
 					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_CANCELED,
 							this.cancelTime, this, e);
 				} finally {
@@ -751,16 +772,16 @@ public class Order {
 				}
 			}
 
-			for(int i = internalListeners.size() - 1; i >= 0; i--) {
+			for (int i = internalListeners.size() - 1; i >= 0; i--) {
 				internalListeners.get(i).onOrderTerminated(this.cancelTime, this);
 			}
 
-			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+			for (int i = externalListeners.size() - 1; i >= 0; i--) {
 				OrderListener listener = externalListeners.get(i);
 				orderBook.enterExternalListenerCallback();
 				try {
 					listener.onOrderTerminated(this.cancelTime, this);
-				} catch(Exception e) {
+				} catch (Exception e) {
 					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_TERMINATED,
 							this.cancelTime, this, e);
 				} finally {
@@ -783,41 +804,42 @@ public class Order {
 
 			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
-    }
-    
-    void execute(long time, long sizeToExecute) {
-    	
-    	execute(time, ExecuteSide.TAKER, sizeToExecute, this.price, -1, -1);
-    }
-    
-    void execute(long time, ExecuteSide execSide, long sizeToExecute, long priceExecuted, long executionId, long matchId) {
-    	
-    	if (sizeToExecute > getOpenSize()) {
-    		
-    		sizeToExecute = getOpenSize();
-    	}
-    	
+	}
+
+	void execute(long time, long sizeToExecute) {
+
+		execute(time, ExecuteSide.TAKER, sizeToExecute, this.price, -1, -1);
+	}
+
+	void execute(long time, ExecuteSide execSide, long sizeToExecute, long priceExecuted, long executionId,
+			long matchId) {
+
+		if (sizeToExecute > getOpenSize()) {
+
+			sizeToExecute = getOpenSize();
+		}
+
 		this.executedSize += sizeToExecute;
 
 		if (isTerminal()) this.isResting = false;
 
 		this.executeTime = time;
-    	
+
 		boolean callbacksCompleted = false;
 
 		try {
-			for(int i = internalListeners.size() - 1; i >= 0; i--) {
-				internalListeners.get(i).onOrderExecuted(this.executeTime, this, execSide, sizeToExecute,
-						priceExecuted, executionId, matchId);
+			for (int i = internalListeners.size() - 1; i >= 0; i--) {
+				internalListeners.get(i).onOrderExecuted(this.executeTime, this, execSide, sizeToExecute, priceExecuted,
+						executionId, matchId);
 			}
 
-			for(int i = externalListeners.size() - 1; i >= 0; i--) {
+			for (int i = externalListeners.size() - 1; i >= 0; i--) {
 				OrderListener listener = externalListeners.get(i);
 				orderBook.enterExternalListenerCallback();
 				try {
-					listener.onOrderExecuted(this.executeTime, this, execSide, sizeToExecute,
-							priceExecuted, executionId, matchId);
-				} catch(Exception e) {
+					listener.onOrderExecuted(this.executeTime, this, execSide, sizeToExecute, priceExecuted,
+							executionId, matchId);
+				} catch (Exception e) {
 					collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_EXECUTED,
 							this.executeTime, this, executionId, matchId, e);
 				} finally {
@@ -826,16 +848,16 @@ public class Order {
 			}
 
 			if (isTerminal()) {
-				for(int i = internalListeners.size() - 1; i >= 0; i--) {
+				for (int i = internalListeners.size() - 1; i >= 0; i--) {
 					internalListeners.get(i).onOrderTerminated(this.executeTime, this);
 				}
 
-				for(int i = externalListeners.size() - 1; i >= 0; i--) {
+				for (int i = externalListeners.size() - 1; i >= 0; i--) {
 					OrderListener listener = externalListeners.get(i);
 					orderBook.enterExternalListenerCallback();
 					try {
 						listener.onOrderTerminated(this.executeTime, this);
-					} catch(Exception e) {
+					} catch (Exception e) {
 						collectListenerException(listener, OrderListenerException.Callback.ON_ORDER_TERMINATED,
 								this.executeTime, this, e);
 					} finally {
@@ -860,364 +882,340 @@ public class Order {
 
 			orderBook.onOrderCallbacksFinished(callbacksCompleted);
 		}
-    }
-    
-	public static enum TimeInForce implements CharEnum { 
+	}
 
-		GTC 			('T', "1"), 
-		IOC				('I', "3"),
-		DAY				('D', "0");
+	public static enum TimeInForce implements CharEnum {
+
+		GTC('T', "1"), IOC('I', "3"), DAY('D', "0");
 
 		private final char b;
 		private final String fixCode;
 		private static final TimeInForce[] VALUES = values();
 		public static final CharMap<TimeInForce> ALL = new CharMap<TimeInForce>();
-		
+
 		static {
-			for(TimeInForce tif : VALUES) {
+			for (TimeInForce tif : VALUES) {
 				if (ALL.put(tif.getChar(), tif) != null) throw new IllegalStateException("Duplicate: " + tif);
 			}
 		}
-		
+
 		private TimeInForce(char b, String fixCode) {
 			this.b = b;
 			this.fixCode = fixCode;
 		}
-		
+
 		public static final TimeInForce fromFixCode(CharSequence sb) {
-			for(TimeInForce s : VALUES) {
+			for (TimeInForce s : VALUES) {
 				if (StringUtils.equals(s.getFixCode(), sb)) {
 					return s;
 				}
 			}
 			return null;
 		}
-		
-    	@Override
-        public final char getChar() {
-    	    return b;
-        }
-    	
-    	public final String getFixCode() {
-    		return fixCode;
-    	}
+
+		@Override
+		public final char getChar() {
+			return b;
+		}
+
+		public final String getFixCode() {
+			return fixCode;
+		}
 	}
-	
+
 	/**
 	 * Reasons an order may be rejected. Some values are available for custom
 	 * validation through {@link OrderBook#validateOrder(Order)} and are not emitted
 	 * automatically by the base {@link OrderBook}.
 	 */
-	public static enum RejectReason implements CharEnum { 
+	public static enum RejectReason implements CharEnum {
 
-		MISSING_FIELD		('1'),
-		BAD_TYPE			('2'),
-		BAD_TIF				('3'),
-		BAD_SIDE			('4'),
-		BAD_SYMBOL			('5'),
-		BAD_EXCHANGE_ORDER_ID ('6'),
-		
-		BAD_PRICE 			('P'), 
-		BAD_SIZE			('S'),
-		TRADING_HALTED		('H'),
-		BAD_LOT				('L'),
-		UNKNOWN_SYMBOL		('U'),
-		DUPLICATE_EXCHANGE_ORDER_ID	('E'),
-		DUPLICATE_CLIENT_ORDER_ID ('C'),
-		BAD_CLIENT_ORDER_ID	('7');
+		MISSING_FIELD('1'), BAD_TYPE('2'), BAD_TIF('3'), BAD_SIDE('4'), BAD_SYMBOL('5'), BAD_EXCHANGE_ORDER_ID('6'),
+		BAD_PRICE('P'), BAD_SIZE('S'), TRADING_HALTED('H'), BAD_LOT('L'), UNKNOWN_SYMBOL('U'),
+		DUPLICATE_EXCHANGE_ORDER_ID('E'), DUPLICATE_CLIENT_ORDER_ID('C'), BAD_CLIENT_ORDER_ID('7');
 
 		private final char b;
 		public static final CharMap<RejectReason> ALL = new CharMap<RejectReason>();
-		
+
 		static {
-			for(RejectReason rr : RejectReason.values()) {
+			for (RejectReason rr : RejectReason.values()) {
 				if (ALL.put(rr.getChar(), rr) != null) throw new IllegalStateException("Duplicate: " + rr);
 			}
 		}
-		
+
 		private RejectReason(char b) {
 			this.b = b;
 		}
-		
-    	@Override
-        public final char getChar() {
-    	    return b;
-        }
+
+		@Override
+		public final char getChar() {
+			return b;
+		}
 	}
 
 	public static enum CancelRejectReason implements CharEnum {
-		
-		NOT_FOUND		('F');
-		
+
+		NOT_FOUND('F');
+
 		private final char b;
 		public static final CharMap<CancelRejectReason> ALL = new CharMap<CancelRejectReason>();
-		
+
 		static {
-			for(CancelRejectReason crr : CancelRejectReason.values()) {
+			for (CancelRejectReason crr : CancelRejectReason.values()) {
 				if (ALL.put(crr.getChar(), crr) != null) throw new IllegalStateException("Duplicate: " + crr);
 			}
 		}
-		
+
 		private CancelRejectReason(char b) {
 			this.b = b;
 		}
-		
-    	@Override
-        public final char getChar() {
-    	    return b;
-        }
+
+		@Override
+		public final char getChar() {
+			return b;
+		}
 	}
-	
+
 	/**
 	 * Reasons an order may be canceled. Some values are vocabulary for callers of
 	 * {@link Order#cancel(CancelReason)} and are not emitted automatically by the
 	 * {@link OrderBook}.
 	 */
-	public static enum CancelReason implements CharEnum { 
+	public static enum CancelReason implements CharEnum {
 
-		MISSED 			('M'), 
-		USER			('U'),
-		NO_LIQUIDITY	('L'),
-		PRICE			('E'),
-		CROSSED			('C'),
-		PURGED			('P'),
-		EXPIRED			('D'),
-		ROLLED			('R');
+		MISSED('M'), USER('U'), NO_LIQUIDITY('L'), PRICE('E'), CROSSED('C'), PURGED('P'), EXPIRED('D'), ROLLED('R');
 
 		private final char b;
 		public static final CharMap<CancelReason> ALL = new CharMap<CancelReason>();
-		
+
 		static {
-			for(CancelReason cr : CancelReason.values()) {
+			for (CancelReason cr : CancelReason.values()) {
 				if (ALL.put(cr.getChar(), cr) != null) throw new IllegalStateException("Duplicate: " + cr);
 			}
 		}
-		
+
 		private CancelReason(char b) {
 			this.b = b;
 		}
-		
-    	@Override
-        public final char getChar() {
-    	    return b;
-        }
-	}
-	
-	public static enum ReduceRejectReason implements CharEnum { 
 
-		ZERO 			('Z'), 
-		NEGATIVE		('N'),
-		INCREASE		('I'),
-		SUPERFLUOUS		('S'),
-		NOT_FOUND		('F');
+		@Override
+		public final char getChar() {
+			return b;
+		}
+	}
+
+	public static enum ReduceRejectReason implements CharEnum {
+
+		ZERO('Z'), NEGATIVE('N'), INCREASE('I'), SUPERFLUOUS('S'), NOT_FOUND('F');
 
 		private final char b;
 		public static final CharMap<ReduceRejectReason> ALL = new CharMap<ReduceRejectReason>();
-		
+
 		static {
-			for(ReduceRejectReason rrr : ReduceRejectReason.values()) {
+			for (ReduceRejectReason rrr : ReduceRejectReason.values()) {
 				if (ALL.put(rrr.getChar(), rrr) != null) throw new IllegalStateException("Duplicate: " + rrr);
 			}
 		}
-		
+
 		private ReduceRejectReason(char b) {
 			this.b = b;
 		}
-		
-    	@Override
-        public final char getChar() {
-    	    return b;
-        }
-	}
-	
-	public static enum Type implements CharEnum { 
 
-		MARKET 			('M', "1"), 
-		LIMIT			('L', "2");
+		@Override
+		public final char getChar() {
+			return b;
+		}
+	}
+
+	public static enum Type implements CharEnum {
+
+		MARKET('M', "1"), LIMIT('L', "2");
 
 		private final char b;
 		private final String fixCode;
 		private static final Type[] VALUES = values();
 		public static final CharMap<Type> ALL = new CharMap<Type>();
-		
+
 		static {
-			for(Type t : VALUES) {
+			for (Type t : VALUES) {
 				if (ALL.put(t.getChar(), t) != null) throw new IllegalStateException("Duplicate: " + t);
 			}
 		}
-		
+
 		private Type(char b, String fixCode) {
 			this.b = b;
 			this.fixCode = fixCode;
 		}
-		
+
 		public static final Type fromFixCode(CharSequence sb) {
-			for(Type s : VALUES) {
+			for (Type s : VALUES) {
 				if (StringUtils.equals(s.getFixCode(), sb)) {
 					return s;
 				}
 			}
 			return null;
 		}
-		
-    	@Override
-        public final char getChar() {
-    	    return b;
-        }
-    	
-    	public final String getFixCode() {
-    		return fixCode;
-    	}
+
+		@Override
+		public final char getChar() {
+			return b;
+		}
+
+		public final String getFixCode() {
+			return fixCode;
+		}
 	}
-	
+
 	public static enum ExecuteSide implements CharEnum {
-		
-		TAKER			('T', "Y"),
-		MAKER			('M', "N");
-		
+
+		TAKER('T', "Y"), MAKER('M', "N");
+
 		private final char b;
 		private final String fixCode;
 		private static final ExecuteSide[] VALUES = values();
 		public static final CharMap<ExecuteSide> ALL = new CharMap<ExecuteSide>();
-		
+
 		static {
-			for(ExecuteSide es : VALUES) {
+			for (ExecuteSide es : VALUES) {
 				if (ALL.put(es.getChar(), es) != null) throw new IllegalStateException("Duplicate: " + es);
 			}
 		}
-		
+
 		private ExecuteSide(char b, String fixCode) {
 			this.b = b;
 			this.fixCode = fixCode;
 		}
-		
+
 		public static final ExecuteSide fromFixCode(CharSequence sb) {
-			for(ExecuteSide s : VALUES) {
+			for (ExecuteSide s : VALUES) {
 				if (StringUtils.equals(s.getFixCode(), sb)) {
 					return s;
 				}
 			}
 			return null;
 		}
-		
-    	@Override
-        public final char getChar() {
-    	    return b;
-        }
-    	
-    	public final String getFixCode() {
-    		return fixCode;
-    	}
-	}
-	
-	public static enum Side implements CharEnum { 
 
-		BUY 			('B', "1", 0), 
-		SELL			('S', "2", 1);
+		@Override
+		public final char getChar() {
+			return b;
+		}
+
+		public final String getFixCode() {
+			return fixCode;
+		}
+	}
+
+	public static enum Side implements CharEnum {
+
+		BUY('B', "1", 0), SELL('S', "2", 1);
 
 		private final char b;
 		private final String fixCode;
 		private final int index;
 		private static final Side[] VALUES = values();
 		public static final CharMap<Side> ALL = new CharMap<Side>();
-		
+
 		static {
-			
-			for(Side s : VALUES) {
+
+			for (Side s : VALUES) {
 				if (ALL.put(s.getChar(), s) != null) throw new IllegalStateException("Duplicate: " + s);
 			}
-			
+
 			if (ALL.size() != 2) {
 				throw new IllegalStateException("Side must have only two values: BUY and SELL!");
 			}
 		}
-		
+
 		private Side(char b, String fixCode, int index) {
 			this.b = b;
 			this.fixCode = fixCode;
 			this.index = index;
 		}
-		
+
 		public static final Side fromFixCode(CharSequence sb) {
-			for(Side s : VALUES) {
+			for (Side s : VALUES) {
 				if (StringUtils.equals(s.getFixCode(), sb)) {
 					return s;
 				}
 			}
 			return null;
 		}
-		
-    	@Override
-        public final char getChar() {
-    	    return b;
-        }
-    	
-    	public final String getFixCode() {
-    		return fixCode;
-    	}
-    
-    	public final int index() {
-    		return index;
-    	}
-    	
-    	public final int invertedIndex() {
-    		return this == BUY ? SELL.index() : BUY.index();
-    	}
-    	
-    	public final boolean isBuy() {
-    		return this == BUY;
-    	}
-    	
-    	public final boolean isSell() {
-    		return this == SELL;
-    	}
-    	
-    	public final boolean isOutside(long price, long market) {
-    		return this == BUY ? price < market : price > market;
-    	}
-    	
-    	public final boolean isInside(long price, long market) {
-    		return this == BUY ? price >= market : price <= market;
-    	}
+
+		@Override
+		public final char getChar() {
+			return b;
+		}
+
+		public final String getFixCode() {
+			return fixCode;
+		}
+
+		public final int index() {
+			return index;
+		}
+
+		public final int invertedIndex() {
+			return this == BUY ? SELL.index() : BUY.index();
+		}
+
+		public final boolean isBuy() {
+			return this == BUY;
+		}
+
+		public final boolean isSell() {
+			return this == SELL;
+		}
+
+		public final boolean isOutside(long price, long market) {
+			return this == BUY ? price < market : price > market;
+		}
+
+		public final boolean isInside(long price, long market) {
+			return this == BUY ? price >= market : price <= market;
+		}
 	}
 
 	/**
-	 * This method of course produces garbage and should be used only for debugging purposes.
-	 * Use toCharSequence(StringBuilder) instead in order to avoid producing garbage.
-	 * 
-	 *  @return a newly created String object containing the information about this order instance
+	 * This method of course produces garbage and should be used only for debugging
+	 * purposes. Use toCharSequence(StringBuilder) instead in order to avoid
+	 * producing garbage.
+	 *
+	 * @return a newly created String object containing the information about this
+	 *         order instance
 	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(256);
 		return toCharSequence(sb).toString();
 	}
-	
+
 	/**
-	 * This method does not produce garbage. Re-use the same StringBuilder over and over again in order to avoid creating garbage.
-	 * 
+	 * This method does not produce garbage. Re-use the same StringBuilder over and
+	 * over again in order to avoid creating garbage.
+	 *
 	 * @param sb the StringBuilder where the information will be written to.
-	 * @return a CharSequence (i.e. the StringBuilder passed) containing the order information
+	 * @return a CharSequence (i.e. the StringBuilder passed) containing the order
+	 *         information
 	 */
 	public CharSequence toCharSequence(StringBuilder sb) {
-		sb.append("Order [id=").append(id).append(", clientId=").append(clientId)
-			.append(", clientOrderId=").append(clientOrderId).append(", side=")
-			.append(side).append(", security=").append(security).append(", originalSize=").append(originalSize)
-			.append(", openSize=").append(getOpenSize()).append(", executedSize=").append(executedSize)
-			.append(", canceledSize=").append(getCanceledSize());
-		
+		sb.append("Order [id=").append(id).append(", clientId=").append(clientId).append(", clientOrderId=").append(
+				clientOrderId).append(", side=").append(side).append(", security=").append(security).append(
+						", originalSize=").append(originalSize).append(", openSize=").append(getOpenSize()).append(
+								", executedSize=").append(executedSize).append(", canceledSize=").append(
+										getCanceledSize());
+
 		if (type != Type.MARKET) {
 			sb.append(", price=").append(DoubleUtils.toDouble(price));
 		}
-		
+
 		sb.append(", type=").append(type);
-		
+
 		if (type != Type.MARKET) {
 			sb.append(", tif=").append(tif);
 		}
-			
+
 		sb.append("]");
-		
+
 		return sb;
 	}
 }

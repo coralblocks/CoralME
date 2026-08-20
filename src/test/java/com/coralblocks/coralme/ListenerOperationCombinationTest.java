@@ -111,16 +111,8 @@ public class ListenerOperationCombinationTest {
 
 		Order taker = book.createLimit(2, "taker", 2, Side.BUY, 100, 100, TimeInForce.GTC);
 
-		assertEquals(Arrays.asList(
-				"book-accepted-2",
-				"book-executed-1",
-				"maker-executed",
-				"book-terminated-1",
-				"maker-terminated",
-				"book-executed-2",
-				"book-rested-2",
-				"maker-report",
-				"book-report"), events);
+		assertEquals(Arrays.asList("book-accepted-2", "book-executed-1", "maker-executed", "book-terminated-1",
+				"maker-terminated", "book-executed-2", "book-rested-2", "maker-report", "book-report"), events);
 		assertEquals(2, makerReport[0].size());
 		assertEquals(5, bookReport[0].size());
 		assertTrue(maker.isTerminal());
@@ -204,8 +196,8 @@ public class ListenerOperationCombinationTest {
 		Order source1 = source.createLimit(1, "1", 1, Side.BUY, 100, 99, TimeInForce.GTC);
 		Order source2 = source.createLimit(1, "2", 2, Side.SELL, 200, 101, TimeInForce.GTC);
 		Order day = source.createLimit(1, "day", 3, Side.BUY, 300, 98, TimeInForce.DAY);
-		OrderListener sourceOrderListener = cancellationAndTerminationThrowingOrderListener(
-				failure, events, sourceOrderReports);
+		OrderListener sourceOrderListener = cancellationAndTerminationThrowingOrderListener(failure, events,
+				sourceOrderReports);
 		source1.addListener(sourceOrderListener);
 		source2.addListener(sourceOrderListener);
 
@@ -293,8 +285,8 @@ public class ListenerOperationCombinationTest {
 			}
 		});
 		Order order = new Order();
-		order.init(book, book.getTimestamper(), 1, "1", 0, book.getSecurity(), Side.BUY, 100, 100,
-				Type.LIMIT, TimeInForce.GTC);
+		order.init(book, book.getTimestamper(), 1, "1", 0, book.getSecurity(), Side.BUY, 100, 100, Type.LIMIT,
+				TimeInForce.GTC);
 		order.addInternalListener(book.internalOrderListener());
 		order.addListener(new OrderListenerAdapter() {
 			@Override
@@ -353,8 +345,7 @@ public class ListenerOperationCombinationTest {
 			}
 		});
 
-		Order order = market
-				? book.createMarket(1, "market", 1, Side.BUY, 100)
+		Order order = market ? book.createMarket(1, "market", 1, Side.BUY, 100)
 				: book.createLimit(1, "ioc", 1, Side.BUY, 100, 100, TimeInForce.IOC);
 
 		assertEquals(Arrays.asList("accepted", "canceled", "terminated", "report"), events);
@@ -363,8 +354,8 @@ public class ListenerOperationCombinationTest {
 		assertTrue(book.isEmpty());
 	}
 
-	private OrderListener executionAndTerminationThrowingOrderListener(RuntimeException failure,
-			List<String> reports, int[] reportCount) {
+	private OrderListener executionAndTerminationThrowingOrderListener(RuntimeException failure, List<String> reports,
+			int[] reportCount) {
 		return new OrderListenerAdapter() {
 			@Override
 			public void onOrderExecuted(long time, Order order, ExecuteSide executeSide, long executeSize,

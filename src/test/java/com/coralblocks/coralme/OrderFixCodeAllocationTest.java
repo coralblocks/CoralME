@@ -67,7 +67,7 @@ public class OrderFixCodeAllocationTest {
 	}
 
 	private void runIterations(int iterations) {
-		for(int i = 0; i < iterations; i++) {
+		for (int i = 0; i < iterations; i++) {
 			checksum += TimeInForce.fromFixCode(timeInForceFixCode).ordinal();
 			checksum += Type.fromFixCode(typeFixCode).ordinal();
 			checksum += ExecuteSide.fromFixCode(executeSideFixCode).ordinal();

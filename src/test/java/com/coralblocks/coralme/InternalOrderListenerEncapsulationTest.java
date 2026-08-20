@@ -32,19 +32,15 @@ public class InternalOrderListenerEncapsulationTest {
 	private static void assertInternalOrderListenerIsEncapsulated(Class<?> type) {
 		assertFalse(OrderListener.class.isAssignableFrom(type));
 
-		for(Method method : type.getMethods()) {
+		for (Method method : type.getMethods()) {
 			assertFalse(isOrderListenerCallback(method.getName()));
 		}
 	}
 
 	private static boolean isOrderListenerCallback(String methodName) {
-		return methodName.equals("onOrderReduced")
-				|| methodName.equals("onOrderCanceled")
-				|| methodName.equals("onOrderExecuted")
-				|| methodName.equals("onOrderAccepted")
-				|| methodName.equals("onOrderRejected")
-				|| methodName.equals("onOrderRested")
-				|| methodName.equals("onOrderTerminated")
-				|| methodName.equals("onExceptionsThrown");
+		return methodName.equals("onOrderReduced") || methodName.equals("onOrderCanceled")
+				|| methodName.equals("onOrderExecuted") || methodName.equals("onOrderAccepted")
+				|| methodName.equals("onOrderRejected") || methodName.equals("onOrderRested")
+				|| methodName.equals("onOrderTerminated") || methodName.equals("onExceptionsThrown");
 	}
 }

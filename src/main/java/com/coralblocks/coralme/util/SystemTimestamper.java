@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,16 +16,21 @@
 package com.coralblocks.coralme.util;
 
 /**
- * <p>This timestamper is here just for illustrative purposes.</p>
- * 
- * <p>There are of course much better ways to get the epoch with nanosecond precision. And without producing any garbage for the GC.</p>
+ * <p>
+ * This timestamper is here just for illustrative purposes.
+ * </p>
+ *
+ * <p>
+ * There are of course much better ways to get the epoch with nanosecond
+ * precision. And without producing any garbage for the GC.
+ * </p>
  */
 public class SystemTimestamper implements Timestamper {
-	
+
 	/**
-	 * Simply returns System.currentTimeMillis * 1000000L.
-	 * Of course this is bad, so feel free to implement other better/native/garbage-free timestampers ;)
-	 * 
+	 * Simply returns System.currentTimeMillis * 1000000L. Of course this is bad, so
+	 * feel free to implement other better/native/garbage-free timestampers ;)
+	 *
 	 * @return the epoch timestamp in nanoseconds
 	 */
 	@Override

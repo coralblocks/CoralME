@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,26 +19,26 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class DoubleUtilsTest {
-	
+
 	@Test
 	public void test1() {
-		
+
 		double d1 = 3.13222;
 		long l1 = DoubleUtils.toLong(d1);
-		
+
 		double d2 = DoubleUtils.toDouble(l1);
-		
+
 		Assert.assertTrue(d1 == d2);
 	}
-	
+
 	@Test
 	public void test2() {
-		
+
 		long l1 = 123123123;
 		double d1 = DoubleUtils.toDouble(l1);
-		
+
 		long l2 = DoubleUtils.toLong(d1);
-		
+
 		Assert.assertTrue(l1 == l2);
 	}
 
@@ -71,7 +71,7 @@ public class DoubleUtilsTest {
 		try {
 			DoubleUtils.toLong(value);
 			Assert.fail("Expected invalid value to be rejected: " + value);
-		} catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			// Expected.
 		}
 	}

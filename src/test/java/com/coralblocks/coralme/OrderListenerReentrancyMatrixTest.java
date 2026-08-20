@@ -61,8 +61,8 @@ public class OrderListenerReentrancyMatrixTest {
 	@Parameters(name = "{0} -> {1}")
 	public static Collection<Object[]> parameters() {
 		List<Object[]> parameters = new ArrayList<Object[]>();
-		for(Callback callback : Callback.values()) {
-			for(GuardedOperation operation : GuardedOperation.values()) {
+		for (Callback callback : Callback.values()) {
+			for (GuardedOperation operation : GuardedOperation.values()) {
 				parameters.add(new Object[] { callback, operation });
 			}
 		}
@@ -90,13 +90,13 @@ public class OrderListenerReentrancyMatrixTest {
 		assertSame(harness, listenerException.getListener());
 		assertEquals(callback.exceptionCallback, listenerException.getCallback());
 		assertTrue(listenerException.getListenerException() instanceof ReentrantOrderBookOperationException);
-		ReentrantOrderBookOperationException reentrantException =
-				(ReentrantOrderBookOperationException) listenerException.getListenerException();
+		ReentrantOrderBookOperationException reentrantException = (ReentrantOrderBookOperationException) listenerException.getListenerException();
 		assertSame(harness.book, reentrantException.getOrderBook());
 		assertEquals(operation.expectedOperation(), reentrantException.getOperation());
 		harness.assertConsistentState();
 
-		// The guard must always be cleared after the callback and after exception reporting.
+		// The guard must always be cleared after the callback and after exception
+		// reporting.
 		harness.book.addListener(new OrderBookAdapter());
 	}
 
@@ -116,13 +116,12 @@ public class OrderListenerReentrancyMatrixTest {
 			this.callback = callback;
 			this.operation = operation;
 			book.addListener(registeredBookListener);
-			order.init(book, book.getTimestamper(), 1, "1", 1, "AAPL", Side.BUY, 100, 100,
-					Type.LIMIT, TimeInForce.GTC);
+			order.init(book, book.getTimestamper(), 1, "1", 1, "AAPL", Side.BUY, 100, 100, Type.LIMIT, TimeInForce.GTC);
 			order.addListener(this);
 		}
 
 		private void trigger() {
-			switch(callback) {
+			switch (callback) {
 			case ACCEPTED:
 				order.accept(1);
 				break;
@@ -153,7 +152,7 @@ public class OrderListenerReentrancyMatrixTest {
 		}
 
 		private void assertConsistentState() {
-			switch(callback) {
+			switch (callback) {
 			case ACCEPTED:
 				assertTrue(order.isAccepted());
 				assertFalse(order.isTerminal());
@@ -182,7 +181,8 @@ public class OrderListenerReentrancyMatrixTest {
 		}
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+				CancelReason cancelReason) {
 			attempt(Callback.REDUCED);
 		}
 

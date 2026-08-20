@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +19,10 @@ package com.coralblocks.coralme.util;
  * A basic contract to return a timestamp, which is epoch in nanoseconds.
  */
 public interface Timestamper {
-	
+
 	/**
 	 * Return the epoch time in nanoseconds.
-	 * 
+	 *
 	 * @return epoch time in nanoseconds
 	 */
 	public abstract long nanoEpoch();

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,25 +20,28 @@ import com.coralblocks.coralme.Order.ExecuteSide;
 import com.coralblocks.coralme.Order.RejectReason;
 
 public interface OrderListener {
-    
-    public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason);
-    
-    public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason cancelReason);
-    
-    public void onOrderExecuted(long time, Order order, ExecuteSide executeSide, long executeSize, long executePrice, long executeId, long executeMatchId);
-    
-    public void onOrderAccepted(long time, Order order);
-    
-    public void onOrderRejected(long time, Order order, RejectReason rejectReason);
-    
-    public void onOrderRested(long time, Order order, long restSize, long restPrice);
-    
-    public void onOrderTerminated(long time, Order order);
+
+	public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+			CancelReason cancelReason);
+
+	public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason cancelReason);
+
+	public void onOrderExecuted(long time, Order order, ExecuteSide executeSide, long executeSize, long executePrice,
+			long executeId, long executeMatchId);
+
+	public void onOrderAccepted(long time, Order order);
+
+	public void onOrderRejected(long time, Order order, RejectReason rejectReason);
+
+	public void onOrderRested(long time, Order order, long restSize, long restPrice);
+
+	public void onOrderTerminated(long time, Order order);
 
 	/**
-	 * Called after the complete {@link OrderBook} operation when one or more external
-	 * {@link OrderListener} callbacks throw. Exceptions thrown by this reporting callback are ignored.
+	 * Called after the complete {@link OrderBook} operation when one or more
+	 * external {@link OrderListener} callbacks throw. Exceptions thrown by this
+	 * reporting callback are ignored.
 	 */
 	public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions);
-    
+
 }

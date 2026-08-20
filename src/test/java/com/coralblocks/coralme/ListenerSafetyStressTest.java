@@ -128,19 +128,17 @@ public class ListenerSafetyStressTest {
 			}
 		};
 
-		for(int i = 0; i < ITERATIONS; i++) {
+		for (int i = 0; i < ITERATIONS; i++) {
 			int makerId = i * 2 + 1;
 			int takerId = makerId + 1;
 			expectedTakerId[0] = takerId;
 			currentTaker[0] = null;
-			currentMaker[0] = book.createLimit(1, "maker-" + makerId, makerId,
-					Side.SELL, 100, 100, TimeInForce.GTC);
+			currentMaker[0] = book.createLimit(1, "maker-" + makerId, makerId, Side.SELL, 100, 100, TimeInForce.GTC);
 			currentMaker[0].addListener(throwingOrderListener);
 			currentMaker[0].addListener(reentrantOrderListener);
 			currentMaker[0].addListener(observingOrderListener);
 
-			Order returnedTaker = book.createLimit(2, "taker-" + takerId, takerId,
-					Side.BUY, 100, 100, TimeInForce.GTC);
+			Order returnedTaker = book.createLimit(2, "taker-" + takerId, takerId, Side.BUY, 100, 100, TimeInForce.GTC);
 
 			assertSame(currentTaker[0], returnedTaker);
 			assertTrue(currentMaker[0].isTerminal());

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,116 +21,120 @@ import com.coralblocks.coralme.Order.RejectReason;
 import com.coralblocks.coralme.util.DoubleUtils;
 
 /**
- * This is a simple OrderBookListener that prints its callbacks to System.out for debugging. 
+ * This is a simple OrderBookListener that prints its callbacks to System.out
+ * for debugging.
  */
 public class OrderBookLogger implements OrderBookListener {
-	
+
 	private boolean isOn = true;
-	
+
 	/**
 	 * Turns on logging to System.out
 	 */
 	public void on() {
 		isOn = true;
 	}
-	
+
 	/**
 	 * Turns off logging to System.out
 	 */
 	public void off() {
 		isOn = false;
 	}
-	
+
 	/**
 	 * Is currently logging to System.out?
-	 * 
+	 *
 	 * @return true if logging
 	 */
 	public boolean isOn() {
 		return isOn;
 	}
-    
+
 	@Override
-    public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+	public void onOrderReduced(OrderBook orderBook, long time, Order order, long canceledSize, long reduceNewTotalSize,
+			CancelReason cancelReason) {
 		if (!isOn) return;
-    	System.out.println("-----> onOrderReduced called:");
-    	System.out.println("  orderBook=" + orderBook);
-    	System.out.println("  time=" + time);
-    	System.out.println("  order=" + order);
-    	System.out.println("  canceledSize=" + canceledSize);
-    	System.out.println("  reduceNewTotalSize=" + reduceNewTotalSize);
+		System.out.println("-----> onOrderReduced called:");
+		System.out.println("  orderBook=" + orderBook);
+		System.out.println("  time=" + time);
+		System.out.println("  order=" + order);
+		System.out.println("  canceledSize=" + canceledSize);
+		System.out.println("  reduceNewTotalSize=" + reduceNewTotalSize);
 		System.out.println("  cancelReason=" + cancelReason);
-    	System.out.println();
-    }
-    
+		System.out.println();
+	}
+
 	@Override
-    public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize, CancelReason cancelReason) {
+	public void onOrderCanceled(OrderBook orderBook, long time, Order order, long canceledSize,
+			CancelReason cancelReason) {
 		if (!isOn) return;
-    	System.out.println("-----> onOrderCanceled called:");
-    	System.out.println("  orderBook=" + orderBook);
-    	System.out.println("  time=" + time);
-    	System.out.println("  order=" + order);
-    	System.out.println("  canceledSize=" + canceledSize);
-    	System.out.println("  cancelReason=" + cancelReason);
-    	System.out.println();
-    }
-    
+		System.out.println("-----> onOrderCanceled called:");
+		System.out.println("  orderBook=" + orderBook);
+		System.out.println("  time=" + time);
+		System.out.println("  order=" + order);
+		System.out.println("  canceledSize=" + canceledSize);
+		System.out.println("  cancelReason=" + cancelReason);
+		System.out.println();
+	}
+
 	@Override
-    public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide, long executeSize, long executePrice, long executeId, long executeMatchId) {
+	public void onOrderExecuted(OrderBook orderBook, long time, Order order, ExecuteSide executeSide, long executeSize,
+			long executePrice, long executeId, long executeMatchId) {
 		if (!isOn) return;
-    	System.out.println("-----> onOrderExecuted called:");
-    	System.out.println("  orderBook=" + orderBook);
-    	System.out.println("  time=" + time);
-    	System.out.println("  order=" + order);
-    	System.out.println("  executeSide=" + executeSide);
-    	System.out.println("  executeSize=" + executeSize);
-    	System.out.println("  executePrice=" + DoubleUtils.toDouble(executePrice));
-    	System.out.println("  executeId=" + executeId);
-    	System.out.println("  executeMatchId=" + executeMatchId);
-    	System.out.println();    	
-    }
-    
+		System.out.println("-----> onOrderExecuted called:");
+		System.out.println("  orderBook=" + orderBook);
+		System.out.println("  time=" + time);
+		System.out.println("  order=" + order);
+		System.out.println("  executeSide=" + executeSide);
+		System.out.println("  executeSize=" + executeSize);
+		System.out.println("  executePrice=" + DoubleUtils.toDouble(executePrice));
+		System.out.println("  executeId=" + executeId);
+		System.out.println("  executeMatchId=" + executeMatchId);
+		System.out.println();
+	}
+
 	@Override
-    public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
+	public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
 		if (!isOn) return;
-    	System.out.println("-----> onOrderAccepted called:");
-    	System.out.println("  orderBook=" + orderBook);
-    	System.out.println("  time=" + time);
-    	System.out.println("  order=" + order);
-    	System.out.println();
-    }
-    
+		System.out.println("-----> onOrderAccepted called:");
+		System.out.println("  orderBook=" + orderBook);
+		System.out.println("  time=" + time);
+		System.out.println("  order=" + order);
+		System.out.println();
+	}
+
 	@Override
-    public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason rejectReason) {
+	public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason rejectReason) {
 		if (!isOn) return;
-    	System.out.println("-----> onOrderRejected called:");
-    	System.out.println("  orderBook=" + orderBook);
-    	System.out.println("  time=" + time);
-    	System.out.println("  order=" + order);
-    	System.out.println("  rejectReason=" + rejectReason);
-    	System.out.println();
-    }
-    
+		System.out.println("-----> onOrderRejected called:");
+		System.out.println("  orderBook=" + orderBook);
+		System.out.println("  time=" + time);
+		System.out.println("  order=" + order);
+		System.out.println("  rejectReason=" + rejectReason);
+		System.out.println();
+	}
+
 	@Override
-    public void onOrderRested(OrderBook orderBook, long time, Order order, long restSize, long restPrice) {
+	public void onOrderRested(OrderBook orderBook, long time, Order order, long restSize, long restPrice) {
 		if (!isOn) return;
-    	System.out.println("-----> onOrderRested called:");
-    	System.out.println("  orderBook=" + orderBook);
-    	System.out.println("  time=" + time);
-    	System.out.println("  order=" + order);
-    	System.out.println("  restSize=" + restSize);
-    	System.out.println("  restPrice=" + DoubleUtils.toDouble(restPrice));
-    	System.out.println();
-    }
+		System.out.println("-----> onOrderRested called:");
+		System.out.println("  orderBook=" + orderBook);
+		System.out.println("  time=" + time);
+		System.out.println("  order=" + order);
+		System.out.println("  restSize=" + restSize);
+		System.out.println("  restPrice=" + DoubleUtils.toDouble(restPrice));
+		System.out.println();
+	}
 
 	@Override
 	public void onOrderTerminated(OrderBook orderBook, long time, Order order) {
 		if (!isOn) return;
-    	System.out.println("-----> onOrderTerminated called:");
-    	System.out.println("  orderBook=" + orderBook);
-    	System.out.println("  time=" + time);
-    	System.out.println("  order=" + order);
-    	System.out.println();
+		System.out.println("-----> onOrderTerminated called:");
+		System.out.println("  orderBook=" + orderBook);
+		System.out.println("  time=" + time);
+		System.out.println("  order=" + order);
+		System.out.println();
 	}
 
 	@Override
@@ -139,7 +143,7 @@ public class OrderBookLogger implements OrderBookListener {
 		System.out.println("-----> onExceptionsThrown called:");
 		System.out.println("  orderBook=" + orderBook);
 		System.out.println("  exceptions=" + exceptions.size());
-		for(OrderBookListenerException exception : exceptions) {
+		for (OrderBookListenerException exception : exceptions) {
 			exception.printStackTrace(System.out);
 		}
 		System.out.println();

@@ -159,7 +159,8 @@ public class ListenerExceptionLifecycleTest {
 		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				throw failure;
 			}
 
@@ -178,19 +179,19 @@ public class ListenerExceptionLifecycleTest {
 		try {
 			bookReport[0].getExceptions().add(bookReport[0].get(0));
 			fail("Expected read-only OrderBookListener exception list");
-		} catch(UnsupportedOperationException expected) {
+		} catch (UnsupportedOperationException expected) {
 		}
 		try {
 			orderReport[0].getExceptions().clear();
 			fail("Expected read-only OrderListener exception list");
-		} catch(UnsupportedOperationException expected) {
+		} catch (UnsupportedOperationException expected) {
 		}
 		Iterator<OrderListenerException> iterator = orderReport[0].iterator();
 		iterator.next();
 		try {
 			iterator.remove();
 			fail("Expected read-only OrderListener exception iterator");
-		} catch(UnsupportedOperationException expected) {
+		} catch (UnsupportedOperationException expected) {
 		}
 	}
 
@@ -214,7 +215,8 @@ public class ListenerExceptionLifecycleTest {
 		Order order = book.createLimit(1, "1", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		order.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				throw failure;
 			}
 

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,17 +16,19 @@
 package com.coralblocks.coralme.util;
 
 /**
- * This utility class provides methods to work with <code>String</code>s and <code>CharSequence</code>s in an efficient way and without producing any garbage.
+ * This utility class provides methods to work with <code>String</code>s and
+ * <code>CharSequence</code>s in an efficient way and without producing any
+ * garbage.
  */
 public class StringUtils {
-	
+
 	private StringUtils() {
-		
+
 	}
 
 	/**
 	 * Checks if these two CharSequences represent the same String
-	 * 
+	 *
 	 * @param cs1 the first CharSequence
 	 * @param cs2 the second CharSequence
 	 * @return true if they represent the same String

@@ -28,9 +28,10 @@ import com.coralblocks.coralme.Order.Side;
 import com.coralblocks.coralme.Order.TimeInForce;
 
 /**
- * Verifies that capacity-stable {@link OrderBook} operations allocate no heap memory after warmup.
- * Per-thread allocated bytes are checked instead of collection counts because a large heap can hide
- * garbage creation without triggering the garbage collector.
+ * Verifies that capacity-stable {@link OrderBook} operations allocate no heap
+ * memory after warmup. Per-thread allocated bytes are checked instead of
+ * collection counts because a large heap can hide garbage creation without
+ * triggering the garbage collector.
  */
 public class OrderBookAllocationTest {
 
@@ -88,7 +89,8 @@ public class OrderBookAllocationTest {
 	}
 
 	private void runIterations(int iterations) {
-		for(int i = 0; i < iterations; i++) runIteration();
+		for (int i = 0; i < iterations; i++)
+			runIteration();
 	}
 
 	private void runIteration() {

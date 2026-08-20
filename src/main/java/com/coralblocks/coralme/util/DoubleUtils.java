@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,29 +16,31 @@
 package com.coralblocks.coralme.util;
 
 /**
- * This utility class convert doubles with 8-decimal precision to longs and vice-versa. 
+ * This utility class convert doubles with 8-decimal precision to longs and
+ * vice-versa.
  */
 public class DoubleUtils {
-	
+
 	private DoubleUtils() {
-		
+
 	}
-	
+
 	/**
 	 * The precision we are using, which is 8 decimals.
 	 */
 	public static final int PRECISION = 8;
-	
+
 	private static final long MULTIPLIER = (long) Math.pow(10, PRECISION);
 	private static final double MIN_VALUE = ((double) Long.MIN_VALUE) / MULTIPLIER;
 	private static final double MAX_VALUE = ((double) Long.MAX_VALUE) / MULTIPLIER;
-	
+
 	/**
 	 * Converts a double value to a long, rounding to 8 decimals of precision.
-	 * 
+	 *
 	 * @param value the double value to convert to a long
 	 * @return the long representing the double value
-	 * @throws IllegalArgumentException if the value is not finite or cannot be represented as a long
+	 * @throws IllegalArgumentException if the value is not finite or cannot be
+	 *                                  represented as a long
 	 */
 	public static long toLong(double value) {
 		if (!Double.isFinite(value) || value < MIN_VALUE || value > MAX_VALUE) {
@@ -47,10 +49,10 @@ public class DoubleUtils {
 
 		return Math.round(value * MULTIPLIER);
 	}
-	
+
 	/**
 	 * Converts a long value to a double with 8 decimals of precision.
-	 * 
+	 *
 	 * @param value the long value to convert to a double
 	 * @return the double representing the long value
 	 */

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,17 +16,18 @@
 package com.coralblocks.coralme.util;
 
 /**
- * A contract for enums so that they can return and be represented by a single character 
+ * A contract for enums so that they can return and be represented by a single
+ * character
  */
 public interface CharEnum {
-	
+
 	/**
-	 * Returns the character associated with this enum. 
-	 * The enum implementation must enforce that different enums will return different characters.
-	 * In other words, all enums will have unique characters.
-	 * 
+	 * Returns the character associated with this enum. The enum implementation must
+	 * enforce that different enums will return different characters. In other
+	 * words, all enums will have unique characters.
+	 *
 	 * @return the unique character for this enum
 	 */
 	public char getChar();
-	
+
 }

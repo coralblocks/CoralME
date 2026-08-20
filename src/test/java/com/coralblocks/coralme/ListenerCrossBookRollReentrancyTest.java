@@ -66,7 +66,8 @@ public class ListenerCrossBookRollReentrancyTest {
 		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
 		callbackOrder.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				source.rollTo(callbackBook);
 			}
 

@@ -78,24 +78,24 @@ public class OrderBookIteratorTest {
 		try {
 			iterator.next();
 			fail("Expected NoSuchElementException");
-		} catch(NoSuchElementException expected) {
+		} catch (NoSuchElementException expected) {
 		}
 
 		try {
 			iterator.remove();
 			fail("Expected UnsupportedOperationException");
-		} catch(UnsupportedOperationException expected) {
+		} catch (UnsupportedOperationException expected) {
 		}
 	}
 
 	@Test
 	public void test_CancelingEveryCurrentOrderContinuesInBothDirections() {
-		for(TraversalOrder traversalOrder : TraversalOrder.values()) {
+		for (TraversalOrder traversalOrder : TraversalOrder.values()) {
 			OrderBook book = createBuyBook();
 			List<Long> visited = new ArrayList<Long>();
 			Iterator<Order> iterator = book.iterator(Side.BUY, traversalOrder);
 
-			while(iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				Order order = iterator.next();
 				visited.add(order.getId());
 				order.cancel();
@@ -116,7 +116,7 @@ public class OrderBookIteratorTest {
 		Iterator<Order> iterator = book.iterator(Side.BUY);
 		int visited = 0;
 
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			Order order = iterator.next();
 			visited++;
 			order.reduceTo(0);
@@ -321,8 +321,8 @@ public class OrderBookIteratorTest {
 		assertSame(order, book.getOrder(1));
 		assertEquals(1, reported[0].size());
 		assertTrue(reported[0].get(0).getListenerException() instanceof ReentrantOrderBookOperationException);
-		ReentrantOrderBookOperationException failure =
-				(ReentrantOrderBookOperationException) reported[0].get(0).getListenerException();
+		ReentrantOrderBookOperationException failure = (ReentrantOrderBookOperationException) reported[0].get(
+				0).getListenerException();
 		assertSame(book, failure.getOrderBook());
 		assertEquals("iterator", failure.getOperation());
 	}
@@ -349,8 +349,8 @@ public class OrderBookIteratorTest {
 		book.getOrder(1).reduceTo(80);
 
 		assertEquals(1, reported[0].size());
-		ReentrantOrderBookOperationException failure =
-				(ReentrantOrderBookOperationException) reported[0].get(0).getListenerException();
+		ReentrantOrderBookOperationException failure = (ReentrantOrderBookOperationException) reported[0].get(
+				0).getListenerException();
 		assertEquals("Iterator.hasNext", failure.getOperation());
 		assertOrderIds(iterator, 1, 2, 3, 4);
 	}
@@ -376,8 +376,8 @@ public class OrderBookIteratorTest {
 		book.getOrder(1).reduceTo(80);
 
 		assertEquals(1, reported[0].size());
-		ReentrantOrderBookOperationException failure =
-				(ReentrantOrderBookOperationException) reported[0].get(0).getListenerException();
+		ReentrantOrderBookOperationException failure = (ReentrantOrderBookOperationException) reported[0].get(
+				0).getListenerException();
 		assertEquals("Iterator.next", failure.getOperation());
 		assertOrderIds(iterator, 1, 2, 3, 4);
 	}
@@ -390,7 +390,8 @@ public class OrderBookIteratorTest {
 		Order order = book.getOrder(1);
 		order.addListener(new ListenerSafetyTestSupport.OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				iterator.next();
 			}
 
@@ -403,8 +404,8 @@ public class OrderBookIteratorTest {
 		order.reduceTo(80);
 
 		assertEquals(1, reported[0].size());
-		ReentrantOrderBookOperationException failure =
-				(ReentrantOrderBookOperationException) reported[0].get(0).getListenerException();
+		ReentrantOrderBookOperationException failure = (ReentrantOrderBookOperationException) reported[0].get(
+				0).getListenerException();
 		assertEquals("Iterator.next", failure.getOperation());
 		assertOrderIds(iterator, 1, 2, 3, 4);
 	}
@@ -426,7 +427,7 @@ public class OrderBookIteratorTest {
 			public void onExceptionsThrown(OrderBook orderBook, OrderBookListenerExceptions exceptions) {
 				try {
 					iterator.next();
-				} catch(Exception e) {
+				} catch (Exception e) {
 					reportFailure[0] = e;
 				}
 			}
@@ -435,8 +436,7 @@ public class OrderBookIteratorTest {
 		book.getOrder(1).reduceTo(80);
 
 		assertTrue(reportFailure[0] instanceof ReentrantOrderBookOperationException);
-		ReentrantOrderBookOperationException failure =
-				(ReentrantOrderBookOperationException) reportFailure[0];
+		ReentrantOrderBookOperationException failure = (ReentrantOrderBookOperationException) reportFailure[0];
 		assertEquals("Iterator.next", failure.getOperation());
 		assertOrderIds(iterator, 1, 2, 3, 4);
 	}
@@ -445,19 +445,18 @@ public class OrderBookIteratorTest {
 	public void test_RepeatedTraversalCancellationAndPoolReuse() {
 		OrderBook book = new OrderBook("AAPL");
 
-		for(int iteration = 0; iteration < 250; iteration++) {
+		for (int iteration = 0; iteration < 250; iteration++) {
 			long firstId = iteration * 4L + 1;
 			book.createLimit(firstId, "1", firstId, Side.BUY, 100, 100, TimeInForce.GTC);
 			book.createLimit(firstId + 1, "2", firstId + 1, Side.BUY, 100, 100, TimeInForce.GTC);
 			book.createLimit(firstId + 2, "3", firstId + 2, Side.BUY, 100, 99, TimeInForce.GTC);
 			book.createLimit(firstId + 3, "4", firstId + 3, Side.BUY, 100, 98, TimeInForce.GTC);
-			TraversalOrder traversalOrder = iteration % 2 == 0
-					? TraversalOrder.PRICE_TIME_PRIORITY
+			TraversalOrder traversalOrder = iteration % 2 == 0 ? TraversalOrder.PRICE_TIME_PRIORITY
 					: TraversalOrder.REVERSE_PRICE_TIME_PRIORITY;
 			Iterator<Order> iterator = book.iterator(Side.BUY, traversalOrder);
 			int visited = 0;
 
-			while(iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				iterator.next().cancel();
 				visited++;
 			}
@@ -478,10 +477,12 @@ public class OrderBookIteratorTest {
 
 	private static void assertOrderIds(Iterator<Order> iterator, long... expectedIds) {
 		List<Long> actualIds = new ArrayList<Long>();
-		while(iterator.hasNext()) actualIds.add(iterator.next().getId());
+		while (iterator.hasNext())
+			actualIds.add(iterator.next().getId());
 
 		List<Long> expected = new ArrayList<Long>();
-		for(long expectedId : expectedIds) expected.add(expectedId);
+		for (long expectedId : expectedIds)
+			expected.add(expectedId);
 		assertEquals(expected, actualIds);
 	}
 

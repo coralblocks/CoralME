@@ -142,7 +142,8 @@ final class ListenerSafetyTestSupport {
 	static class OrderListenerAdapter implements OrderListener {
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+				CancelReason cancelReason) {
 		}
 
 		@Override

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,18 +20,15 @@ import com.coralblocks.coralme.Order.Side;
 /**
  * Describes an exception thrown by an external {@link OrderBookListener}.
  *
- * <p>The order information is copied when the exception is captured because
- * {@link Order} instances are pooled and may later be reused.</p>
+ * <p>
+ * The order information is copied when the exception is captured because
+ * {@link Order} instances are pooled and may later be reused.
+ * </p>
  */
 public final class OrderBookListenerException extends RuntimeException {
 
 	public static enum Callback {
-		ON_ORDER_REDUCED,
-		ON_ORDER_CANCELED,
-		ON_ORDER_EXECUTED,
-		ON_ORDER_ACCEPTED,
-		ON_ORDER_REJECTED,
-		ON_ORDER_RESTED,
+		ON_ORDER_REDUCED, ON_ORDER_CANCELED, ON_ORDER_EXECUTED, ON_ORDER_ACCEPTED, ON_ORDER_REJECTED, ON_ORDER_RESTED,
 		ON_ORDER_TERMINATED
 	}
 
@@ -51,7 +48,8 @@ public final class OrderBookListenerException extends RuntimeException {
 		this(listener, callback, time, order, -1, -1, cause);
 	}
 
-	OrderBookListenerException(OrderBookListener listener, Callback callback, long time, Order order, long executionId, long matchId, Exception cause) {
+	OrderBookListenerException(OrderBookListener listener, Callback callback, long time, Order order, long executionId,
+			long matchId, Exception cause) {
 		super(message(listener, callback, order), cause);
 		this.listener = listener;
 		this.callback = callback;
@@ -67,7 +65,8 @@ public final class OrderBookListenerException extends RuntimeException {
 	}
 
 	private static String message(OrderBookListener listener, Callback callback, Order order) {
-		String listenerIdentity = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener));
+		String listenerIdentity = listener.getClass().getName() + "@"
+				+ Integer.toHexString(System.identityHashCode(listener));
 		return "OrderBookListener " + listenerIdentity + " threw from " + callback + " for orderId=" + order.getId();
 	}
 
@@ -104,16 +103,16 @@ public final class OrderBookListenerException extends RuntimeException {
 	}
 
 	/**
-	 * Returns the execution identifier, or {@code -1} when the failing callback
-	 * was not {@link Callback#ON_ORDER_EXECUTED}.
+	 * Returns the execution identifier, or {@code -1} when the failing callback was
+	 * not {@link Callback#ON_ORDER_EXECUTED}.
 	 */
 	public long getExecutionId() {
 		return executionId;
 	}
 
 	/**
-	 * Returns the match identifier, or {@code -1} when the failing callback was
-	 * not {@link Callback#ON_ORDER_EXECUTED}.
+	 * Returns the match identifier, or {@code -1} when the failing callback was not
+	 * {@link Callback#ON_ORDER_EXECUTED}.
 	 */
 	public long getMatchId() {
 		return matchId;

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015-2024 (c) CoralBlocks LLC - http://www.coralblocks.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,30 +35,31 @@ import com.coralblocks.coralpool.ObjectBuilder;
 import com.coralblocks.coralpool.ObjectPool;
 
 public class OrderBook {
-	
+
 	/**
-	 * The default initial size of the {@link Order} object pool. Can be changed for tuning.
-	 * The value is read when an {@link OrderBook} is constructed, so changes affect
-	 * only subsequently constructed order books.
+	 * The default initial size of the {@link Order} object pool. Can be changed for
+	 * tuning. The value is read when an {@link OrderBook} is constructed, so
+	 * changes affect only subsequently constructed order books.
 	 */
 	public static int ORDER_POOL_INITIAL_SIZE = 512;
-	
+
 	/**
-	 * The default initial size of the {@link PriceLevel} object pool. Can be changed for tuning.
-	 * The value is read when an {@link OrderBook} is constructed, so changes affect
-	 * only subsequently constructed order books.
+	 * The default initial size of the {@link PriceLevel} object pool. Can be
+	 * changed for tuning. The value is read when an {@link OrderBook} is
+	 * constructed, so changes affect only subsequently constructed order books.
 	 */
 	public static int PRICE_LEVEL_POOL_INITIAL_SIZE = 128;
-	
+
 	private static final boolean DEFAULT_ALLOW_TRADE_TO_SELF = true;
-	
+
 	private static final Timestamper TIMESTAMPER = new SystemTimestamper();
-	
-	public static enum State { NORMAL, LOCKED, CROSSED, ONESIDED, EMPTY }
+
+	public static enum State {
+		NORMAL, LOCKED, CROSSED, ONESIDED, EMPTY
+	}
 
 	public static enum TraversalOrder {
-		PRICE_TIME_PRIORITY(false),
-		REVERSE_PRICE_TIME_PRIORITY(true);
+		PRICE_TIME_PRIORITY(false), REVERSE_PRICE_TIME_PRIORITY(true);
 
 		private final boolean reverse;
 
@@ -66,31 +67,31 @@ public class OrderBook {
 			this.reverse = reverse;
 		}
 	}
-	
+
 	private final ObjectPool<Order> orderPool = new ArrayObjectPool<Order>(ORDER_POOL_INITIAL_SIZE, Order.class);
-	
+
 	private final ObjectPool<PriceLevel> priceLevelPool;
-	
+
 	private long execId = 0;
-	
+
 	private long matchId = 0;
-	
+
 	private PriceLevel[] head = new PriceLevel[2];
-	
+
 	private PriceLevel[] tail = new PriceLevel[2];
-	
+
 	private int[] levels = new int[] { 0, 0 };
-	
+
 	private final LongMap<Order> orders = new LongMap<Order>();
 
 	private final ReusableOrderIterator priceTimePriorityIterator = new ReusableOrderIterator(false);
 
 	private final ReusableOrderIterator reversePriceTimePriorityIterator = new ReusableOrderIterator(true);
-	
+
 	private final String security;
-	
+
 	private long lastExecutedPrice = Long.MAX_VALUE;
-	
+
 	private final List<OrderBookListener> listeners = new ArrayList<OrderBookListener>(8);
 
 	private boolean externalListenerCallbackInProgress;
@@ -100,69 +101,68 @@ public class OrderBook {
 	private OrderBookListenerExceptions listenerExceptions;
 
 	private List<Order> deferredOrderListenerExceptionReports;
-	
+
 	private final Timestamper timestamper;
-	
+
 	private final boolean allowTradeToSelf;
 
 	private final OrderListener internalOrderListener = new InternalOrderListener();
-	
-	
+
 	public OrderBook(String security, boolean allowTradeToSelf) {
 		this(security, TIMESTAMPER, null, allowTradeToSelf);
 	}
-	
+
 	public OrderBook(String security) {
 		this(security, TIMESTAMPER, null);
 	}
-	
+
 	public OrderBook(String security, Timestamper timestamper, boolean allowTradeToSelf) {
 		this(security, timestamper, null, allowTradeToSelf);
 	}
-	
+
 	public OrderBook(String security, Timestamper timestamper) {
 		this(security, timestamper, null);
 	}
-	
+
 	public OrderBook(String security, OrderBookListener listener, boolean allowTradeToSelf) {
 		this(security, TIMESTAMPER, listener, allowTradeToSelf);
 	}
-	
+
 	public OrderBook(String security, OrderBookListener listener) {
 		this(security, TIMESTAMPER, listener);
 	}
-	
+
 	public OrderBook(String security, Timestamper timestamper, OrderBookListener listener) {
 		this(security, timestamper, listener, DEFAULT_ALLOW_TRADE_TO_SELF);
 	}
-	
+
 	public OrderBook(OrderBook orderBook) {
 		this(orderBook.getSecurity(), orderBook.getTimestamper(), null, orderBook.isAllowTradeToSelf());
-		 for(int i = 0; i < orderBook.listeners.size(); i++) {
-			 addListener(orderBook.listeners.get(i));
-		 }
+		for (int i = 0; i < orderBook.listeners.size(); i++) {
+			addListener(orderBook.listeners.get(i));
+		}
 	}
 
 	public OrderBook(String security, Timestamper timestamper, OrderBookListener listener, boolean allowTradeToSelf) {
-		
+
 		this.security = security;
-		
+
 		this.timestamper = timestamper;
-		
+
 		this.allowTradeToSelf = allowTradeToSelf;
-		
+
 		ObjectBuilder<PriceLevel> priceLevelBuilder = new ObjectBuilder<PriceLevel>() {
 			@Override
 			public PriceLevel newInstance() {
 				return new PriceLevel();
 			}
 		};
-		
+
 		this.priceLevelPool = new ArrayObjectPool<PriceLevel>(PRICE_LEVEL_POOL_INITIAL_SIZE, priceLevelBuilder);
-		
+
 		if (listener != null) listeners.add(listener);
 	}
-	
+
 	/**
 	 * Adds a listener if it has not already been registered. Listeners are notified
 	 * in registration order.
@@ -175,7 +175,7 @@ public class OrderBook {
 		if (listener == null) throw new NullPointerException("listener");
 		if (!listeners.contains(listener)) listeners.add(listener);
 	}
-	
+
 	public void removeListener(OrderBookListener listener) {
 		checkExternalListenerReentrancy("removeListener");
 		listeners.remove(listener);
@@ -200,38 +200,38 @@ public class OrderBook {
 	 *
 	 * @return true when trade to self is allowed
 	 */
-	
+
 	public final boolean isAllowTradeToSelf() {
 		return allowTradeToSelf;
 	}
-	
+
 	public Timestamper getTimestamper() {
 		return timestamper;
 	}
-	
+
 	public String getSecurity() {
-		
+
 		return security;
 	}
-	
+
 	public final Order getBestBidOrder() {
-		
+
 		if (!hasBids()) return null;
-		
+
 		PriceLevel pl = head(Side.BUY);
-		
+
 		return pl.head();
 	}
-	
+
 	public final Order getBestAskOrder() {
-		
+
 		if (!hasAsks()) return null;
-		
+
 		PriceLevel pl = head(Side.SELL);
-				
+
 		return pl.head();
 	}
-	
+
 	/**
 	 * Returns the cached iterator for the requested traversal order, reset to the
 	 * beginning of the requested side. No iterator is allocated by this method.
@@ -249,15 +249,14 @@ public class OrderBook {
 	 * The same iterator instance is reused for every traversal in the same
 	 * direction. Requesting it again resets any traversal using that instance.
 	 *
-	 * @param side the side to traverse
+	 * @param side           the side to traverse
 	 * @param traversalOrder the order in which prices and orders are visited
 	 * @return the cached, reset iterator
 	 */
 	public final Iterator<Order> iterator(Side side, TraversalOrder traversalOrder) {
 		checkExternalListenerReentrancy("iterator");
 
-		ReusableOrderIterator iterator = traversalOrder.reverse
-				? reversePriceTimePriorityIterator
+		ReusableOrderIterator iterator = traversalOrder.reverse ? reversePriceTimePriorityIterator
 				: priceTimePriorityIterator;
 		iterator.reset(side);
 		return iterator;
@@ -338,40 +337,41 @@ public class OrderBook {
 			throw new UnsupportedOperationException();
 		}
 	}
-	
+
 	/**
-	 * Returns the resting order with the given exchange order ID, or null if none exists.
-	 * Exchange order IDs must be unique among resting orders. After an order becomes
-	 * terminal and is removed from the order book, its ID may be reused.
+	 * Returns the resting order with the given exchange order ID, or null if none
+	 * exists. Exchange order IDs must be unique among resting orders. After an
+	 * order becomes terminal and is removed from the order book, its ID may be
+	 * reused.
 	 *
 	 * @param id the exchange order ID
 	 * @return the resting order, or null if the ID is not in use
 	 */
 	public final Order getOrder(long id) {
-		
+
 		return orders.get(id);
 	}
-	
+
 	public final int getNumberOfOrders() {
-		
+
 		return orders.size();
 	}
-	
+
 	public final boolean isEmpty() {
 
 		return orders.isEmpty();
 	}
-	
+
 	public final PriceLevel head(Side side) {
-		
+
 		return head[side.index()];
 	}
-	
+
 	public final PriceLevel tail(Side side) {
-		
+
 		return tail[side.index()];
 	}
-	
+
 	/**
 	 * Returns the price of the last execution, or {@link Long#MAX_VALUE} if no
 	 * execution has occurred. Because {@code Long.MAX_VALUE} is also a valid long
@@ -380,7 +380,7 @@ public class OrderBook {
 	 * @return the last executed price, or {@code Long.MAX_VALUE}
 	 */
 	public long getLastExecutedPrice() {
-		
+
 		return lastExecutedPrice;
 	}
 
@@ -395,72 +395,72 @@ public class OrderBook {
 	}
 
 	/**
-	 * Returns the difference between the best ask and best bid prices.
-	 * Call {@link #hasSpread()} first to ensure both sides are present. The result
-	 * is zero for a locked order book and negative for a crossed order book.
+	 * Returns the difference between the best ask and best bid prices. Call
+	 * {@link #hasSpread()} first to ensure both sides are present. The result is
+	 * zero for a locked order book and negative for a crossed order book.
 	 *
 	 * @return the spread
-	 * @throws ArithmeticException if the spread cannot be represented as a long
+	 * @throws ArithmeticException  if the spread cannot be represented as a long
 	 * @throws NullPointerException if either side has no resting orders
 	 */
 	public final long getSpread() {
-		
+
 		PriceLevel bestBid = head[Side.BUY.index()];
-		
+
 		PriceLevel bestAsk = head[Side.SELL.index()];
-		
+
 		return Math.subtractExact(bestAsk.getPrice(), bestBid.getPrice());
 	}
-	
+
 	public final State getState() {
 
 		PriceLevel bestBid = head[Side.BUY.index()];
-		
+
 		PriceLevel bestAsk = head[Side.SELL.index()];
 
 		if (bestBid != null && bestAsk != null) {
-			
+
 			int priceComparison = Long.compare(bestAsk.getPrice(), bestBid.getPrice());
-			
+
 			if (priceComparison == 0) return State.LOCKED;
-			
+
 			if (priceComparison < 0) return State.CROSSED;
-			
+
 			return State.NORMAL;
-			
+
 		} else if (bestBid == null && bestAsk == null) {
-			
+
 			return State.EMPTY;
-			
+
 		} else {
-			
+
 			return State.ONESIDED;
 		}
 	}
-	
+
 	public final boolean hasTop(Side side) {
-		
+
 		return side.isBuy() ? hasBestBid() : hasBestAsk();
 	}
-	
+
 	public final boolean hasAsks() {
 		return hasBestAsk();
 	}
-	
+
 	public final boolean hasBids() {
 		return hasBestBid();
 	}
-	
+
 	public final boolean hasBestBid() {
-		
+
 		return head[Side.BUY.index()] != null;
 	}
-	
+
 	public final boolean hasBestAsk() {
-		
+
 		return head[Side.SELL.index()] != null;
 	}
-	
+
 	/**
 	 * Returns the best price for the requested side.
 	 *
@@ -469,7 +469,7 @@ public class OrderBook {
 	 * @throws NullPointerException if the side is null or has no resting orders
 	 */
 	public final long getBestPrice(Side side) {
-		
+
 		return side.isBuy() ? getBestBidPrice() : getBestAskPrice();
 	}
 
@@ -481,12 +481,12 @@ public class OrderBook {
 	 * @throws NullPointerException if there are no resting bids
 	 */
 	public final long getBestBidPrice() {
-		
+
 		int index = Side.BUY.index();
-		
+
 		return head[index].getPrice();
 	}
-	
+
 	/**
 	 * Returns the best ask price. Call {@link #hasAsks()} first when the ask side
 	 * may be empty.
@@ -495,12 +495,12 @@ public class OrderBook {
 	 * @throws NullPointerException if there are no resting asks
 	 */
 	public final long getBestAskPrice() {
-		
+
 		int index = Side.SELL.index();
-		
+
 		return head[index].getPrice();
 	}
-	
+
 	/**
 	 * Returns the aggregate size at the best price for the requested side.
 	 *
@@ -509,10 +509,10 @@ public class OrderBook {
 	 * @throws NullPointerException if the side is null or has no resting orders
 	 */
 	public final long getBestSize(Side side) {
-		
+
 		return side.isBuy() ? getBestBidSize() : getBestAskSize();
 	}
-	
+
 	/**
 	 * Returns the aggregate size at the best bid. Call {@link #hasBids()} first
 	 * when the bid side may be empty.
@@ -521,12 +521,12 @@ public class OrderBook {
 	 * @throws NullPointerException if there are no resting bids
 	 */
 	public final long getBestBidSize() {
-		
+
 		int index = Side.BUY.index();
-		
+
 		return head[index].getSize();
 	}
-	
+
 	/**
 	 * Returns the aggregate size at the best ask. Call {@link #hasAsks()} first
 	 * when the ask side may be empty.
@@ -535,123 +535,123 @@ public class OrderBook {
 	 * @throws NullPointerException if there are no resting asks
 	 */
 	public final long getBestAskSize() {
-		
+
 		int index = Side.SELL.index();
-		
+
 		return head[index].getSize();
 	}
-	
+
 	public final int getLevels(Side side) {
-		
+
 		return side.isBuy() ? getBidLevels() : getAskLevels();
 	}
-	
+
 	public final int getBidLevels() {
-		
+
 		return levels[Side.BUY.index()];
 	}
-	
+
 	public final int getAskLevels() {
-		
+
 		return levels[Side.SELL.index()];
 	}
-	
+
 	public void showOrders() {
 		System.out.println(orders());
 	}
-	
+
 	public void showLevels() {
 		System.out.println(levels());
 	}
-	
+
 	public String levels() {
 		StringBuilder sb = new StringBuilder(1024);
 		levels(sb);
 		return sb.toString();
 	}
-	
+
 	public String orders() {
 		StringBuilder sb = new StringBuilder(1024);
 		orders(sb);
 		return sb.toString();
 	}
-	
+
 	public void levels(StringBuilder sb, Side side) {
 
 		if (side == Side.SELL) {
-			
+
 			if (!hasAsks()) {
 				return;
 			}
-		
-			for(PriceLevel pl = head[side.index()]; pl != null; pl = pl.next) {
-				
+
+			for (PriceLevel pl = head[side.index()]; pl != null; pl = pl.next) {
+
 				String size = String.format("%6d", pl.getSize());
 				String price = String.format("%9.2f", DoubleUtils.toDouble(pl.getPrice()));
-				
+
 				sb.append(size).append(" @ ").append(price);
 				sb.append(" (orders=").append(pl.getOrders()).append(")\n");
 			}
-			
+
 		} else {
-			
+
 			if (!hasBids()) {
 				return;
 			}
-			
-			for(PriceLevel pl = tail[side.index()]; pl != null; pl = pl.prev) {
-				
+
+			for (PriceLevel pl = tail[side.index()]; pl != null; pl = pl.prev) {
+
 				String size = String.format("%6d", pl.getSize());
 				String price = String.format("%9.2f", DoubleUtils.toDouble(pl.getPrice()));
-				
+
 				sb.append(size).append(" @ ").append(price);
 				sb.append(" (orders=").append(pl.getOrders()).append(")\n");
 			}
 		}
 	}
-	
+
 	public void orders(StringBuilder sb, Side side) {
 
 		if (side == Side.SELL) {
-			
+
 			if (!hasAsks()) {
 				return;
 			}
-		
-			for(PriceLevel pl = head[side.index()]; pl != null; pl = pl.next) {
-				
-				for(Order o = pl.head(); o != null; o = o.next) {
+
+			for (PriceLevel pl = head[side.index()]; pl != null; pl = pl.next) {
+
+				for (Order o = pl.head(); o != null; o = o.next) {
 
 					String size = String.format("%6d", o.getOpenSize());
 					String price = String.format("%9.2f", DoubleUtils.toDouble(o.getPrice()));
-					
+
 					sb.append(size).append(" @ ").append(price);
 					sb.append(" (id=").append(o.getId()).append(")\n");
 				}
 			}
-			
+
 		} else {
-			
+
 			if (!hasBids()) {
 				return;
 			}
-			
-			for(PriceLevel pl = tail[side.index()]; pl != null; pl = pl.prev) {
-				
-				for(Order o = pl.head(); o != null; o = o.next) {
+
+			for (PriceLevel pl = tail[side.index()]; pl != null; pl = pl.prev) {
+
+				for (Order o = pl.head(); o != null; o = o.next) {
 
 					String size = String.format("%6d", o.getOpenSize());
 					String price = String.format("%9.2f", DoubleUtils.toDouble(o.getPrice()));
-					
+
 					sb.append(size).append(" @ ").append(price);
 					sb.append(" (id=").append(o.getId()).append(")\n");
 				}
 			}
 		}
 	}
-	
+
 	public void orders(StringBuilder sb) {
-		
+
 		if (hasBids()) orders(sb, Side.BUY);
 		if (hasSpread()) {
 			sb.append("-------- ");
@@ -662,9 +662,9 @@ public class OrderBook {
 		}
 		if (hasAsks()) orders(sb, Side.SELL);
 	}
-	
+
 	public void levels(StringBuilder sb) {
-		
+
 		if (hasBids()) levels(sb, Side.BUY);
 		if (hasSpread()) {
 			sb.append("-------- ");
@@ -675,150 +675,153 @@ public class OrderBook {
 		}
 		if (hasAsks()) levels(sb, Side.SELL);
 	}
-	
+
 	private final void match(Order order) {
-		
+
 		int index = order.getSide().invertedIndex(); // NOTE: Inverted because bid hits ask and vice-versa
-		
-		OUTER:
-		for(PriceLevel pl = head[index], nextPriceLevel; pl != null; pl = nextPriceLevel) {
+
+		OUTER: for (PriceLevel pl = head[index], nextPriceLevel; pl != null; pl = nextPriceLevel) {
 
 			// Maker callbacks can release both objects, so save their links first.
 			nextPriceLevel = pl.next;
-			
+
 			if (order.getType() != Type.MARKET && order.getSide().isOutside(order.getPrice(), pl.getPrice())) break;
-			
-			for(Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
+
+			for (Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
 
 				nextOrder = o.next;
-				
+
 				if (!allowTradeToSelf && o.getClientId() == order.getClientId()) {
 					order.cancel(CancelReason.CROSSED);
 					break OUTER;
 				}
-				
+
 				long sizeToExecute = Math.min(order.getOpenSize(), o.getOpenSize());
-				
+
 				long priceExecuted = o.getPrice(); // always price improve the taker
-				
+
 				long ts = timestamper.nanoEpoch();
-				
+
 				lastExecutedPrice = priceExecuted;
-				
+
 				long execId1 = ++execId;
 				long execId2 = ++execId;
 				long matchId = ++this.matchId;
-				
+
 				// Maker execution callbacks precede taker execution callbacks for each match.
 				o.execute(ts, ExecuteSide.MAKER, sizeToExecute, priceExecuted, execId1, matchId);
-				
+
 				order.execute(ts, ExecuteSide.TAKER, sizeToExecute, priceExecuted, execId2, matchId);
-				
+
 				if (order.isTerminal()) {
-					
+
 					break OUTER;
 				}
 			}
 		}
 	}
-	
+
 	private final PriceLevel findPriceLevel(Side side, long price) {
-		
+
 		PriceLevel foundPriceLevel = null;
-		
+
 		int index = side.index();
-		
-		for(PriceLevel pl = head[index]; pl != null; pl = pl.next) {
-			
+
+		for (PriceLevel pl = head[index]; pl != null; pl = pl.next) {
+
 			if (side.isInside(price, pl.getPrice())) {
-				
+
 				foundPriceLevel = pl;
-				
+
 				break;
 			}
 		}
-		
+
 		PriceLevel priceLevel;
-		
+
 		if (foundPriceLevel == null) {
-			
+
 			priceLevel = priceLevelPool.get();
 
 			priceLevel.init(security, side, price);
-			
+
 			levels[index]++;
-			
+
 			if (head[index] == null) {
-				
+
 				head[index] = tail[index] = priceLevel;
-				
+
 				priceLevel.next = priceLevel.prev = null;
-				
+
 			} else {
-				
+
 				tail[index].next = priceLevel;
-				
+
 				priceLevel.prev = tail[index];
-				
+
 				priceLevel.next = null;
-				
+
 				tail[index] = priceLevel;
 			}
-			
+
 		} else if (foundPriceLevel.getPrice() != price) {
-			
+
 			priceLevel = priceLevelPool.get();
-			
+
 			priceLevel.init(security, side, price);
-			
+
 			levels[index]++;
 
 			if (foundPriceLevel.prev != null) {
-				
+
 				foundPriceLevel.prev.next = priceLevel;
-				
+
 				priceLevel.prev = foundPriceLevel.prev;
 			}
 
 			priceLevel.next = foundPriceLevel;
-			
+
 			foundPriceLevel.prev = priceLevel;
-			
+
 			if (head[index] == foundPriceLevel) {
-				
+
 				head[index] = priceLevel;
 			}
-			
+
 		} else {
-			
+
 			priceLevel = foundPriceLevel;
 		}
 
 		return priceLevel;
 	}
-	
-	public Order createLimit(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size, double price, TimeInForce tif) {
+
+	public Order createLimit(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size,
+			double price, TimeInForce tif) {
 		return createLimit(clientId, clientOrderId, exchangeOrderId, side, size, DoubleUtils.toLong(price), tif);
 	}
 
-	public Order createLimit(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size, long price, TimeInForce tif) {
+	public Order createLimit(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size,
+			long price, TimeInForce tif) {
 		checkExternalListenerReentrancy("createLimit");
 		return createOrder(clientId, clientOrderId, exchangeOrderId, side, size, price, Type.LIMIT, tif);
 	}
-	
+
 	public Order createMarket(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size) {
 		checkExternalListenerReentrancy("createMarket");
 		return createOrder(clientId, clientOrderId, exchangeOrderId, side, size, 0, Type.MARKET, null);
 	}
 
-	private void collectListenerException(OrderBookListener listener, OrderBookListenerException.Callback callback, long time, Order order, Exception exception) {
+	private void collectListenerException(OrderBookListener listener, OrderBookListenerException.Callback callback,
+			long time, Order order, Exception exception) {
 		collectListenerException(listener, callback, time, order, -1, -1, exception);
 	}
 
-	private void collectListenerException(OrderBookListener listener, OrderBookListenerException.Callback callback, long time, Order order,
-			long executionId, long matchId, Exception exception) {
+	private void collectListenerException(OrderBookListener listener, OrderBookListenerException.Callback callback,
+			long time, Order order, long executionId, long matchId, Exception exception) {
 		if (listenerExceptions == null) listenerExceptions = new OrderBookListenerExceptions();
-		listenerExceptions.add(new OrderBookListenerException(listener, callback, time, order, executionId, matchId, exception));
+		listenerExceptions.add(
+				new OrderBookListenerException(listener, callback, time, order, executionId, matchId, exception));
 	}
 
 	final boolean isOrderListenerExceptionReportingDeferred() {
@@ -830,7 +833,7 @@ public class OrderBook {
 			deferredOrderListenerExceptionReports = new ArrayList<Order>(4);
 		}
 
-		for(int i = 0; i < deferredOrderListenerExceptionReports.size(); i++) {
+		for (int i = 0; i < deferredOrderListenerExceptionReports.size(); i++) {
 			if (deferredOrderListenerExceptionReports.get(i) == order) return;
 		}
 
@@ -843,7 +846,7 @@ public class OrderBook {
 
 	private void discardDeferredOrderListenerExceptionReports() {
 		if (deferredOrderListenerExceptionReports != null) {
-			for(int i = 0; i < deferredOrderListenerExceptionReports.size(); i++) {
+			for (int i = 0; i < deferredOrderListenerExceptionReports.size(); i++) {
 				deferredOrderListenerExceptionReports.get(i).discardListenerExceptions();
 			}
 			deferredOrderListenerExceptionReports = null;
@@ -869,13 +872,14 @@ public class OrderBook {
 
 		int size = listeners.size();
 
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			OrderBookListener listener = listeners.get(i);
 			enterExternalListenerCallback();
 			try {
 				listener.onExceptionsThrown(this, orderBookExceptions);
-			} catch(Exception ignored) {
-				// Exceptions thrown while reporting listener exceptions are intentionally swallowed...
+			} catch (Exception ignored) {
+				// Exceptions thrown while reporting listener exceptions are intentionally
+				// swallowed...
 				// For someone to throw an exception here would be very silly
 			} finally {
 				exitExternalListenerCallback();
@@ -889,16 +893,16 @@ public class OrderBook {
 		List<Order> orders = deferredOrderListenerExceptionReports;
 		deferredOrderListenerExceptionReports = null;
 
-		for(int i = 0; i < orders.size(); i++) {
+		for (int i = 0; i < orders.size(); i++) {
 			orders.get(i).reportListenerExceptions();
 		}
 	}
 
 	/**
 	 * Performs additional validation before an order is accepted. Implementations
-	 * should inspect the order without mutating it and return a rejection reason, or
-	 * null to accept it. If validation throws, the original failure is propagated
-	 * after the unaccepted order has been returned to the object pool.
+	 * should inspect the order without mutating it and return a rejection reason,
+	 * or null to accept it. If validation throws, the original failure is
+	 * propagated after the unaccepted order has been returned to the object pool.
 	 *
 	 * @param order the unaccepted order to validate
 	 * @return the rejection reason, or null if the order is valid
@@ -921,105 +925,108 @@ public class OrderBook {
 			}
 		}
 	}
-	
+
 	private final Order fillOrCancel(Order order, long exchangeOrderId) {
-		
+
 		Type type = order.getType();
-		
+
 		if (type == Type.MARKET && order.getPrice() != 0) {
-			
-			order.reject(RejectReason.BAD_PRICE); // remember... the OrderListener callback will return the order to the pool...
-			
+
+			order.reject(RejectReason.BAD_PRICE); // remember... the OrderListener callback will return the order to the
+													// pool...
+
 			return order;
 		}
-		
+
 		RejectReason rejectReason = validateOrderAndReleaseOnFailure(order);
 
 		if (rejectReason != null) {
-		
+
 			order.reject(rejectReason); // remember... the OrderListener callback will return the order to the pool...
-			
+
 			return order;
 		}
 
 		// always accept first...
 		order.accept(exchangeOrderId);
-		
+
 		// walk through the book matching:
 
 		match(order);
-		
+
 		// check if there is quantity left that needs to be canceled:
 
 		if (!order.isTerminal()) {
-			
+
 			if (type == Type.MARKET) {
-				
+
 				order.cancel(CancelReason.NO_LIQUIDITY);
-					
+
 			} else {
-				
+
 				CancelReason cancelReason = CancelReason.MISSED;
-				
+
 				if (!hasTop(order.getOtherSide())) {
 					cancelReason = CancelReason.NO_LIQUIDITY;
 				}
-			
+
 				order.cancel(cancelReason);
 			}
 		}
-		
+
 		return order;
 	}
-	
+
 	private Order fillOrRest(Order order, long exchangeOrderId) {
-		
+
 		RejectReason rejectReason = validateOrderAndReleaseOnFailure(order);
 
 		if (rejectReason != null) {
-		
+
 			order.reject(rejectReason); // remember... the OrderListener callback will return the order to the pool...
-			
+
 			return order;
 		}
-		
+
 		// always accept first:
 		order.accept(exchangeOrderId);
-		
+
 		// something needs to be executed first...
-			
+
 		match(order);
-			
+
 		if (order.isTerminal()) {
-				
+
 			return order;
 		}
-		
+
 		// rest the remaining in the book:
 		// but first check if it will not cross its own order
-		if (!allowTradeToSelf && hasTop(order.getOtherSide()) && order.getSide().isInside(order.getPrice(), getBestPrice(order.getOtherSide()))) {
-			
+		if (!allowTradeToSelf && hasTop(order.getOtherSide())
+				&& order.getSide().isInside(order.getPrice(), getBestPrice(order.getOtherSide()))) {
+
 			CancelReason cancelReason = CancelReason.CROSSED;
-			
+
 			order.cancel(cancelReason);
-			
+
 		} else {
-		
+
 			rest(order);
-			
+
 		}
-		
+
 		return order;
 	}
-	
-	final Order createOrder(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size, long price, Type type,TimeInForce tif) {
+
+	final Order createOrder(long clientId, CharSequence clientOrderId, long exchangeOrderId, Side side, long size,
+			long price, Type type, TimeInForce tif) {
 
 		checkExternalListenerReentrancy("createOrder");
-		
+
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
 		boolean operationCompleted = false;
-		
+
 		try {
 
 			Order order = getOrder(clientId, clientOrderId, security, side, size, price, type, tif);
@@ -1044,7 +1051,7 @@ public class OrderBook {
 
 			operationCompleted = true;
 			return order;
-			
+
 		} finally {
 			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
 			if (!operationCompleted) {
@@ -1056,16 +1063,17 @@ public class OrderBook {
 			}
 		}
 	}
-	
+
 	public long rollTo(OrderBook newOrderBook) {
 		return rollTo(newOrderBook, 1);
 	}
 
 	/**
-	 * Rolls this order book's GTC orders to another order book for the same security.
-	 * Exchange order IDs already used by resting orders in the destination are skipped.
+	 * Rolls this order book's GTC orders to another order book for the same
+	 * security. Exchange order IDs already used by resting orders in the
+	 * destination are skipped.
 	 *
-	 * @param newOrderBook the destination order book
+	 * @param newOrderBook         the destination order book
 	 * @param firstExchangeOrderId the first exchange order ID to consider
 	 * @return the next exchange order ID after those considered by the roll
 	 */
@@ -1079,53 +1087,58 @@ public class OrderBook {
 		}
 
 		if (!security.equals(newOrderBook.security)) {
-			throw new IllegalArgumentException("Cannot roll between different securities: " + security + " and " + newOrderBook.security);
+			throw new IllegalArgumentException(
+					"Cannot roll between different securities: " + security + " and " + newOrderBook.security);
 		}
 
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
 		boolean operationCompleted = false;
-		
+
 		try {
 			if (hasBids()) {
-			
-				for(PriceLevel pl = head(Side.BUY), nextPriceLevel; pl != null; pl = nextPriceLevel) {
+
+				for (PriceLevel pl = head(Side.BUY), nextPriceLevel; pl != null; pl = nextPriceLevel) {
 
 					// A successful roll releases the source order and possibly its level.
 					nextPriceLevel = pl.next;
-				
-					for(Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
+
+					for (Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
 
 						nextOrder = o.next;
-					
+
 						if (o.getTimeInForce() != TimeInForce.GTC) continue;
 
-						while(newOrderBook.orders.containsKey(firstExchangeOrderId)) firstExchangeOrderId++;
+						while (newOrderBook.orders.containsKey(firstExchangeOrderId))
+							firstExchangeOrderId++;
 
-						Order rolledOrder = newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
-					
+						Order rolledOrder = newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(),
+								firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
+
 						if (rolledOrder.isAccepted()) o.cancel(CancelReason.ROLLED);
 					}
 				}
 			}
 
 			if (hasAsks()) {
-			
-				for(PriceLevel pl = head(Side.SELL), nextPriceLevel; pl != null; pl = nextPriceLevel) {
+
+				for (PriceLevel pl = head(Side.SELL), nextPriceLevel; pl != null; pl = nextPriceLevel) {
 
 					// A successful roll releases the source order and possibly its level.
 					nextPriceLevel = pl.next;
-				
-					for(Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
+
+					for (Order o = pl.head(), nextOrder; o != null; o = nextOrder) {
 
 						nextOrder = o.next;
-					
+
 						if (o.getTimeInForce() != TimeInForce.GTC) continue;
 
-						while(newOrderBook.orders.containsKey(firstExchangeOrderId)) firstExchangeOrderId++;
+						while (newOrderBook.orders.containsKey(firstExchangeOrderId))
+							firstExchangeOrderId++;
 
-						Order rolledOrder = newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(), firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
-					
+						Order rolledOrder = newOrderBook.createLimit(o.getClientId(), o.getClientOrderId(),
+								firstExchangeOrderId++, o.getSide(), o.getOpenSize(), o.getPrice(), TimeInForce.GTC);
+
 						if (rolledOrder.isAccepted()) o.cancel(CancelReason.ROLLED);
 					}
 				}
@@ -1145,24 +1158,25 @@ public class OrderBook {
 			}
 		}
 	}
-	
+
 	/**
-	 * Cancels all resting DAY orders with {@link CancelReason#EXPIRED}. Cancellation
-	 * callbacks follow the internal order map iteration order, not price-time priority.
+	 * Cancels all resting DAY orders with {@link CancelReason#EXPIRED}.
+	 * Cancellation callbacks follow the internal order map iteration order, not
+	 * price-time priority.
 	 */
 	public void expire() {
 
 		checkExternalListenerReentrancy("expire");
-		
+
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
 		boolean operationCompleted = false;
-		
+
 		try {
 			Iterator<Order> iter = orders.iterator();
 
-			while(iter.hasNext()) {
-				
+			while (iter.hasNext()) {
+
 				Order order = iter.next();
 
 				if (order.getTimeInForce() != TimeInForce.DAY) continue;
@@ -1173,7 +1187,7 @@ public class OrderBook {
 			}
 
 			operationCompleted = true;
-			
+
 		} finally {
 			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
 			if (!operationCompleted) {
@@ -1185,24 +1199,25 @@ public class OrderBook {
 			}
 		}
 	}
-	
+
 	/**
 	 * Cancels all resting orders with {@link CancelReason#PURGED}. Cancellation
-	 * callbacks follow the internal order map iteration order, not price-time priority.
+	 * callbacks follow the internal order map iteration order, not price-time
+	 * priority.
 	 */
 	public final void purge() {
 
 		checkExternalListenerReentrancy("purge");
-		
+
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
 		boolean operationCompleted = false;
-		
+
 		try {
-			
+
 			Iterator<Order> iter = orders.iterator();
 
-			while(iter.hasNext()) {
+			while (iter.hasNext()) {
 				Order order = iter.next();
 
 				iter.remove(); // important otherwise you get a ConcurrentModificationException!
@@ -1211,7 +1226,7 @@ public class OrderBook {
 			}
 
 			operationCompleted = true;
-			
+
 		} finally {
 			deferListenerExceptionReporting = listenerExceptionReportingWasDeferred;
 			if (!operationCompleted) {
@@ -1223,43 +1238,44 @@ public class OrderBook {
 			}
 		}
 	}
-	
+
 	private final void rest(Order order) {
-		
+
 		PriceLevel priceLevel = findPriceLevel(order.getSide(), order.getPrice());
-		
+
 		order.setPriceLevel(priceLevel);
-		
+
 		priceLevel.addOrder(order);
-		
+
 		orders.put(order.getId(), order);
-		
+
 		order.rest();
 	}
-	
-	private Order getOrder(long clientId, CharSequence clientOrderId, String security, Side side, long size, long price, Type type, TimeInForce tif) {
-		
+
+	private Order getOrder(long clientId, CharSequence clientOrderId, String security, Side side, long size, long price,
+			Type type, TimeInForce tif) {
+
 		Order order = orderPool.get();
-		
+
 		order.init(this, timestamper, clientId, clientOrderId, 0, security, side, size, price, type, tif);
-		
+
 		order.addInternalListener(internalOrderListener);
-		
+
 		return order;
 	}
 
 	final OrderListener internalOrderListener() {
 		return internalOrderListener;
 	}
-	
+
 	private void removeOrder(Order order) {
 
 		/*
 		 * Returning these objects to their pools does not modify them. External
-		 * callbacks that follow can inspect them because reentrant operations on
-		 * the same order book are blocked for the duration of callback dispatch.
+		 * callbacks that follow can inspect them because reentrant operations on the
+		 * same order book are blocked for the duration of callback dispatch.
 		 */
-		
+
 		PriceLevel priceLevel = order.getPriceLevel();
 
 		if (priceLevel != null) {
@@ -1267,221 +1283,240 @@ public class OrderBook {
 			priceTimePriorityIterator.orderRemoved(order);
 			reversePriceTimePriorityIterator.orderRemoved(order);
 		}
-		
+
 		if (priceLevel != null && priceLevel.isEmpty()) {
-			
+
 			// remove priceLevel...
-			
+
 			if (priceLevel.prev != null) {
-				
+
 				priceLevel.prev.next = priceLevel.next;
 			}
-			
+
 			if (priceLevel.next != null) {
-				
+
 				priceLevel.next.prev = priceLevel.prev;
 			}
-			
+
 			int index = order.getSide().index();
-			
+
 			if (tail[index] == priceLevel) {
-				
+
 				tail[index] = priceLevel.prev;
 			}
-			
+
 			if (head[index] == priceLevel) {
-				
+
 				head[index] = priceLevel.next;
 			}
-			
+
 			levels[index]--;
-			
+
 			priceLevelPool.release(priceLevel);
 		}
-		
+
 		orders.remove(order.getId());
-		
+
 		orderPool.release(order);
 	}
-	
+
 	private final class InternalOrderListener implements OrderListener {
 
-	@Override
-    public void onOrderReduced(long time, Order order, long canceledSize, long newSize, CancelReason reason) {
+		@Override
+		public void onOrderReduced(long time, Order order, long canceledSize, long newSize, CancelReason reason) {
 
-		checkExternalListenerReentrancy("onOrderReduced");
-		
-		int size = listeners.size();
+			checkExternalListenerReentrancy("onOrderReduced");
 
-		for(int i = 0; i < size; i++) {
-			OrderBookListener listener = listeners.get(i);
-			enterExternalListenerCallback();
-			try {
-				listener.onOrderReduced(OrderBook.this, time, order, canceledSize, newSize, reason);
-			} catch(Exception e) {
-				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REDUCED, time, order, e);
-			} finally {
-				exitExternalListenerCallback();
+			int size = listeners.size();
+
+			for (int i = 0; i < size; i++) {
+				OrderBookListener listener = listeners.get(i);
+				enterExternalListenerCallback();
+				try {
+					listener.onOrderReduced(OrderBook.this, time, order, canceledSize, newSize, reason);
+				} catch (Exception e) {
+					collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REDUCED, time,
+							order, e);
+				} finally {
+					exitExternalListenerCallback();
+				}
 			}
+
+			// The Order reports after its internal and external OrderListeners have
+			// finished
 		}
 
-		// The Order reports after its internal and external OrderListeners have finished
-	}
+		@Override
+		public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason reason) {
 
-	@Override
-    public void onOrderCanceled(long time, Order order, long canceledSize, CancelReason reason) {
+			checkExternalListenerReentrancy("onOrderCanceled");
 
-		checkExternalListenerReentrancy("onOrderCanceled");
-		
-		removeOrder(order);
-		
-		int size = listeners.size();
-
-		for(int i = 0; i < size; i++) {
-			OrderBookListener listener = listeners.get(i);
-			enterExternalListenerCallback();
-			try {
-				listener.onOrderCanceled(OrderBook.this, time, order, canceledSize, reason);
-			} catch(Exception e) {
-				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_CANCELED, time, order, e);
-			} finally {
-				exitExternalListenerCallback();
-			}
-		}
-
-		// The Order reports after onOrderCanceled and onOrderTerminated have both finished
-	}
-
-	@Override
-    public void onOrderExecuted(long time, Order order, ExecuteSide execSide, long sizeExecuted, long priceExecuted, long executionId, long matchId) {
-
-		checkExternalListenerReentrancy("onOrderExecuted");
-		
-		if (order.isTerminal()) {
-			
 			removeOrder(order);
-		}
-		
-		int size = listeners.size();
 
-		for(int i = 0; i < size; i++) {
-			OrderBookListener listener = listeners.get(i);
-			enterExternalListenerCallback();
-			try {
-				listener.onOrderExecuted(OrderBook.this, time, order, execSide, sizeExecuted, priceExecuted, executionId, matchId);
-			} catch(Exception e) {
-				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_EXECUTED, time, order, executionId, matchId, e);
-			} finally {
-				exitExternalListenerCallback();
+			int size = listeners.size();
+
+			for (int i = 0; i < size; i++) {
+				OrderBookListener listener = listeners.get(i);
+				enterExternalListenerCallback();
+				try {
+					listener.onOrderCanceled(OrderBook.this, time, order, canceledSize, reason);
+				} catch (Exception e) {
+					collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_CANCELED, time,
+							order, e);
+				} finally {
+					exitExternalListenerCallback();
+				}
 			}
+
+			// The Order reports after onOrderCanceled and onOrderTerminated have both
+			// finished
 		}
 
-		// Execution is an intermediate callback, so listener exceptions must not be reported here.
-		// Any operation that executes an order must defer reporting until all affected orders have
-		// been updated and the complete OrderBook operation has finished.
-	}
+		@Override
+		public void onOrderExecuted(long time, Order order, ExecuteSide execSide, long sizeExecuted, long priceExecuted,
+				long executionId, long matchId) {
 
-	@Override
-	public void onOrderAccepted(long time, Order order) {
+			checkExternalListenerReentrancy("onOrderExecuted");
 
-		checkExternalListenerReentrancy("onOrderAccepted");
-		
-		int size = listeners.size();
+			if (order.isTerminal()) {
 
-		for(int i = 0; i < size; i++) {
-			OrderBookListener listener = listeners.get(i);
-			enterExternalListenerCallback();
-			try {
-				listener.onOrderAccepted(OrderBook.this, time, order);
-			} catch(Exception e) {
-				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_ACCEPTED, time, order, e);
-			} finally {
-				exitExternalListenerCallback();
+				removeOrder(order);
 			}
-		}
 
-		// Acceptance is an intermediate callback, so listener exceptions must not be reported here.
-		// Any operation that accepts an order must defer reporting until the complete OrderBook
-		// operation has finished.
-	}
-	
-	@Override
-	public void onOrderRejected(long time, Order order, Order.RejectReason reason) {
+			int size = listeners.size();
 
-		checkExternalListenerReentrancy("onOrderRejected");
-	
-		removeOrder(order);
-		
-		int size = listeners.size();
-
-		for(int i = 0; i < size; i++) {
-			OrderBookListener listener = listeners.get(i);
-			enterExternalListenerCallback();
-			try {
-				listener.onOrderRejected(OrderBook.this, time, order, reason);
-			} catch(Exception e) {
-				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REJECTED, time, order, e);
-			} finally {
-				exitExternalListenerCallback();
+			for (int i = 0; i < size; i++) {
+				OrderBookListener listener = listeners.get(i);
+				enterExternalListenerCallback();
+				try {
+					listener.onOrderExecuted(OrderBook.this, time, order, execSide, sizeExecuted, priceExecuted,
+							executionId, matchId);
+				} catch (Exception e) {
+					collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_EXECUTED, time,
+							order, executionId, matchId, e);
+				} finally {
+					exitExternalListenerCallback();
+				}
 			}
+
+			// Execution is an intermediate callback, so listener exceptions must not be
+			// reported here.
+			// Any operation that executes an order must defer reporting until all affected
+			// orders have
+			// been updated and the complete OrderBook operation has finished.
 		}
 
-		// The Order reports after its internal and external OrderListeners have finished
-	}
+		@Override
+		public void onOrderAccepted(long time, Order order) {
 
-	@Override
-    public void onOrderRested(long time, Order order, long restSize, long restPrice) {
+			checkExternalListenerReentrancy("onOrderAccepted");
 
-		checkExternalListenerReentrancy("onOrderRested");
-	    
-		int size = listeners.size();
+			int size = listeners.size();
 
-		for(int i = 0; i < size; i++) {
-			OrderBookListener listener = listeners.get(i);
-			enterExternalListenerCallback();
-			try {
-				listener.onOrderRested(OrderBook.this, time, order, restSize, restPrice);
-			} catch(Exception e) {
-				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_RESTED, time, order, e);
-			} finally {
-				exitExternalListenerCallback();
+			for (int i = 0; i < size; i++) {
+				OrderBookListener listener = listeners.get(i);
+				enterExternalListenerCallback();
+				try {
+					listener.onOrderAccepted(OrderBook.this, time, order);
+				} catch (Exception e) {
+					collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_ACCEPTED, time,
+							order, e);
+				} finally {
+					exitExternalListenerCallback();
+				}
 			}
+
+			// Acceptance is an intermediate callback, so listener exceptions must not be
+			// reported here.
+			// Any operation that accepts an order must defer reporting until the complete
+			// OrderBook
+			// operation has finished.
 		}
 
-		// Resting is part of the operation that accepts and processes an order, so listener exceptions
-		// must not be reported here. That operation must report after the complete OrderBook operation
-		// has finished.
-	}
-	
-	@Override
-	public void onOrderTerminated(long time, Order order) {
+		@Override
+		public void onOrderRejected(long time, Order order, Order.RejectReason reason) {
 
-		checkExternalListenerReentrancy("onOrderTerminated");
-		
-		int size = listeners.size();
-		
-		for(int i = 0; i < size; i++) {
-			OrderBookListener listener = listeners.get(i);
-			enterExternalListenerCallback();
-			try {
-				listener.onOrderTerminated(OrderBook.this, time, order);
-			} catch(Exception e) {
-				collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_TERMINATED, time, order, e);
-			} finally {
-				exitExternalListenerCallback();
+			checkExternalListenerReentrancy("onOrderRejected");
+
+			removeOrder(order);
+
+			int size = listeners.size();
+
+			for (int i = 0; i < size; i++) {
+				OrderBookListener listener = listeners.get(i);
+				enterExternalListenerCallback();
+				try {
+					listener.onOrderRejected(OrderBook.this, time, order, reason);
+				} catch (Exception e) {
+					collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_REJECTED, time,
+							order, e);
+				} finally {
+					exitExternalListenerCallback();
+				}
 			}
+
+			// The Order reports after its internal and external OrderListeners have
+			// finished
 		}
 
-		// The Order reports after its internal and external OrderListeners have finished
+		@Override
+		public void onOrderRested(long time, Order order, long restSize, long restPrice) {
+
+			checkExternalListenerReentrancy("onOrderRested");
+
+			int size = listeners.size();
+
+			for (int i = 0; i < size; i++) {
+				OrderBookListener listener = listeners.get(i);
+				enterExternalListenerCallback();
+				try {
+					listener.onOrderRested(OrderBook.this, time, order, restSize, restPrice);
+				} catch (Exception e) {
+					collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_RESTED, time, order,
+							e);
+				} finally {
+					exitExternalListenerCallback();
+				}
+			}
+
+			// Resting is part of the operation that accepts and processes an order, so
+			// listener exceptions
+			// must not be reported here. That operation must report after the complete
+			// OrderBook operation
+			// has finished.
+		}
+
+		@Override
+		public void onOrderTerminated(long time, Order order) {
+
+			checkExternalListenerReentrancy("onOrderTerminated");
+
+			int size = listeners.size();
+
+			for (int i = 0; i < size; i++) {
+				OrderBookListener listener = listeners.get(i);
+				enterExternalListenerCallback();
+				try {
+					listener.onOrderTerminated(OrderBook.this, time, order);
+				} catch (Exception e) {
+					collectListenerException(listener, OrderBookListenerException.Callback.ON_ORDER_TERMINATED, time,
+							order, e);
+				} finally {
+					exitExternalListenerCallback();
+				}
+			}
+
+			// The Order reports after its internal and external OrderListeners have
+			// finished
+		}
+
+		@Override
+		public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
+
+			// Internal OrderListeners do not receive external listener exception reports
+		}
 	}
 
-	@Override
-	public void onExceptionsThrown(Order order, OrderListenerExceptions exceptions) {
-
-		// Internal OrderListeners do not receive external listener exception reports
-	}
-	}
-	
 	@Override
 	public String toString() {
 		return security;

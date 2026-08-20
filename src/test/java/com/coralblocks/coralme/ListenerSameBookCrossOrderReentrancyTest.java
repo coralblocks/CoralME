@@ -87,7 +87,8 @@ public class ListenerSameBookCrossOrderReentrancyTest {
 		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
 		triggeringOrder.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				protectedOrder.cancel();
 			}
 
@@ -114,7 +115,8 @@ public class ListenerSameBookCrossOrderReentrancyTest {
 		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
 		triggeringOrder.addListener(new OrderListenerAdapter() {
 			@Override
-			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+			public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+					CancelReason cancelReason) {
 				protectedOrder.addListener(new OrderListenerAdapter());
 			}
 

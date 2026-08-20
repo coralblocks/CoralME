@@ -39,20 +39,13 @@ import com.coralblocks.coralme.Order.Type;
 public class InternalListenerFailureIsolationTest {
 
 	private static enum Callback {
-		ACCEPTED,
-		RESTED,
-		REDUCED,
-		EXECUTED,
-		CANCELED,
-		REJECTED,
-		TERMINATED
+		ACCEPTED, RESTED, REDUCED, EXECUTED, CANCELED, REJECTED, TERMINATED
 	}
 
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> parameters() {
-		return Arrays.asList(Arrays.stream(Callback.values())
-				.map(callback -> new Object[] { callback })
-				.toArray(Object[][]::new));
+		return Arrays.asList(
+				Arrays.stream(Callback.values()).map(callback -> new Object[] { callback }).toArray(Object[][]::new));
 	}
 
 	private final Callback callback;
@@ -71,10 +64,11 @@ public class InternalListenerFailureIsolationTest {
 		book.addListener(new OneShotThrowingOrderBookListener(callback, externalFailure, bookReports));
 
 		Order order = new Order();
-		order.init(book, book.getTimestamper(), 1, "1", 1, "AAPL", Side.BUY, 100, 100,
-				Type.LIMIT, TimeInForce.GTC);
-		// Internal callbacks execute in reverse registration order. The OrderBook runs first,
-		// collects the external failure, and the fatal internal listener then interrupts processing.
+		order.init(book, book.getTimestamper(), 1, "1", 1, "AAPL", Side.BUY, 100, 100, Type.LIMIT, TimeInForce.GTC);
+		// Internal callbacks execute in reverse registration order. The OrderBook runs
+		// first,
+		// collects the external failure, and the fatal internal listener then
+		// interrupts processing.
 		order.addInternalListener(new ThrowingInternalOrderListener(callback, internalFailure));
 		order.addInternalListener(book.internalOrderListener());
 		order.addListener(new OrderListenerAdapter() {
@@ -87,7 +81,7 @@ public class InternalListenerFailureIsolationTest {
 		try {
 			trigger(order);
 			fail("Expected internal listener failure");
-		} catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			assertSame(internalFailure, e);
 		}
 
@@ -121,10 +115,9 @@ public class InternalListenerFailureIsolationTest {
 			}
 		});
 		Order order = new Order();
-		order.init(book, book.getTimestamper(), 1, "1", 1, "AAPL", Side.BUY, 100, 100,
-				Type.LIMIT, TimeInForce.GTC);
-		final ReentrantOrderBookOperationException internalFailure =
-				new ReentrantOrderBookOperationException(book, "synthetic-internal-failure");
+		order.init(book, book.getTimestamper(), 1, "1", 1, "AAPL", Side.BUY, 100, 100, Type.LIMIT, TimeInForce.GTC);
+		final ReentrantOrderBookOperationException internalFailure = new ReentrantOrderBookOperationException(book,
+				"synthetic-internal-failure");
 		order.addInternalListener(new ThrowingInternalOrderListener(callback, internalFailure));
 		order.addListener(new OrderListenerAdapter() {
 			@Override
@@ -136,7 +129,7 @@ public class InternalListenerFailureIsolationTest {
 		try {
 			trigger(order);
 			fail("Expected internal reentrant exception");
-		} catch(ReentrantOrderBookOperationException e) {
+		} catch (ReentrantOrderBookOperationException e) {
 			assertSame(internalFailure, e);
 		}
 
@@ -145,7 +138,7 @@ public class InternalListenerFailureIsolationTest {
 	}
 
 	private void trigger(Order order) {
-		switch(callback) {
+		switch (callback) {
 		case ACCEPTED:
 			order.accept(1);
 			break;
@@ -246,7 +239,8 @@ public class InternalListenerFailureIsolationTest {
 		}
 
 		@Override
-		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize, CancelReason cancelReason) {
+		public void onOrderReduced(long time, Order order, long canceledSize, long reduceNewTotalSize,
+				CancelReason cancelReason) {
 			fail(Callback.REDUCED);
 		}
 
