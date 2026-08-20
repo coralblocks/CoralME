@@ -894,10 +894,12 @@ public class OrderBook implements OrderListener {
 		boolean operationCompleted = false;
 		
 		try {
-			
+
 			Order order = getOrder(clientId, clientOrderId, security, side, size, price, type, tif);
 
-			if (tif == TimeInForce.IOC || type == Type.MARKET) {
+			if (order.getSide() == null) {
+				order.reject(RejectReason.BAD_SIDE);
+			} else if (tif == TimeInForce.IOC || type == Type.MARKET) {
 				order = fillOrCancel(order, exchangeOrderId);
 			} else {
 				order = fillOrRest(order, exchangeOrderId);

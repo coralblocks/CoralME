@@ -173,6 +173,41 @@ public class OrderRejectionLifecycleTest {
 		assertTrue(book.isEmpty());
 	}
 
+	@Test
+	public void test_NullSideIsRejectedBeforeAcceptanceAndReturnedToPool() {
+		int[] acceptances = new int[1];
+		int[] rejections = new int[1];
+		RejectReason[] reportedReason = new RejectReason[1];
+		OrderBook book = new OrderBook("AAPL", new OrderBookAdapter() {
+			@Override
+			public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
+				acceptances[0]++;
+			}
+
+			@Override
+			public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason reason) {
+				rejections[0]++;
+				reportedReason[0] = reason;
+			}
+		});
+
+		Order rejected = book.createLimit(1, "invalid", 1, null, 100, 100, TimeInForce.GTC);
+
+		assertTrue(rejected.isTerminal());
+		assertFalse(rejected.isAccepted());
+		assertEquals(0, acceptances[0]);
+		assertEquals(1, rejections[0]);
+		assertSame(RejectReason.BAD_SIDE, reportedReason[0]);
+		assertTrue(book.isEmpty());
+
+		Order reused = book.createLimit(2, "valid", 2, Side.BUY, 100, 100, TimeInForce.GTC);
+
+		assertSame(rejected, reused);
+		assertEquals(1, acceptances[0]);
+		assertEquals(1, rejections[0]);
+		assertSame(reused, book.getOrder(2));
+	}
+
 	private static void assertRejectionProhibited(Order order) {
 		try {
 			order.reject(RejectReason.BAD_TYPE);
