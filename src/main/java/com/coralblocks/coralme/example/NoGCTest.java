@@ -23,8 +23,7 @@ import com.coralblocks.coralme.OrderBook;
 import com.coralblocks.coralme.OrderBookAdapter;
 
 /**
- * <p>Manual garbage-collection smoke test for a warmed-up, capacity-stable order book workload.</p>
- * 
+ * <p>Manual garbage-collection smoke test for a repeated, capacity-stable order book workload.</p> 
  * <p>Build with <code>mvn package</code>, then run:</p>
  * 
  * <p><code>java -Xlog:gc -Xms32m -Xmx64m -cp target/coralme-all.jar
