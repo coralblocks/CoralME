@@ -23,6 +23,7 @@ import java.lang.management.ManagementFactory;
 import org.junit.Assume;
 import org.junit.Test;
 
+import com.coralblocks.coralme.Order.RejectReason;
 import com.coralblocks.coralme.Order.Side;
 import com.coralblocks.coralme.Order.TimeInForce;
 
@@ -38,8 +39,23 @@ public class OrderBookAllocationTest {
 	private static final int MEASURED_ITERATIONS = 100_000;
 
 	private final StringBuilder clientOrderId = new StringBuilder(32);
-	private final OrderBook book = new OrderBook("AAPL", new OrderBookAdapter());
+	private final WorkloadListener listener = new WorkloadListener();
+	private final OrderBook book = new OrderBook("AAPL", listener) {
+		@Override
+		protected RejectReason validateOrder(Order order) {
+			return order.getOriginalSize() % 100 == 0 ? null : RejectReason.BAD_LOT;
+		}
+	};
 	private long nextOrderId = 1;
+
+	private static class WorkloadListener extends OrderBookAdapter {
+		private long rejectedOrders;
+
+		@Override
+		public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason rejectReason) {
+			rejectedOrders++;
+		}
+	}
 
 	@Test
 	public void testSteadyStateOperationsAllocateNoGarbage() {
@@ -54,6 +70,7 @@ public class OrderBookAllocationTest {
 		try {
 			runIterations(WARMUP_ITERATIONS);
 			assertTrue(book.isEmpty());
+			assertEquals(WARMUP_ITERATIONS * 2L, listener.rejectedOrders);
 
 			long threadId = Thread.currentThread().getId();
 			allocationBean.getThreadAllocatedBytes(threadId);
@@ -63,6 +80,7 @@ public class OrderBookAllocationTest {
 
 			long allocatedBytesAfter = allocationBean.getThreadAllocatedBytes(threadId);
 			assertTrue(book.isEmpty());
+			assertEquals((WARMUP_ITERATIONS + MEASURED_ITERATIONS) * 2L, listener.rejectedOrders);
 			assertEquals(0, allocatedBytesAfter - allocatedBytesBefore);
 		} finally {
 			if (!allocationMeasurementWasEnabled) allocationBean.setThreadAllocatedMemoryEnabled(false);
@@ -87,11 +105,11 @@ public class OrderBookAllocationTest {
 		createLimit(Side.SELL, 500, 115.00, TimeInForce.DAY);
 
 		createLimit(Side.BUY, 600, 103.00, TimeInForce.IOC);
-		createLimit(Side.SELL, 900, 96.00, TimeInForce.IOC);
+		createLimit(Side.SELL, 800, 96.00, TimeInForce.IOC);
 
 		Order bidOrder = book.getBestBidOrder();
 		Order askOrder = book.getBestAskOrder();
-		bidOrder.reduceTo(100);
+		bidOrder.reduceTo(900);
 		askOrder.reduceTo(100);
 		bidOrder.cancel();
 		askOrder.cancel();
@@ -99,7 +117,7 @@ public class OrderBookAllocationTest {
 		createLimit(Side.BUY, 620, 103.00, TimeInForce.DAY);
 		createLimit(Side.SELL, 940, 96.00, TimeInForce.DAY);
 		createLimit(Side.BUY, 600, 96.00, TimeInForce.DAY);
-		createLimit(Side.SELL, 990, 111.00, TimeInForce.DAY);
+		createLimit(Side.SELL, 900, 111.00, TimeInForce.DAY);
 
 		createMarket(Side.BUY, 15000);
 		createMarket(Side.SELL, 15000);
