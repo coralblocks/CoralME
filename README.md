@@ -89,7 +89,8 @@ OrderBookLogger orderBookLogger = new OrderBookLogger();
 
 OrderBook orderBook = new OrderBook("AAPL", orderBookLogger);
 
-orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.BUY, 200, 150.44, TimeInForce.DAY);
+orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId,
+        Side.BUY, 200, 150.44, TimeInForce.DAY);
 
 /*
 	-----> onOrderAccepted called:
@@ -121,7 +122,8 @@ orderBook.showOrders();
 -------- 			  
 */
 
-orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.BUY, 500, 149.44, TimeInForce.DAY);
+orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId,
+        Side.BUY, 500, 149.44, TimeInForce.DAY);
 
 /* 
 	-----> onOrderAccepted called:
@@ -141,12 +143,17 @@ orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.BUY, 5
 
 orderBookLogger.off(); // omit callbacks output for clarity
 
-orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.BUY, 100, 149.44, TimeInForce.GTC);
-orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.BUY, 100, 148.14, TimeInForce.DAY);
+orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId,
+        Side.BUY, 100, 149.44, TimeInForce.GTC);
+orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId,
+        Side.BUY, 100, 148.14, TimeInForce.DAY);
 
-orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.SELL, 300, 153.24, TimeInForce.GTC);
-orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.SELL, 500, 156.43, TimeInForce.DAY);
-orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.SELL, 1500, 158.54, TimeInForce.DAY);
+orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId,
+        Side.SELL, 300, 153.24, TimeInForce.GTC);
+orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId,
+        Side.SELL, 500, 156.43, TimeInForce.DAY);
+orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId,
+        Side.SELL, 1500, 158.54, TimeInForce.DAY);
 
 orderBook.showLevels();
 
@@ -288,7 +295,8 @@ orderBook.showLevels();
 
 // hit the sell side of the book with a LIMIT IOC and notice your price improvement
 
-orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.BUY, 3000, 155.00, TimeInForce.IOC);
+orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId,
+        Side.BUY, 3000, 155.00, TimeInForce.IOC);
 
 /*
 	-----> onOrderAccepted called:
@@ -352,7 +360,8 @@ orderBook.showLevels();
 
 orderBookLogger.off();
 
-orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.SELL, 3000, 160.00, TimeInForce.DAY);
+orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId,
+        Side.SELL, 3000, 160.00, TimeInForce.DAY);
 
 orderBook.showLevels();
 
@@ -369,7 +378,8 @@ orderBook.showLevels();
 
 orderBookLogger.on();
 
-orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.BUY, 3900, 159.00, TimeInForce.DAY);
+orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId,
+        Side.BUY, 3900, 159.00, TimeInForce.DAY);
 
 /*
 	-----> onOrderAccepted called:
