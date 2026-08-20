@@ -157,8 +157,15 @@ public class OrderBook implements OrderListener {
 		if (listener != null) listeners.add(listener);
 	}
 	
+	/**
+	 * Adds a listener if it has not already been registered.
+	 *
+	 * @param listener the listener to add
+	 * @throws NullPointerException if the listener is null
+	 */
 	public void addListener(OrderBookListener listener) {
 		checkExternalListenerReentrancy("addListener");
+		if (listener == null) throw new NullPointerException("listener");
 		if (!listeners.contains(listener)) listeners.add(listener);
 	}
 	

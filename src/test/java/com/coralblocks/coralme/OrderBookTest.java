@@ -47,6 +47,19 @@ public class OrderBookTest {
 	private void clear(OrderBookListener listener) {
 		Mockito.clearInvocations(listener);
 	}
+
+	@Test
+	public void test_Null_Listener_Rejected() {
+
+		OrderBook book = new OrderBook("AAPL");
+
+		Assert.assertThrows(NullPointerException.class, () -> book.addListener(null));
+
+		Order order = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 100, 432.12, TimeInForce.GTC);
+		Assert.assertTrue(order.isAccepted());
+		Assert.assertTrue(order.isResting());
+		Assert.assertSame(order, book.getOrder(1));
+	}
 	
 	private static class OrderExecutedCaptor {
 		
