@@ -39,12 +39,12 @@ public class OrderBook {
 	/**
 	 * The default initial size of the {@link Order} object pool. Can be changed for tuning.
 	 */
-	public static int ORDER_POOL_INITIAL_SIZE = 128;
+	public static int ORDER_POOL_INITIAL_SIZE = 512;
 	
 	/**
 	 * The default initial size of the {@link PriceLevel} object pool. Can be changed for tuning.
 	 */
-	public static int PRICE_LEVEL_POOL_INITIAL_SIZE = 64;
+	public static int PRICE_LEVEL_POOL_INITIAL_SIZE = 128;
 	
 	private static final boolean DEFAULT_ALLOW_TRADE_TO_SELF = true;
 	
