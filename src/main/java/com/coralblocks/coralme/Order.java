@@ -534,6 +534,7 @@ public class Order {
 		} finally {
 			if (!callbacksCompleted) {
 				discardListenerExceptions();
+				internalListeners.clear();
 			}
 
 			if (callbacksCompleted) {
@@ -754,6 +755,7 @@ public class Order {
 		} finally {
 			if (!callbacksCompleted) {
 				discardListenerExceptions();
+				internalListeners.clear();
 			}
 
 			if (callbacksCompleted) {
@@ -830,6 +832,7 @@ public class Order {
 		} finally {
 			if (!callbacksCompleted) {
 				discardListenerExceptions();
+				if (isTerminal()) internalListeners.clear();
 			}
 
 			if (callbacksCompleted) {

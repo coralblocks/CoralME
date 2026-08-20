@@ -94,8 +94,18 @@ public class InternalListenerFailureIsolationTest {
 		assertEquals(0, bookReports[0]);
 		assertEquals(0, orderReports[0]);
 
-		// A later operation must not report failures discarded from the interrupted operation.
-		book.createLimit(2, "unrelated", 2, Side.BUY, 100, 50, TimeInForce.GTC);
+		// A later operation must not retain listeners or report failures discarded from
+		// the interrupted operation, even when it reuses a terminal pooled order.
+		Order unrelated;
+		if (callback == Callback.REJECTED) {
+			unrelated = book.createLimit(2, "unrelated", 2, Side.BUY, 0, 50, TimeInForce.GTC);
+		} else {
+			unrelated = book.createLimit(2, "unrelated", 2, Side.BUY, 100, 50, TimeInForce.GTC);
+			if (callback == Callback.CANCELED || callback == Callback.TERMINATED) unrelated.cancel();
+		}
+		if (callback == Callback.CANCELED || callback == Callback.REJECTED || callback == Callback.TERMINATED) {
+			assertSame(order, unrelated);
+		}
 		assertEquals(0, bookReports[0]);
 		assertEquals(0, orderReports[0]);
 	}
