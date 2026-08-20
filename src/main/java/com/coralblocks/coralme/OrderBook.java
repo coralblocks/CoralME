@@ -922,6 +922,8 @@ public class OrderBook implements OrderListener {
 				order.reject(RejectReason.BAD_SIZE);
 			} else if (order.getSide() == null) {
 				order.reject(RejectReason.BAD_SIDE);
+			} else if (type == Type.LIMIT && tif == null) {
+				order.reject(RejectReason.BAD_TIF);
 			} else if (exchangeOrderId <= 0) {
 				order.reject(RejectReason.BAD_EXCHANGE_ORDER_ID);
 			} else if (orders.containsKey(exchangeOrderId)) {
