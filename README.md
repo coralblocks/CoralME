@@ -12,7 +12,7 @@ CoralME is an order book data-structure that matches orders based on price-time 
 ## Features
 - Fast
 - Garbage-free
-Listener-based callbacks for order events at both the order book and individual order levels
+- Listener-based callbacks for order events at both the order book and individual order levels
 - Price levels
 - Price improvement for fills
 - MARKET and LIMIT order types
