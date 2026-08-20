@@ -212,11 +212,22 @@ public class Order {
     	return originalSize;
     }
     
+    /**
+     * Returns the size executed for this order.
+     *
+     * @return the executed size
+     */
     public final long getExecutedSize() {
-    	
-    	return executedSize;
+
+        return executedSize;
     }
-    
+
+    /**
+     * Returns the size executed for this order. This is an alias for
+     * {@link #getExecutedSize()}.
+     *
+     * @return the executed size
+     */
     public final long getFilledSize() {
     	
     	return executedSize;
@@ -341,6 +352,13 @@ public class Order {
 	/**
 	 * Adds an external listener. Exceptions thrown by this listener are collected
 	 * and reported through {@link OrderListener#onExceptionsThrown(Order, OrderListenerExceptions)}.
+	 * External listeners are notified in reverse registration order.
+	 *
+	 * <p>A listener added after an {@link OrderBook} creation method returns does
+	 * not receive that order's accepted, rejected, or rested callbacks because
+	 * those creation-time events have already been dispatched.</p>
+	 *
+	 * @param listener the listener to add
 	 */
     public void addListener(OrderListener listener) {
 
@@ -885,6 +903,11 @@ public class Order {
     	}
 	}
 	
+	/**
+	 * Reasons an order may be rejected. Some values are available for custom
+	 * validation through {@link OrderBook#validateOrder(Order)} and are not emitted
+	 * automatically by the base {@link OrderBook}.
+	 */
 	public static enum RejectReason implements CharEnum { 
 
 		MISSING_FIELD		('1'),
@@ -945,6 +968,11 @@ public class Order {
         }
 	}
 	
+	/**
+	 * Reasons an order may be canceled. Some values are vocabulary for callers of
+	 * {@link Order#cancel(CancelReason)} and are not emitted automatically by the
+	 * {@link OrderBook}.
+	 */
 	public static enum CancelReason implements CharEnum { 
 
 		MISSED 			('M'), 

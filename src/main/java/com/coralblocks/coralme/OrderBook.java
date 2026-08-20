@@ -38,11 +38,15 @@ public class OrderBook {
 	
 	/**
 	 * The default initial size of the {@link Order} object pool. Can be changed for tuning.
+	 * The value is read when an {@link OrderBook} is constructed, so changes affect
+	 * only subsequently constructed order books.
 	 */
 	public static int ORDER_POOL_INITIAL_SIZE = 512;
 	
 	/**
 	 * The default initial size of the {@link PriceLevel} object pool. Can be changed for tuning.
+	 * The value is read when an {@link OrderBook} is constructed, so changes affect
+	 * only subsequently constructed order books.
 	 */
 	public static int PRICE_LEVEL_POOL_INITIAL_SIZE = 128;
 	
@@ -160,7 +164,8 @@ public class OrderBook {
 	}
 	
 	/**
-	 * Adds a listener if it has not already been registered.
+	 * Adds a listener if it has not already been registered. Listeners are notified
+	 * in registration order.
 	 *
 	 * @param listener the listener to add
 	 * @throws NullPointerException if the listener is null
@@ -367,20 +372,36 @@ public class OrderBook {
 		return tail[side.index()];
 	}
 	
+	/**
+	 * Returns the price of the last execution, or {@link Long#MAX_VALUE} if no
+	 * execution has occurred. Because {@code Long.MAX_VALUE} is also a valid long
+	 * price, this value alone cannot distinguish those two cases.
+	 *
+	 * @return the last executed price, or {@code Long.MAX_VALUE}
+	 */
 	public long getLastExecutedPrice() {
 		
 		return lastExecutedPrice;
 	}
-	
+
+	/**
+	 * Returns whether the order book has both a best bid and a best ask. This does
+	 * not imply a positive spread; a locked or crossed order book returns true.
+	 *
+	 * @return true when both sides have a best price
+	 */
 	public final boolean hasSpread() {
 		return hasBestBid() && hasBestAsk();
 	}
 
 	/**
 	 * Returns the difference between the best ask and best bid prices.
+	 * Call {@link #hasSpread()} first to ensure both sides are present. The result
+	 * is zero for a locked order book and negative for a crossed order book.
 	 *
 	 * @return the spread
 	 * @throws ArithmeticException if the spread cannot be represented as a long
+	 * @throws NullPointerException if either side has no resting orders
 	 */
 	public final long getSpread() {
 		
@@ -440,11 +461,25 @@ public class OrderBook {
 		return head[Side.SELL.index()] != null;
 	}
 	
+	/**
+	 * Returns the best price for the requested side.
+	 *
+	 * @param side the requested side
+	 * @return the best price
+	 * @throws NullPointerException if the side is null or has no resting orders
+	 */
 	public final long getBestPrice(Side side) {
 		
 		return side.isBuy() ? getBestBidPrice() : getBestAskPrice();
 	}
-	
+
+	/**
+	 * Returns the best bid price. Call {@link #hasBids()} first when the bid side
+	 * may be empty.
+	 *
+	 * @return the best bid price
+	 * @throws NullPointerException if there are no resting bids
+	 */
 	public final long getBestBidPrice() {
 		
 		int index = Side.BUY.index();
@@ -452,6 +487,13 @@ public class OrderBook {
 		return head[index].getPrice();
 	}
 	
+	/**
+	 * Returns the best ask price. Call {@link #hasAsks()} first when the ask side
+	 * may be empty.
+	 *
+	 * @return the best ask price
+	 * @throws NullPointerException if there are no resting asks
+	 */
 	public final long getBestAskPrice() {
 		
 		int index = Side.SELL.index();
@@ -459,11 +501,25 @@ public class OrderBook {
 		return head[index].getPrice();
 	}
 	
+	/**
+	 * Returns the aggregate size at the best price for the requested side.
+	 *
+	 * @param side the requested side
+	 * @return the aggregate size at the best price
+	 * @throws NullPointerException if the side is null or has no resting orders
+	 */
 	public final long getBestSize(Side side) {
 		
 		return side.isBuy() ? getBestBidSize() : getBestAskSize();
 	}
 	
+	/**
+	 * Returns the aggregate size at the best bid. Call {@link #hasBids()} first
+	 * when the bid side may be empty.
+	 *
+	 * @return the aggregate size at the best bid
+	 * @throws NullPointerException if there are no resting bids
+	 */
 	public final long getBestBidSize() {
 		
 		int index = Side.BUY.index();
@@ -471,6 +527,13 @@ public class OrderBook {
 		return head[index].getSize();
 	}
 	
+	/**
+	 * Returns the aggregate size at the best ask. Call {@link #hasAsks()} first
+	 * when the ask side may be empty.
+	 *
+	 * @return the aggregate size at the best ask
+	 * @throws NullPointerException if there are no resting asks
+	 */
 	public final long getBestAskSize() {
 		
 		int index = Side.SELL.index();
@@ -646,7 +709,8 @@ public class OrderBook {
 				long execId2 = ++execId;
 				long matchId = ++this.matchId;
 				
-				o.execute(ts, ExecuteSide.MAKER, sizeToExecute, priceExecuted, execId1, matchId); // notify the maker first?
+				// Maker execution callbacks precede taker execution callbacks for each match.
+				o.execute(ts, ExecuteSide.MAKER, sizeToExecute, priceExecuted, execId1, matchId);
 				
 				order.execute(ts, ExecuteSide.TAKER, sizeToExecute, priceExecuted, execId2, matchId);
 				
@@ -1082,6 +1146,10 @@ public class OrderBook {
 		}
 	}
 	
+	/**
+	 * Cancels all resting DAY orders with {@link CancelReason#EXPIRED}. Cancellation
+	 * callbacks follow the internal order map iteration order, not price-time priority.
+	 */
 	public void expire() {
 
 		checkExternalListenerReentrancy("expire");
@@ -1118,6 +1186,10 @@ public class OrderBook {
 		}
 	}
 	
+	/**
+	 * Cancels all resting orders with {@link CancelReason#PURGED}. Cancellation
+	 * callbacks follow the internal order map iteration order, not price-time priority.
+	 */
 	public final void purge() {
 
 		checkExternalListenerReentrancy("purge");
