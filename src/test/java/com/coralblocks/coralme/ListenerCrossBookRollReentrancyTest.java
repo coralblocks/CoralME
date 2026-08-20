@@ -31,10 +31,10 @@ public class ListenerCrossBookRollReentrancyTest {
 
 	@Test
 	public void test_OrderBookListenerCannotRollAnotherBookIntoCallbackBook() {
-		final OrderBook source = new OrderBook("SOURCE");
+		final OrderBook source = new OrderBook("AAPL");
 		final Order sourceOrder = source.createLimit(1, "source", 1, Side.BUY, 100, 100, TimeInForce.GTC);
 		final OrderBookListenerExceptions[] reported = new OrderBookListenerExceptions[1];
-		OrderBook callbackBook = new OrderBook("CALLBACK", new OrderBookAdapter() {
+		OrderBook callbackBook = new OrderBook("AAPL", new OrderBookAdapter() {
 			@Override
 			public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
 				source.rollTo(orderBook);
@@ -59,9 +59,9 @@ public class ListenerCrossBookRollReentrancyTest {
 
 	@Test
 	public void test_OrderListenerCannotRollAnotherBookIntoCallbackBook() {
-		final OrderBook source = new OrderBook("SOURCE");
+		final OrderBook source = new OrderBook("AAPL");
 		final Order sourceOrder = source.createLimit(1, "source", 1, Side.BUY, 100, 100, TimeInForce.GTC);
-		final OrderBook callbackBook = new OrderBook("CALLBACK");
+		final OrderBook callbackBook = new OrderBook("AAPL");
 		final Order callbackOrder = callbackBook.createLimit(2, "callback", 2, Side.SELL, 100, 200, TimeInForce.GTC);
 		final OrderListenerExceptions[] reported = new OrderListenerExceptions[1];
 		callbackOrder.addListener(new OrderListenerAdapter() {

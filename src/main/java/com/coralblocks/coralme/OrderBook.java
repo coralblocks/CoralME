@@ -927,6 +927,14 @@ public class OrderBook implements OrderListener {
 		checkExternalListenerReentrancy("rollTo");
 		newOrderBook.checkExternalListenerReentrancy("rollTo");
 
+		if (newOrderBook == this) {
+			throw new IllegalArgumentException("Cannot roll an order book to itself");
+		}
+
+		if (!security.equals(newOrderBook.security)) {
+			throw new IllegalArgumentException("Cannot roll between different securities: " + security + " and " + newOrderBook.security);
+		}
+
 		boolean listenerExceptionReportingWasDeferred = deferListenerExceptionReporting;
 		deferListenerExceptionReporting = true;
 		boolean operationCompleted = false;

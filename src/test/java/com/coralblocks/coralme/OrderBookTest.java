@@ -499,6 +499,60 @@ public class OrderBookTest {
 	}
 	
 	@Test
+	public void test_RollRejectsDifferentSecurityWithoutChangingEitherBook() {
+
+		OrderBookListener sourceListener = Mockito.mock(OrderBookListener.class);
+		OrderBookListener destinationListener = Mockito.mock(OrderBookListener.class);
+		OrderBook source = new OrderBook("AAPL", sourceListener);
+		OrderBook destination = new OrderBook("MSFT", destinationListener);
+		Order sourceOrder = source.createLimit(CLIENT_ID, "source", 1, Side.BUY, 100, 432.12, TimeInForce.GTC);
+		Order destinationOrder = destination.createLimit(CLIENT_ID, "destination", 2, Side.SELL, 200, 435.23, TimeInForce.GTC);
+		Mockito.clearInvocations(sourceListener, destinationListener);
+
+		IllegalArgumentException failure = Assert.assertThrows(IllegalArgumentException.class,
+				() -> source.rollTo(destination));
+
+		Assert.assertEquals("Cannot roll between different securities: AAPL and MSFT", failure.getMessage());
+		Assert.assertSame(sourceOrder, source.getOrder(1));
+		Assert.assertSame(destinationOrder, destination.getOrder(2));
+		Assert.assertFalse(sourceOrder.isTerminal());
+		Assert.assertFalse(destinationOrder.isTerminal());
+		Assert.assertEquals(1, source.getNumberOfOrders());
+		Assert.assertEquals(1, destination.getNumberOfOrders());
+		Mockito.verifyNoInteractions(sourceListener, destinationListener);
+	}
+
+	@Test
+	public void test_RollRejectsSameOrderBookWithoutChangingIt() {
+
+		OrderBook book = new OrderBook("AAPL");
+		Order order = book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 100, 432.12, TimeInForce.GTC);
+
+		IllegalArgumentException failure = Assert.assertThrows(IllegalArgumentException.class,
+				() -> book.rollTo(book));
+
+		Assert.assertEquals("Cannot roll an order book to itself", failure.getMessage());
+		Assert.assertSame(order, book.getOrder(1));
+		Assert.assertFalse(order.isTerminal());
+		Assert.assertEquals(1, book.getNumberOfOrders());
+	}
+
+	@Test
+	public void test_RollAllowsDifferentOrderBooksWithEqualSecurityValues() {
+
+		OrderBook source = new OrderBook(new String("AAPL"));
+		OrderBook destination = new OrderBook(new String("AAPL"));
+		source.createLimit(CLIENT_ID, "1", 1, Side.BUY, 100, 432.12, TimeInForce.GTC);
+		Assert.assertNotSame(source.getSecurity(), destination.getSecurity());
+
+		source.rollTo(destination);
+
+		Assert.assertEquals(0, source.getNumberOfOrders());
+		Assert.assertEquals(1, destination.getNumberOfOrders());
+		Assert.assertEquals("AAPL", destination.getOrder(1).getSecurity());
+	}
+
+	@Test
 	public void test_Roll_GTC() {
 		
 		OrderBookListener listener = Mockito.mock(OrderBookListener.class);

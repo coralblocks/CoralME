@@ -199,8 +199,8 @@ public class ListenerOperationCombinationTest {
 		final int[] sourceBookReports = new int[1];
 		final int[] destinationBookReports = new int[1];
 		final List<OrderBookListenerExceptions> destinationReports = new ArrayList<OrderBookListenerExceptions>();
-		OrderBook source = new OrderBook("OLD");
-		OrderBook destination = new OrderBook("NEW");
+		OrderBook source = new OrderBook("AAPL");
+		OrderBook destination = new OrderBook("AAPL");
 		Order source1 = source.createLimit(1, "1", 1, Side.BUY, 100, 99, TimeInForce.GTC);
 		Order source2 = source.createLimit(1, "2", 2, Side.SELL, 200, 101, TimeInForce.GTC);
 		Order day = source.createLimit(1, "day", 3, Side.BUY, 300, 98, TimeInForce.DAY);

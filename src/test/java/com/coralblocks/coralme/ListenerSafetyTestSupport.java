@@ -100,7 +100,7 @@ final class ListenerSafetyTestSupport {
 			@Override
 			void execute(OrderBook book, Order order, OrderBookListener registeredBookListener,
 					Iterator<Order> iterator) {
-				book.rollTo(new OrderBook("OTHER"));
+				book.rollTo(new OrderBook(book.getSecurity()));
 			}
 		},
 		ITERATOR("iterator") {

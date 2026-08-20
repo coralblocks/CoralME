@@ -193,7 +193,7 @@ public class OrderBookIteratorMutationStressTest {
 	public void test_RollSkipsEveryRemovedGtcOrderInBothDirections() {
 		for(TraversalOrder traversalOrder : TraversalOrder.values()) {
 			OrderBook source = createMixedTimeInForceBook();
-			OrderBook destination = new OrderBook("MSFT");
+			OrderBook destination = new OrderBook("AAPL");
 			Iterator<Order> iterator = source.iterator(Side.BUY, traversalOrder);
 			int[] ids = traversalIds(traversalOrder);
 			assertEquals(ids[0], iterator.next().getId());
