@@ -250,6 +250,127 @@ public class OrderRejectionLifecycleTest {
 		assertSame(reused, book.getOrder(1));
 	}
 
+	@Test
+	public void test_NonPositiveSizesAreRejectedBeforeOtherValidation() {
+		int[] acceptances = new int[1];
+		int[] rejections = new int[1];
+		int[] validations = new int[1];
+		OrderBook book = new OrderBook("AAPL", new OrderBookAdapter() {
+			@Override
+			public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
+				acceptances[0]++;
+			}
+
+			@Override
+			public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason reason) {
+				rejections[0]++;
+				assertSame(RejectReason.BAD_SIZE, reason);
+			}
+		}) {
+			@Override
+			protected RejectReason validateOrder(Order order) {
+				validations[0]++;
+				return null;
+			}
+		};
+
+		Order zeroSize = book.createLimit(1, "zero", 0, null, 0, 100, TimeInForce.GTC);
+
+		assertTrue(zeroSize.isTerminal());
+		assertFalse(zeroSize.isAccepted());
+		assertTrue(zeroSize.getRejectTime() >= 0);
+		assertEquals(0, acceptances[0]);
+		assertEquals(1, rejections[0]);
+		assertEquals(0, validations[0]);
+		assertTrue(book.isEmpty());
+
+		Order negativeSize = book.createMarket(2, "negative", 2, Side.BUY, -1);
+
+		assertSame(zeroSize, negativeSize);
+		assertTrue(negativeSize.isTerminal());
+		assertFalse(negativeSize.isAccepted());
+		assertTrue(negativeSize.getRejectTime() >= 0);
+		assertEquals(0, acceptances[0]);
+		assertEquals(2, rejections[0]);
+		assertEquals(0, validations[0]);
+		assertTrue(book.isEmpty());
+	}
+
+	@Test
+	public void test_NonPositiveCrossingSizesCannotChangeBookOrConsumeExecutionIds() {
+		int[] acceptances = new int[1];
+		int[] rejections = new int[1];
+		int[] executions = new int[1];
+		long[] executionIds = new long[2];
+		long[] matchIds = new long[2];
+		OrderBook book = new OrderBook("AAPL", new OrderBookAdapter() {
+			@Override
+			public void onOrderAccepted(OrderBook orderBook, long time, Order order) {
+				acceptances[0]++;
+			}
+
+			@Override
+			public void onOrderRejected(OrderBook orderBook, long time, Order order, RejectReason reason) {
+				rejections[0]++;
+				assertSame(RejectReason.BAD_SIZE, reason);
+			}
+
+			@Override
+			public void onOrderExecuted(OrderBook orderBook, long time, Order order, Order.ExecuteSide executeSide,
+					long executeSize, long executePrice, long executionId, long matchId) {
+				executionIds[executions[0]] = executionId;
+				matchIds[executions[0]] = matchId;
+				executions[0]++;
+			}
+		});
+		Order maker = book.createLimit(1, "maker", 1, Side.SELL, 100, 100, TimeInForce.GTC);
+		PriceLevel makerLevel = maker.getPriceLevel();
+
+		book.createLimit(2, "negative", 2, Side.BUY, -50, 100, TimeInForce.GTC);
+		book.createLimit(3, "zero", 3, Side.BUY, 0, 100, TimeInForce.IOC);
+
+		assertEquals(1, acceptances[0]);
+		assertEquals(2, rejections[0]);
+		assertEquals(0, executions[0]);
+		assertEquals(0, maker.getExecutedSize());
+		assertEquals(100, maker.getOpenSize());
+		assertEquals(100, makerLevel.getSize());
+		assertEquals(1, makerLevel.getOrders());
+		assertSame(maker, book.getOrder(1));
+		assertEquals(Long.MAX_VALUE, book.getLastExecutedPrice());
+
+		book.createLimit(4, "valid", 4, Side.BUY, 50, 100, TimeInForce.IOC);
+
+		assertEquals(2, acceptances[0]);
+		assertEquals(2, rejections[0]);
+		assertEquals(2, executions[0]);
+		assertEquals(1, executionIds[0]);
+		assertEquals(2, executionIds[1]);
+		assertEquals(1, matchIds[0]);
+		assertEquals(1, matchIds[1]);
+		assertEquals(50, maker.getExecutedSize());
+		assertEquals(50, maker.getOpenSize());
+		assertEquals(50, makerLevel.getSize());
+	}
+
+	@Test
+	public void test_ZeroSizeNonCrossingOrderIsReturnedToPool() {
+		OrderBook book = new OrderBook("AAPL");
+
+		Order rejected = book.createLimit(1, "zero", 1, Side.BUY, 0, 100, TimeInForce.DAY);
+
+		assertTrue(rejected.isTerminal());
+		assertFalse(rejected.isAccepted());
+		assertTrue(book.isEmpty());
+
+		Order reused = book.createLimit(2, "valid", 2, Side.BUY, 100, 99, TimeInForce.DAY);
+
+		assertSame(rejected, reused);
+		assertTrue(reused.isAccepted());
+		assertTrue(reused.isResting());
+		assertSame(reused, book.getOrder(2));
+	}
+
 	private static void assertRejectionProhibited(Order order) {
 		try {
 			order.reject(RejectReason.BAD_TYPE);

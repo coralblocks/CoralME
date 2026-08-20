@@ -910,7 +910,9 @@ public class OrderBook implements OrderListener {
 
 			Order order = getOrder(clientId, clientOrderId, security, side, size, price, type, tif);
 
-			if (order.getSide() == null) {
+			if (size <= 0) {
+				order.reject(RejectReason.BAD_SIZE);
+			} else if (order.getSide() == null) {
 				order.reject(RejectReason.BAD_SIDE);
 			} else if (exchangeOrderId <= 0) {
 				order.reject(RejectReason.BAD_EXCHANGE_ORDER_ID);
