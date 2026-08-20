@@ -24,6 +24,13 @@ import com.coralblocks.coralme.util.DoubleUtils;
 import com.coralblocks.coralme.util.StringUtils;
 import com.coralblocks.coralme.util.Timestamper;
 
+/**
+ * A mutable order instance owned and reused by an {@link OrderBook}.
+ *
+ * <p>After an order becomes terminal, a later {@link OrderBook} operation may
+ * reuse the same instance for a different order. Do not retain an order reference
+ * after it becomes terminal; copy any values that must outlive it.</p>
+ */
 public class Order {
 
 	static final String EMPTY_CLIENT_ORDER_ID = "NULL";
