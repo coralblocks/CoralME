@@ -17,8 +17,8 @@ CoralME is an order book data-structure that matches orders based on price-time 
 - Price improvement for fills
 - MARKET and LIMIT order types
 - IOC, GTC and DAY
-- Re-entry protection for listener callbacks
-- Listener exception isolation and reporting
+- Re-entry protection for listeners to prevent nested operations that could corrupt order book state
+- Listener exception isolation and reporting so a failing listener cannot interrupt the current order book operation or prevent the remaining listeners from running
 - Garbage-free forward and reverse price-time order iteration
 - MAKER (of liquidity) and TAKER (of liquidity) execution sides
 - NORMAL, CROSSED, LOCKED, ONESIDED and EMPTY book states
@@ -28,9 +28,12 @@ CoralME is an order book data-structure that matches orders based on price-time 
 - Supports cancelation of open size as well as [reduction of total size](https://chatgpt.com/share/6808fbb1-d840-8013-82a8-9ae1854c7707) (executed + open)
 
 ## Listener Safety
-CoralME supports both `OrderBookListener` and `OrderListener`. External listeners cannot reenter the same order book while an ordinary listener callback or `onExceptionsThrown` is running. A reentrant attempt throws `ReentrantOrderBookOperationException` before the requested operation changes the order book.
 
-An exception thrown by an ordinary external listener, including `ReentrantOrderBookOperationException`, does not interrupt the order book operation or prevent the remaining listeners from running. CoralME collects those exceptions and reports them after one complete `OrderBook` operation through the corresponding listener type's `onExceptionsThrown` method. Exceptions thrown from `onExceptionsThrown` are ignored so that exception reporting cannot recurse.
+CoralME supports both `OrderBookListener` and `OrderListener`. These external listeners cannot reenter the same order book while any of their listener callback methods are executing. A reentrant attempt throws a `ReentrantOrderBookOperationException`, and the requested operation is not executed.
+
+An exception thrown by any ordinary external listener callback does not interrupt the current order book operation or prevent the remaining listeners from running. CoralME collects these exceptions and reports them after one complete `OrderBook` operation through the corresponding listener type's `onExceptionsThrown` method. Exceptions thrown from `onExceptionsThrown` are ignored so that exception reporting cannot recurse.
+
+A listener that wants to modify or traverse the order book, modify one of its orders, or change listener registration must defer that work until the current `OrderBook` operation and all listener callbacks have finished. In an event-loop architecture, you can enqueue the work for a later iteration of the same thread that owns CoralME.
 
 ## What people usually mean by the term _Matching Engine_?
 Usually when people talk about a _Matching Engine_, what they are really referring to is the full solution for an electronic exchange. That would include gateways, drop copies, market data, balances, reports, monitors, margins, compliance, fees, etc. Plus the _messaging middleware_ to tie all these pieces together. In that context, **the matching engine is really just one of the many parts of an electronic exchange**. It is an important part, the central nervous systems of an exchange, which maintains orders resting inside order books, and matches them when liquidity takers meet liquidity providers (i.e. market makers).
@@ -478,5 +481,4 @@ java -verbose:gc -Xms128m -Xmx256m -cp target/classes com.coralblocks.coralme.ex
 ```
  
  
-
 
