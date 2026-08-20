@@ -350,14 +350,20 @@ public class OrderBook implements OrderListener {
 	public final boolean hasSpread() {
 		return hasBestBid() && hasBestAsk();
 	}
-	
+
+	/**
+	 * Returns the difference between the best ask and best bid prices.
+	 *
+	 * @return the spread
+	 * @throws ArithmeticException if the spread cannot be represented as a long
+	 */
 	public final long getSpread() {
 		
 		PriceLevel bestBid = head[Side.BUY.index()];
 		
 		PriceLevel bestAsk = head[Side.SELL.index()];
 		
-		return bestAsk.getPrice() - bestBid.getPrice();
+		return Math.subtractExact(bestAsk.getPrice(), bestBid.getPrice());
 	}
 	
 	public final State getState() {
@@ -368,11 +374,11 @@ public class OrderBook implements OrderListener {
 
 		if (bestBid != null && bestAsk != null) {
 			
-			long spread = bestAsk.getPrice() - bestBid.getPrice();
+			int priceComparison = Long.compare(bestAsk.getPrice(), bestBid.getPrice());
 			
-			if (spread == 0) return State.LOCKED;
+			if (priceComparison == 0) return State.LOCKED;
 			
-			if (spread < 0) return State.CROSSED;
+			if (priceComparison < 0) return State.CROSSED;
 			
 			return State.NORMAL;
 			

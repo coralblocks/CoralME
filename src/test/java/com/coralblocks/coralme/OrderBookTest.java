@@ -214,6 +214,18 @@ public class OrderBookTest {
 		assertEquals(800, book.getBestBidSize());
 		assertEquals(100, book.getBestAskSize());
 	}
+
+	@Test
+	public void test_Spread_Overflow() {
+
+		OrderBook book = new OrderBook("AAPL");
+
+		book.createLimit(CLIENT_ID, "1", 1, Side.BUY, 1, Long.MIN_VALUE, TimeInForce.GTC);
+		book.createLimit(CLIENT_ID, "2", 2, Side.SELL, 1, Long.MAX_VALUE, TimeInForce.GTC);
+
+		assertEquals(OrderBook.State.NORMAL, book.getState());
+		Assert.assertThrows(ArithmeticException.class, book::getSpread);
+	}
 	
 	@Test
 	public void test_Order_Reduced_Then_Canceled() {
