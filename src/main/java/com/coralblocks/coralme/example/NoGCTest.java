@@ -168,6 +168,8 @@ public class NoGCTest {
 			if (i % PROGRESS_INTERVAL == 0 || i == iterations) printIteration(i);
 		}
 
+		if (createGarbage && garbageSink == null) throw new IllegalStateException("Garbage negative control did not run");
+
 		long expectedRejectedOrders = iterations * 2L;
 		if (listener.rejectedOrders != expectedRejectedOrders) {
 			throw new IllegalStateException(
