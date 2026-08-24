@@ -51,14 +51,16 @@ public class Example {
 		orderBook.showLevels();
 
 		/*
-		 * 200 @ 150.44 (orders=1) --------
-		 */
+		   200 @    150.44 (orders=1)
+		--------
+		*/
 
 		orderBook.showOrders();
 
 		/*
-		 * 200 @ 150.44 (id=1) --------
-		 */
+		   200 @    150.44 (id=1)
+		--------
+		*/
 
 		orderBook.createLimit(CLIENT_ID, String.valueOf(++orderId), orderId, Side.BUY, 500, 149.44, TimeInForce.DAY);
 
@@ -86,18 +88,27 @@ public class Example {
 		orderBook.showLevels();
 
 		/*
-		 * 100 @ 148.14 (orders=1) 600 @ 149.44 (orders=2) 200 @ 150.44 (orders=1)
-		 * -------- 2.80 300 @ 153.24 (orders=1) 500 @ 156.43 (orders=1) 1500 @ 158.54
-		 * (orders=1)
-		 */
+		   100 @    148.14 (orders=1)
+		   600 @    149.44 (orders=2)
+		   200 @    150.44 (orders=1)
+		--------      2.80
+		   300 @    153.24 (orders=1)
+		   500 @    156.43 (orders=1)
+		  1500 @    158.54 (orders=1)
+		*/
 
 		orderBook.showOrders();
 
 		/*
-		 * 100 @ 148.14 (id=4) 500 @ 149.44 (id=2) 100 @ 149.44 (id=3) 200 @ 150.44
-		 * (id=1) -------- 2.80 300 @ 153.24 (id=5) 500 @ 156.43 (id=6) 1500 @ 158.54
-		 * (id=7)
-		 */
+		   100 @    148.14 (id=4)
+		   500 @    149.44 (id=2)
+		   100 @    149.44 (id=3)
+		   200 @    150.44 (id=1)
+		--------      2.80
+		   300 @    153.24 (id=5)
+		   500 @    156.43 (id=6)
+		  1500 @    158.54 (id=7)
+		*/
 
 		orderBookLogger.on();
 
@@ -130,10 +141,14 @@ public class Example {
 		orderBook.showLevels();
 
 		/*
-		 * 100 @ 148.14 (orders=1) 600 @ 149.44 (orders=2) 200 @ 150.44 (orders=1)
-		 * -------- 2.80 200 @ 153.24 (orders=1) 500 @ 156.43 (orders=1) 1500 @ 158.54
-		 * (orders=1)
-		 */
+		   100 @    148.14 (orders=1)
+		   600 @    149.44 (orders=2)
+		   200 @    150.44 (orders=1)
+		--------      2.80
+		   200 @    153.24 (orders=1)
+		   500 @    156.43 (orders=1)
+		  1500 @    158.54 (orders=1)
+		*/
 
 		// cancel 100 shares from order with id = 1
 
@@ -151,10 +166,14 @@ public class Example {
 		orderBook.showLevels();
 
 		/*
-		 * 100 @ 148.14 (orders=1) 600 @ 149.44 (orders=2) 100 @ 150.44 (orders=1)
-		 * -------- 2.80 200 @ 153.24 (orders=1) 500 @ 156.43 (orders=1) 1500 @ 158.54
-		 * (orders=1)
-		 */
+		   100 @    148.14 (orders=1)
+		   600 @    149.44 (orders=2)
+		   100 @    150.44 (orders=1)
+		--------      2.80
+		   200 @    153.24 (orders=1)
+		   500 @    156.43 (orders=1)
+		  1500 @    158.54 (orders=1)
+		*/
 
 		// now cancel the order
 
@@ -175,9 +194,13 @@ public class Example {
 		orderBook.showLevels();
 
 		/*
-		 * 100 @ 148.14 (orders=1) 600 @ 149.44 (orders=2) -------- 3.80 200 @ 153.24
-		 * (orders=1) 500 @ 156.43 (orders=1) 1500 @ 158.54 (orders=1)
-		 */
+		   100 @    148.14 (orders=1)
+		   600 @    149.44 (orders=2)
+		--------      3.80
+		   200 @    153.24 (orders=1)
+		   500 @    156.43 (orders=1)
+		  1500 @    158.54 (orders=1)
+		*/
 
 		// hit the sell side of the book with a LIMIT IOC and notice your price
 		// improvement
@@ -221,9 +244,12 @@ public class Example {
 		orderBook.showLevels();
 
 		/*
-		 * 100 @ 148.14 (orders=1) 600 @ 149.44 (orders=2) -------- 6.99 500 @ 156.43
-		 * (orders=1) 1500 @ 158.54 (orders=1)
-		 */
+		   100 @    148.14 (orders=1)
+		   600 @    149.44 (orders=2)
+		--------      6.99
+		   500 @    156.43 (orders=1)
+		  1500 @    158.54 (orders=1)
+		*/
 
 		orderBookLogger.off();
 
@@ -232,9 +258,13 @@ public class Example {
 		orderBook.showLevels();
 
 		/*
-		 * 100 @ 148.14 (orders=1) 600 @ 149.44 (orders=2) -------- 6.99 500 @ 156.43
-		 * (orders=1) 1500 @ 158.54 (orders=1) 3000 @ 160.00 (orders=1)
-		 */
+		   100 @    148.14 (orders=1)
+		   600 @    149.44 (orders=2)
+		--------      6.99
+		   500 @    156.43 (orders=1)
+		  1500 @    158.54 (orders=1)
+		  3000 @    160.00 (orders=1)
+		*/
 
 		// now hit two ask levels, price improve and sit on the book at 159.00
 
@@ -291,9 +321,12 @@ public class Example {
 		orderBook.showOrders();
 
 		/*
-		 * 100 @ 148.14 (id=4) 500 @ 149.44 (id=2) 100 @ 149.44 (id=3) 1900 @ 159.00
-		 * (id=11) <==== Your order sat here after hitting some asks... -------- 1.00
-		 * 3000 @ 160.00 (id=10)
-		 */
+		   100 @    148.14 (id=4)
+		   500 @    149.44 (id=2)
+		   100 @    149.44 (id=3)
+		  1900 @    159.00 (id=11)    <==== Your order sat here after hitting some asks...
+		--------      1.00
+		  3000 @    160.00 (id=10)
+		*/
 	}
 }
